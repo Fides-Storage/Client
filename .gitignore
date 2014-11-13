@@ -13,3 +13,9 @@ hs_err_pid*
 
 # Maven target
 FidesClient/target/
+
+# IntelliJ
+*.iml
+
+# Eclipse
+.project
