@@ -20,6 +20,8 @@ public class KeyGenerator {
 
 	private static int pbkdf2Iterations = 1000;
 
+	private	static SecureRandom random = new SecureRandom();
+
 	/**
 	 * Constructor of the KeyGenerator class
 	 *
@@ -37,7 +39,6 @@ public class KeyGenerator {
 	 */
 	public static byte[] getSalt(int saltByteSize) {
 		// Generate a random salt
-		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[saltByteSize];
 		random.nextBytes(salt);
 		return salt;
@@ -63,6 +64,21 @@ public class KeyGenerator {
 	public Key generateKey(String password, byte[] salt, int rounds) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		pbkdf2Iterations = rounds;
 		return pbkdf2(password.toCharArray(), salt, pbkdf2Iterations, hashByteSize);
+	}
+
+	/**
+	 *
+	 * @return a random generated Key
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
+	public Key generateRandomKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		byte[] randomBytes = new byte[hashByteSize];
+		random.nextBytes(randomBytes);
+		String keyString = new String(randomBytes);
+		PBEKeySpec spec = new PBEKeySpec(keyString.toCharArray(), getSalt(12), pbkdf2Iterations, hashByteSize * 8);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
+		return skf.generateSecret(spec);
 	}
 
 	/**
