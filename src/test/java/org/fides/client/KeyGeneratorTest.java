@@ -50,7 +50,7 @@ public class KeyGeneratorTest {
 		KeyGenerator keyGenerator = new KeyGenerator(keySize);
 		byte[] generatedHash = new byte[0];
 		try {
-			generatedHash = keyGenerator.generateRandomKey().getEncoded();
+			generatedHash = keyGenerator.generateRandomKey("AES").getEncoded();
 		}
 		catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
