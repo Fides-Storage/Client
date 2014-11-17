@@ -5,8 +5,10 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * The KeyGenerator is a helper class for generating hashes from passwords
@@ -72,13 +74,10 @@ public class KeyGenerator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
 	 */
-	public Key generateRandomKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		byte[] randomBytes = new byte[hashByteSize];
-		random.nextBytes(randomBytes);
-		String keyString = new String(randomBytes);
-		PBEKeySpec spec = new PBEKeySpec(keyString.toCharArray(), getSalt(12), pbkdf2Iterations, hashByteSize * 8);
-		SecretKeyFactory skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM);
-		return skf.generateSecret(spec);
+	public Key generateRandomKey(String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		javax.crypto.KeyGenerator generator = javax.crypto.KeyGenerator.getInstance(algorithm);
+		generator.init(256);
+		return generator.generateKey();
 	}
 
 	/**
