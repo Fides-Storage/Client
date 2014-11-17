@@ -1,9 +1,8 @@
-package client.connector;
+package org.fides.client.connector;
 
 import java.io.InputStream;
 import java.security.Key;
 
-import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
 import org.fides.client.files.KeyFile;
 
