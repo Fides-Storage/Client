@@ -76,7 +76,7 @@ public class KeyGenerator {
 	 */
 	public Key generateRandomKey(String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		javax.crypto.KeyGenerator generator = javax.crypto.KeyGenerator.getInstance(algorithm);
-		generator.init(256);
+		generator.init(hashByteSize * 8);
 		return generator.generateKey();
 	}
 
