@@ -10,3 +10,7 @@ The client side centers around a keyfile. This file contains a list of all the u
 When the user adds, removes or updates files, the keyfile gets updated with the new files and their keys. The keyfile is then encrypted with the user's masterkey, which is derived from a password or a key file. After encrypting the keyfile, it is uploaded to the server.
 
 To synchronise with the server, the client will first download and decrypt the keyfile that's saved on the server. In this file the client can see which files it's missing and which files it needs to upload.
+
+Fides Storage Server
+======
+The server is supposed to know as little about the users as possible. All the files from all users are saved in the same folder. To pair up a user with his files, every user has a so called userfile. This file is a simple list of all the user's files. The userfile gets encrypted with the user's password hash. When a user connects, the decrypted userfile gets stored in temporary memory. This way, when a hacker infiltrates the server, he won't know which files belong to which user.
