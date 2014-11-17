@@ -1,6 +1,7 @@
 package org.fides.client.connector;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ServerConnector {
 
@@ -20,12 +21,12 @@ public class ServerConnector {
 		return false;
 	}
 
-	public byte[] requestKeyFile() {
+	public InputStream requestKeyFile() {
 		return null;
 	}
 
-	public void uploadKeyFile(byte[] keyFileBytes) {
-
+	public OutputStream uploadKeyFile() {
+		return null;
 	}
 
 	/**
@@ -35,12 +36,12 @@ public class ServerConnector {
 		return null;
 	}
 
-	public String uploadFile(InputStream instream) {
+	public LocationOutputStreamPair uploadFile() {
 		return null;
 	}
 
-	public boolean updateFile(InputStream instream, String location) {
-		return false;
+	public OutputStream updateFile(String location) {
+		return null;
 	}
 
 	public boolean removeFile(String location) {
