@@ -5,30 +5,36 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * The KeyGenerator is a helper class for generating hashes from passwords
+ * These hashes will be generated with PBKDF2
+ */
 public class KeyGenerator {
 
-	private static String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
+	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
-	// The following constants may be changed without breaking existing hashes.
-	private static int HASH_BYTE_SIZE;
+	private static int hashByteSize;
 
-	private static int PBKDF2_ITERATIONS = 1000;
+	private static int pbkdf2Iterations = 1000;
 
-	private static final int ITERATION_INDEX = 0;
-
-	private static final int SALT_INDEX = 1;
-
-	private static final int PBKDF2_INDEX = 2;
-
+	/**
+	 * Constructor of the KeyGenerator class
+	 *
+	 * @param keysize is the size of the hash in bytes.
+	 */
 	public KeyGenerator(int keysize) {
-		HASH_BYTE_SIZE = keysize;
+		hashByteSize = keysize;
 	}
 
+	/**
+	 * Returns a random generated salt
+	 *
+	 * @param saltByteSize is the size of the salt
+	 * @return a salt as byte array
+	 */
 	public static byte[] getSalt(int saltByteSize) {
 		// Generate a random salt
 		SecureRandom random = new SecureRandom();
@@ -37,8 +43,13 @@ public class KeyGenerator {
 		return salt;
 	}
 
+	/**
+	 * Returns the default number of rounds used by PBKDF2
+	 *
+	 * @return the default number of rounds
+	 */
 	public static int getRounds() {
-		return PBKDF2_ITERATIONS;
+		return pbkdf2Iterations;
 	}
 
 	/**
@@ -46,28 +57,12 @@ public class KeyGenerator {
 	 *
 	 * @param password the password to hash
 	 * @param rounds   the amount of rounds pfkdf2 should use
+	 * @param salt     the salt for pbkdf2
 	 * @return a Key which was generated with pbkdf2
-	 * @param    salt        the salt for pbkdf2
 	 */
 	public Key generateKey(String password, byte[] salt, int rounds) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		PBKDF2_ITERATIONS = rounds;
-		return pbkdf2(password.toCharArray(), salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
-	}
-
-	/**
-	 * Compares two byte arrays in length-constant time. This comparison method
-	 * is used so that password hashes cannot be extracted from an on-line
-	 * system using a timing attack and then attacked off-line.
-	 *
-	 * @param a the first byte array
-	 * @param b the second byte array
-	 * @return true if both byte arrays are the same, false if not
-	 */
-	private static boolean slowEquals(byte[] a, byte[] b) {
-		int diff = a.length ^ b.length;
-		for (int i = 0; i < a.length && i < b.length; i++)
-			diff |= a[i] ^ b[i];
-		return diff == 0;
+		pbkdf2Iterations = rounds;
+		return pbkdf2(password.toCharArray(), salt, pbkdf2Iterations, hashByteSize);
 	}
 
 	/**
@@ -87,22 +82,6 @@ public class KeyGenerator {
 	}
 
 	/**
-	 * Converts a string of hexadecimal characters into a byte array.
-	 *
-	 * @param   hex         the hex string
-	 * @return the hex string decoded into a byte array
-	 */
-	//	private static byte[] fromHex(String hex)
-	//	{
-	//		byte[] binary = new byte[hex.length() / 2];
-	//		for(int i = 0; i < binary.length; i++)
-	//		{
-	//			binary[i] = (byte)Integer.parseInt(hex.substring(2*i, 2*i+2), 16);
-	//		}
-	//		return binary;
-	//	}
-
-	/**
 	 * Converts a byte array into a hexadecimal string.
 	 *
 	 * @param array the byte array to convert
@@ -112,9 +91,25 @@ public class KeyGenerator {
 		BigInteger bi = new BigInteger(1, array);
 		String hex = bi.toString(16);
 		int paddingLength = (array.length * 2) - hex.length();
-		if (paddingLength > 0)
+		if (paddingLength > 0) {
 			return String.format("%0" + paddingLength + "d", 0) + hex;
-		else
+		}
+		else {
 			return hex;
+		}
+	}
+
+	/**
+	 * Converts a string of hexadecimal characters into a byte array.
+	 *
+	 * @param hex the hex string
+	 * @return the hex string decoded into a byte array
+	 */
+	public static byte[] fromHex(String hex) {
+		byte[] binary = new byte[hex.length() / 2];
+		for (int i = 0; i < binary.length; i++) {
+			binary[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+		}
+		return binary;
 	}
 }
