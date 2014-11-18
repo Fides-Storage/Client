@@ -5,9 +5,9 @@ import java.security.Key;
 
 /**
  * Contains an {@link OutputStream} to a specific location on the server. This is and extension of the
- * {@link LocationOutputStreamPair}, but also contains the key for the encrypted stream
+ * {@link OutputStreamData}, but also contains the key for the encrypted stream
  */
-public class LocationEncryptedOutputStreamPair extends LocationOutputStreamPair {
+public class EncryptedOutputStreamData extends OutputStreamData {
 
 	private Key key;
 
@@ -21,7 +21,7 @@ public class LocationEncryptedOutputStreamPair extends LocationOutputStreamPair 
 	 * @param key
 	 *            The key used in the encryption
 	 */
-	public LocationEncryptedOutputStreamPair(OutputStream outputStream, String location, Key key) {
+	public EncryptedOutputStreamData(OutputStream outputStream, String location, Key key) {
 		super(outputStream, location);
 		this.key = key;
 	}

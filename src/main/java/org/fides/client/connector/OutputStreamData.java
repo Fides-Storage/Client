@@ -5,7 +5,7 @@ import java.io.OutputStream;
 /**
  * Contains an {@link OutputStream} to a specific location on the server
  */
-public class LocationOutputStreamPair {
+public class OutputStreamData {
 
 	private final OutputStream outputStream;
 
@@ -19,7 +19,7 @@ public class LocationOutputStreamPair {
 	 * @param location
 	 *            The location on the server
 	 */
-	public LocationOutputStreamPair(OutputStream outputStream, String location) {
+	public OutputStreamData(OutputStream outputStream, String location) {
 		super();
 		this.outputStream = outputStream;
 		this.location = location;
