@@ -1,6 +1,7 @@
 package org.fides.client.files;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -15,6 +16,13 @@ public class KeyFile implements Serializable {
 	private static final long serialVersionUID = -3100793225474334464L;
 
 	private Collection<ClientFile> clientFiles;
+
+	/**
+	 * Constructor
+	 */
+	public KeyFile() {
+		clientFiles = new ArrayList<>();
+	}
 
 	/**
 	 * Return a {@link ClientFile} with the given name
