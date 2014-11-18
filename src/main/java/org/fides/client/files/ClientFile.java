@@ -1,5 +1,6 @@
 package org.fides.client.files;
 
+import java.io.Serializable;
 import java.security.Key;
 
 /**
@@ -8,7 +9,7 @@ import java.security.Key;
  * @author Koen
  *
  */
-public class ClientFile {
+public class ClientFile implements Serializable {
 
 	private String name;
 

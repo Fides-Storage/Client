@@ -1,5 +1,6 @@
 package org.fides.client.files;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Collection;
  * @author Koen
  *
  */
-public class KeyFile {
+public class KeyFile implements Serializable {
 
 	private Collection<ClientFile> clientFiles;
 
