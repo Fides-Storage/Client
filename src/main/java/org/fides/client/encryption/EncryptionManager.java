@@ -59,8 +59,6 @@ public class EncryptionManager {
 
 	private final Cipher cipher;
 
-	private final KeyGenerator keyGenerator;
-
 	/**
 	 * Constructor
 	 * 
@@ -73,13 +71,12 @@ public class EncryptionManager {
 	 * @throws NoSuchPaddingException
 	 *             Thrown if the padding is incorrect
 	 */
-	public EncryptionManager(ServerConnector connector, String password, KeyGenerator keyGenerator) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		if (connector == null || StringUtils.isBlank(password) || keyGenerator == null) {
+	public EncryptionManager(ServerConnector connector, String password) throws NoSuchAlgorithmException, NoSuchPaddingException {
+		if (connector == null || StringUtils.isBlank(password)) {
 			throw new NullPointerException();
 		}
 		this.connector = connector;
 		this.password = password;
-		this.keyGenerator = keyGenerator;
 		this.cipher = Cipher.getInstance(ALGORITHM + ALGORITHM_MODE);
 	}
 
@@ -102,7 +99,7 @@ public class EncryptionManager {
 		din.read(saltBytes, 0, SALT_SIZE);
 		int pbkdf2Rounds = din.readInt();
 
-		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
 		ObjectInputStream inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
 		KeyFile keyFile = (KeyFile) inDecrypted.readObject();
@@ -132,7 +129,7 @@ public class EncryptionManager {
 		byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 		int pbkdf2Rounds = KeyGenerator.getRounds();
 
-		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
 		key = new SecretKeySpec(key.getEncoded(), "AES");
 
@@ -185,7 +182,7 @@ public class EncryptionManager {
 			throw new NullPointerException();
 		}
 
-		Key key = keyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
+		Key key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		LocationOutputStreamPair losp = connector.uploadFile();
 
 		return new LocationEncryptedOutputStreamPair(getEncryptionStream(losp.getOutputStream(), key), losp.getLocation(), key);

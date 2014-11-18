@@ -10,16 +10,18 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
- * The KeyGenerator is a helper class for generating hashes from passwords These
- * hashes will be generated with PBKDF2
+ * The KeyGenerator is a helper class for generating hashes from passwords These hashes will be generated with PBKDF2
  */
-public class KeyGenerator {
+public final class KeyGenerator {
 
 	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
 	private static int pbkdf2Iterations = 1000;
 
 	private static SecureRandom random = new SecureRandom();
+
+	private KeyGenerator() {
+	}
 
 	/**
 	 * Returns a random generated salt
@@ -57,7 +59,7 @@ public class KeyGenerator {
 	 *            is the size of the generated hash in bytes.
 	 * @return a Key which was generated with PBKDF2
 	 */
-	public Key generateKey(String password, byte[] salt, int rounds, int keyByteSize) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public static Key generateKey(String password, byte[] salt, int rounds, int keyByteSize) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		pbkdf2Iterations = rounds;
 		return pbkdf2(password.toCharArray(), salt, pbkdf2Iterations, keyByteSize);
 	}
@@ -71,7 +73,7 @@ public class KeyGenerator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
 	 */
-	public Key generateRandomKey(String algorithm, int keyByteSize) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public static Key generateRandomKey(String algorithm, int keyByteSize) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		javax.crypto.KeyGenerator generator = javax.crypto.KeyGenerator.getInstance(algorithm);
 		generator.init(keyByteSize * 8);
 		return generator.generateKey();
