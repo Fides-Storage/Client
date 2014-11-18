@@ -1,4 +1,4 @@
-package org.fides.client;
+package org.fides.client.encryption;
 
 import static org.junit.Assert.assertEquals;
 
