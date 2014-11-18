@@ -36,7 +36,7 @@ public class ServerConnector {
 		return null;
 	}
 
-	public LocationOutputStreamPair uploadFile() {
+	public OutputStreamData uploadFile() {
 		return null;
 	}
 

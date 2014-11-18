@@ -23,8 +23,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fides.client.connector.LocationEncryptedOutputStreamPair;
-import org.fides.client.connector.LocationOutputStreamPair;
+import org.fides.client.connector.EncryptedOutputStreamData;
+import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
 import org.fides.client.files.KeyFile;
@@ -188,15 +188,12 @@ public class EncryptionManager {
 	 * @throws InvalidAlgorithmParameterException
 	 * @throws InvalidKeyException
 	 */
-	public LocationEncryptedOutputStreamPair uploadFile(final KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException {
-		if (keyFile == null) {
-			throw new NullPointerException();
-		}
-
+	public EncryptedOutputStreamData uploadFile() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException {
 		Key key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
-		LocationOutputStreamPair losp = connector.uploadFile();
+		OutputStreamData outStreamData = connector.uploadFile();
 
-		return new LocationEncryptedOutputStreamPair(getEncryptionStream(losp.getOutputStream(), key), losp.getLocation(), key);
+		OutputStream encryptOut = getEncryptionStream(outStreamData.getOutputStream(), key);
+		return new EncryptedOutputStreamData(encryptOut, outStreamData.getLocation(), key);
 	}
 
 	/**
