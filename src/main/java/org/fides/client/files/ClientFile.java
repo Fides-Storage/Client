@@ -3,11 +3,13 @@ package org.fides.client.files;
 import java.io.Serializable;
 import java.security.Key;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Contains the information of the user's files on the servers
  * 
  * @author Koen
- *
+ * 
  */
 public class ClientFile implements Serializable {
 
@@ -55,6 +57,41 @@ public class ClientFile implements Serializable {
 
 	public String getHash() {
 		return hash;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	// TODO: Think about a correct way to compare 2 clientfiles.
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ClientFile other = (ClientFile) obj;
+		if (!StringUtils.equals(hash, other.hash)) {
+			return false;
+		}
+		if (!StringUtils.equals(location, other.location)) {
+			return false;
+		}
+		if (!StringUtils.equals(name, other.name)) {
+			return false;
+		}
+		return true;
 	}
 
 }

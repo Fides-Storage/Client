@@ -12,6 +12,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.Cipher;
@@ -39,10 +40,10 @@ import org.fides.client.files.KeyFile;
 public class EncryptionManager {
 
 	/** The algorithm used for encryption and decryption */
-	private static final String ALGORITHM = "AES";
+	private static final String ALGORITHM = "Camellia";
 
 	/** The algorithm used for encryption and decryption */
-	private static final int KEY_SIZE = 32; // 256 bit
+	private static final int KEY_SIZE = 16; // TODO: Eventually we want a 32byte keysize.
 
 	/** The mode of operation and padding for the cipher */
 	private static final String ALGORITHM_MODE = "/CBC/PKCS5Padding";
@@ -75,6 +76,8 @@ public class EncryptionManager {
 		if (connector == null || StringUtils.isBlank(password)) {
 			throw new NullPointerException();
 		}
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		
 		this.connector = connector;
 		this.password = password;
 		this.cipher = Cipher.getInstance(ALGORITHM + ALGORITHM_MODE);
@@ -96,8 +99,8 @@ public class EncryptionManager {
 		DataInputStream din = new DataInputStream(in);
 
 		byte[] saltBytes = new byte[SALT_SIZE];
-		din.read(saltBytes, 0, SALT_SIZE);
 		int pbkdf2Rounds = din.readInt();
+		din.read(saltBytes, 0, SALT_SIZE);
 
 		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
@@ -131,14 +134,15 @@ public class EncryptionManager {
 
 		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
-		key = new SecretKeySpec(key.getEncoded(), "AES");
+		key = new SecretKeySpec(key.getEncoded(), ALGORITHM);
 
+		dout.writeInt(pbkdf2Rounds);
 		dout.write(saltBytes, 0, SALT_SIZE);
-		dout.writeLong(pbkdf2Rounds);
 
 		OutputStream outEncrypted = getEncryptionStream(dout, key);
 		ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
 		objectOut.writeObject(keyFile);
+		objectOut.close();
 	}
 
 	/**
