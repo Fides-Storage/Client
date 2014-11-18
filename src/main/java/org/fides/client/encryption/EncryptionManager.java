@@ -2,6 +2,7 @@ package org.fides.client.encryption;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -21,6 +22,7 @@ import javax.crypto.spec.IvParameterSpec;
 
 import org.fides.client.connector.LocationOutputStreamPair;
 import org.fides.client.connector.ServerConnector;
+import org.fides.client.files.ClientFile;
 import org.fides.client.files.KeyFile;
 
 /**
@@ -35,6 +37,9 @@ public class EncryptionManager {
 
 	/** The algorithm used for encryption and decryption */
 	private static final String ALGORITHM = "AES";
+
+	/** The algorithm used for encryption and decryption */
+	private static final int KEY_SIZE = 32;
 
 	/** The mode of operation and padding for the cipher */
 	private static final String ALGORITHM_MODE = "/CBC/PKCS5Padding";
@@ -65,11 +70,11 @@ public class EncryptionManager {
 	 * @throws NoSuchPaddingException
 	 *             Thrown if the padding is incorrect
 	 */
-	public EncryptionManager(ServerConnector connector, String password) throws NoSuchAlgorithmException, NoSuchPaddingException {
+	public EncryptionManager(ServerConnector connector, String password, KeyGenerator keyGenerator) throws NoSuchAlgorithmException, NoSuchPaddingException {
 		this.connector = connector;
 		this.password = password;
+		this.keyGenerator = keyGenerator;
 		this.cipher = Cipher.getInstance(ALGORITHM + ALGORITHM_MODE);
-		this.keyGenerator = new KeyGenerator(32);
 	}
 
 	/**
@@ -91,7 +96,7 @@ public class EncryptionManager {
 		din.read(saltBytes, 0, SALT_SIZE);
 		int pbkdf2Rounds = din.readInt();
 
-		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds);
+		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
 		ObjectInputStream inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
 		KeyFile keyFile = (KeyFile) inDecrypted.readObject();
@@ -111,13 +116,17 @@ public class EncryptionManager {
 	 * @throws IOException
 	 */
 	public void uploadKeyFile(final KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
+		if (keyFile == null) {
+			throw new NullPointerException();
+		}
+
 		OutputStream out = connector.uploadKeyFile();
 		DataOutputStream dout = new DataOutputStream(out);
 
 		byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 		int pbkdf2Rounds = KeyGenerator.getRounds();
 
-		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds);
+		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
 		dout.write(saltBytes, 0, SALT_SIZE);
 		dout.writeLong(pbkdf2Rounds);
@@ -132,14 +141,26 @@ public class EncryptionManager {
 	 * 
 	 * @param location
 	 *            The location of the file on the server
-	 * @param keyfile
+	 * @param keyFile
 	 *            The keyfile containing
 	 * @return An {@link InputStream} of the file
+	 * @throws FileNotFoundException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws InvalidKeyException
 	 */
-	public InputStream requestFile(String location, KeyFile keyfile) {
-		InputStream in = connector.requestFile(location);
+	public InputStream requestFile(String location, KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
+		if (location == null || keyFile == null) {
+			throw new NullPointerException();
+		}
 
-		return null;
+		InputStream in = connector.requestFile(location);
+		ClientFile clientFile = keyFile.getClientFileByLocation(location);
+		if (clientFile == null) {
+			throw new FileNotFoundException();
+		}
+
+		Key key = clientFile.getKey();
+		return getDecryptionStream(in, key);
 	}
 
 	/**
