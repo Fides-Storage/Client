@@ -16,20 +16,15 @@ public class KeyGenerator {
 
 	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
-	// private static int hashByteSize;
-
 	private static int pbkdf2Iterations = 1000;
 
 	private static SecureRandom random = new SecureRandom();
 
 	/**
 	 * Constructor of the KeyGenerator class
-	 *
-	 * @param keysize
-	 *            is the size of the hash in bytes.
 	 */
 	public KeyGenerator() {
-		// hashByteSize = keysize;
+
 	}
 
 	/**

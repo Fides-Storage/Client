@@ -12,6 +12,8 @@ import java.util.Collection;
  */
 public class KeyFile implements Serializable {
 
+	private static final long serialVersionUID = -3100793225474334464L;
+
 	private Collection<ClientFile> clientFiles;
 
 	public ClientFile getClientFileByName(String name) {

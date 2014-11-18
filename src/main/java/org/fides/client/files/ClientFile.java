@@ -11,6 +11,8 @@ import java.security.Key;
  */
 public class ClientFile implements Serializable {
 
+	private static final long serialVersionUID = -2910237556924682964L;
+
 	private String name;
 
 	private String location;

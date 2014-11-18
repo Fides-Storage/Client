@@ -148,7 +148,7 @@ public class EncryptionManager {
 	 * @throws InvalidAlgorithmParameterException
 	 * @throws InvalidKeyException
 	 */
-	public InputStream requestFile(String location, KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
+	public InputStream requestFile(final String location, final KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
 		if (location == null || keyFile == null) {
 			throw new NullPointerException();
 		}
@@ -168,7 +168,7 @@ public class EncryptionManager {
 	 * 
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 */
-	public LocationOutputStreamPair uploadFile() {
+	public LocationOutputStreamPair uploadFile(final KeyFile keyFile) {
 		return null;
 	}
 
@@ -179,7 +179,7 @@ public class EncryptionManager {
 	 *            The location of the existing file on the server
 	 * @return The {@link OutputStream} used for writing
 	 */
-	public OutputStream updateFile(String location) {
+	public OutputStream updateFile(final String location, final KeyFile keyFile) {
 		return null;
 	}
 

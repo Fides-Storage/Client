@@ -2,11 +2,10 @@ package org.fides.client.encryption;
 
 import static org.junit.Assert.assertEquals;
 
-import org.fides.client.encryption.KeyGenerator;
-import org.junit.Test;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+
+import org.junit.Test;
 
 /**
  * Unit test for the KeyGenerator class.
@@ -25,10 +24,10 @@ public class KeyGeneratorTest {
 		final String correctHash = "cfe2eda0e288b7fb60431d4eaaceee0554caeab591e6c1adecd2b82c5660fd92";
 		final int rounds = 1000;
 
-		KeyGenerator keyGenerator = new KeyGenerator(keySize);
+		KeyGenerator keyGenerator = new KeyGenerator();
 		byte[] generatedHash = new byte[0];
 		try {
-			generatedHash = keyGenerator.generateKey(password, KeyGenerator.fromHex(salt), rounds).getEncoded();
+			generatedHash = keyGenerator.generateKey(password, KeyGenerator.fromHex(salt), rounds, keySize).getEncoded();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (InvalidKeySpecException e) {
@@ -55,10 +54,10 @@ public class KeyGeneratorTest {
 	@Test
 	public void generateRandomKey() {
 
-		KeyGenerator keyGenerator = new KeyGenerator(keySize);
+		KeyGenerator keyGenerator = new KeyGenerator();
 		byte[] generatedHash = new byte[0];
 		try {
-			generatedHash = keyGenerator.generateRandomKey("AES").getEncoded();
+			generatedHash = keyGenerator.generateRandomKey("AES", keySize).getEncoded();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (InvalidKeySpecException e) {
