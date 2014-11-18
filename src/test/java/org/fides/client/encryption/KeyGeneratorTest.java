@@ -24,14 +24,7 @@ public class KeyGeneratorTest {
 		final String correctHash = "cfe2eda0e288b7fb60431d4eaaceee0554caeab591e6c1adecd2b82c5660fd92";
 		final int rounds = 1000;
 
-		byte[] generatedHash = new byte[0];
-		try {
-			generatedHash = KeyGenerator.generateKey(password, KeyGenerator.fromHex(salt), rounds, keySize).getEncoded();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
-			e.printStackTrace();
-		}
+		byte[] generatedHash = KeyGenerator.generateKey(password, KeyGenerator.fromHex(salt), rounds, keySize).getEncoded();
 		assertEquals(correctHash, KeyGenerator.toHex(generatedHash));
 		assertEquals(keySize, generatedHash.length);
 	}
