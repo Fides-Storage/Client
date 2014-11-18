@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.fides.client.connector.EncryptedOutputStreamData;
@@ -28,7 +30,7 @@ public class EncryptionManagerTest {
 		+ "et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
 		+ "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non "
 		+ "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.").getBytes();
-
+	
 	/**
 	 * Tests the encryption of a key file.
 	 */
@@ -118,11 +120,12 @@ public class EncryptionManagerTest {
 
 			// Check if encrypting the same file twice gives different results
 			String result1 = KeyGenerator.toHex(mockOut.toByteArray());
-			mockOut = new ByteArrayOutputStream();
+			mockOut.reset();
 			outputStreamData = manager.uploadFile();
 			outputStreamData.getOutputStream().write(MESSAGE);
 			outputStreamData.getOutputStream().close();
 			String result2 = KeyGenerator.toHex(mockOut.toByteArray());
+			assertTrue(mockOut.size() > 0);
 			assertNotEquals(result1, result2);
 		} catch (Exception e) {
 			fail("An unexpected exception has occured: " + e.getMessage());
@@ -164,4 +167,52 @@ public class EncryptionManagerTest {
 		}
 	}
 
+	/**
+	 * Tests the update by uploading a file and then updating it.
+	 */
+	@Test
+	public void testUpdateFile() {
+		// Create a mock of the ServerConnector to catch the call to updateKeyFile.
+		String fileLocation = "Location";
+		ServerConnector mockConnector = mock(ServerConnector.class);
+		ByteArrayOutputStream mockUploadOut = new ByteArrayOutputStream();
+		ByteArrayOutputStream mockUpdateOut = new ByteArrayOutputStream();
+		when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockUploadOut, fileLocation));
+		when(mockConnector.updateFile(fileLocation)).thenReturn(mockUpdateOut);
+		
+		try {
+			// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
+			EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
+			EncryptedOutputStreamData outputStreamData = manager.uploadFile();
+			outputStreamData.getOutputStream().write(MESSAGE);
+			outputStreamData.getOutputStream().close();
+			byte[] uploadedBytes = mockUploadOut.toByteArray();
+	
+			KeyFile keyFile = new KeyFile();
+			ClientFile clientFile = new ClientFile("Name", outputStreamData.getLocation(), outputStreamData.getKey(), "Hash");
+			keyFile.addClientFile(clientFile);
+			
+			// Update the uploaded file with a new message.
+			OutputStream outStream = manager.updateFile(fileLocation, keyFile);
+			outStream.write("A different message than the default message".getBytes());
+			outStream.close();
+			
+			// Check if the updated outputstream is different from the uploaded outputstream
+			assertTrue(mockUpdateOut.size() > 0);
+			assertFalse(Arrays.equals(uploadedBytes, mockUpdateOut.toByteArray()));
+			
+			// Update the uploaded file with the original message.
+			mockUpdateOut.reset();
+			outStream = manager.updateFile(fileLocation, keyFile);
+			outStream.write(MESSAGE);
+			outStream.close();
+			
+			// Check if the updated outputstream is the same as the original uploaded outputstream
+			assertTrue(mockUpdateOut.size() > 0);
+			assertArrayEquals(uploadedBytes, mockUpdateOut.toByteArray());
+			
+		} catch (Exception e) {
+			fail("An unexpected exception has occured: " + e.getMessage());
+		}
+	}
 }
