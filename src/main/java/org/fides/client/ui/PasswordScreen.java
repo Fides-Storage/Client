@@ -1,6 +1,5 @@
 package org.fides.client.ui;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
