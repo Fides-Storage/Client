@@ -191,6 +191,9 @@ public class EncryptionManager {
 	public EncryptedOutputStreamData uploadFile() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException {
 		Key key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		OutputStreamData outStreamData = connector.uploadFile();
+		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
+			throw new NullPointerException();
+		}
 
 		OutputStream encryptOut = getEncryptionStream(outStreamData.getOutputStream(), key);
 		return new EncryptedOutputStreamData(encryptOut, outStreamData.getLocation(), key);
