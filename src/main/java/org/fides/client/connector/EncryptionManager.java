@@ -1,6 +1,7 @@
 package org.fides.client.connector;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -86,7 +87,7 @@ public class EncryptionManager {
 		DataInputStream din = new DataInputStream(in);
 
 		byte[] saltBytes = new byte[SALT_SIZE];
-		din.read(saltBytes);
+		din.read(saltBytes, 0, SALT_SIZE);
 		int pbkdf2Rounds = din.readInt();
 
 		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds);
@@ -108,12 +109,19 @@ public class EncryptionManager {
 	 * @throws InvalidKeyException
 	 * @throws IOException
 	 */
-	public void uploadKeyFile(KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
+	public void uploadKeyFile(final KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
 		OutputStream out = connector.uploadKeyFile();
+		DataOutputStream dout = new DataOutputStream(out);
 
-		Key key = keyGenerator.generateKey(password, keyGenerator.getSalt(SALT_SIZE), keyGenerator.getRounds());
+		byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
+		int pbkdf2Rounds = KeyGenerator.getRounds();
 
-		OutputStream outEncrypted = getEncryptionStream(out, key);
+		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds);
+
+		dout.write(saltBytes, 0, SALT_SIZE);
+		dout.writeLong(pbkdf2Rounds);
+
+		OutputStream outEncrypted = getEncryptionStream(dout, key);
 		ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
 		objectOut.writeObject(keyFile);
 	}
@@ -123,9 +131,13 @@ public class EncryptionManager {
 	 * 
 	 * @param location
 	 *            The location of the file on the server
+	 * @param keyfile
+	 *            The keyfile containing
 	 * @return An {@link InputStream} of the file
 	 */
-	public InputStream requestFile(String location) {
+	public InputStream requestFile(String location, KeyFile keyfile) {
+		InputStream in = connector.requestFile(location);
+
 		return null;
 	}
 
