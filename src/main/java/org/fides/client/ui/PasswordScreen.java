@@ -3,7 +3,14 @@ package org.fides.client.ui;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
+import javax.swing.SwingUtilities;
 import javax.swing.JOptionPane;
+import java.awt.Component;
+import java.awt.Window;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * UI where a password can be submitted by a user
@@ -25,12 +32,27 @@ public class PasswordScreen {
 		JPanel panel = new JPanel();
 
 		// Add a label to the panel
-		JLabel label = new JLabel("Enter a password:");
+		JLabel label = new JLabel("Password:");
 		panel.add(label);
 
 		// Add a passwordfield to the panel with a coloumn with of 10
 		JPasswordField pass = new JPasswordField(10);
 		panel.add(pass);
+
+		// Make sure that the password field is selected while it is still possible to press enter for OK
+		pass.addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				final Component c = e.getComponent();
+				if (c.isShowing() && (e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
+					Window top = SwingUtilities.getWindowAncestor(c);
+					top.addWindowFocusListener(new WindowAdapter() {
+						public void windowGainedFocus(WindowEvent e) {
+							c.requestFocus();
+						}
+					});
+				}
+			}
+		});
 
 		// Place the 2 buttons for OK and Cancel and show the dialog
 		String[] options = new String[] { "OK", "Cancel" };
