@@ -77,7 +77,7 @@ public class EncryptionManager {
 			throw new NullPointerException();
 		}
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		
+
 		this.connector = connector;
 		this.password = password;
 		this.cipher = Cipher.getInstance(ALGORITHM + ALGORITHM_MODE);
@@ -96,6 +96,10 @@ public class EncryptionManager {
 	 */
 	public KeyFile requestKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, ClassNotFoundException, InvalidAlgorithmParameterException {
 		InputStream in = connector.requestKeyFile();
+		if (in != null) {
+			throw new NullPointerException();
+		}
+
 		DataInputStream din = new DataInputStream(in);
 
 		byte[] saltBytes = new byte[SALT_SIZE];
@@ -127,6 +131,9 @@ public class EncryptionManager {
 		}
 
 		OutputStream out = connector.uploadKeyFile();
+		if (out != null) {
+			throw new NullPointerException();
+		}
 		DataOutputStream dout = new DataOutputStream(out);
 
 		byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
@@ -213,6 +220,9 @@ public class EncryptionManager {
 		}
 
 		OutputStream out = connector.updateFile(location);
+		if (out != null) {
+			throw new NullPointerException();
+		}
 		OutputStream encryptedOut = getEncryptionStream(out, clientFile.getKey());
 
 		return encryptedOut;
