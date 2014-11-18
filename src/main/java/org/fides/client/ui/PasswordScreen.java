@@ -16,29 +16,35 @@ public class PasswordScreen extends JFrame {
 	 */
 	private static final long serialVersionUID = 3222910346000466192L;
 
+	private static final int MAXPASSWORDSIZE = 32;
+	
 	/**
 	 * Show a dialog where the user can enter its password
-	 * @return the entered password, returns an empty String if nothing was entered
+	 * 
+	 * @return the entered password, returns an empty String if nothing was
+	 *         entered
 	 */
 	public static String getPassword() {
-		//Create a Panel
+		// Create a Panel
 		JPanel panel = new JPanel();
-		//Add a label to the panel
+		
+		// Add a label to the panel
 		JLabel label = new JLabel("Enter a password:");
 		panel.add(label);
-		//Add a passwordfield to the panel
-		JPasswordField pass = new JPasswordField(32);
+		
+		// Add a passwordfield to the panel 
+		// TODO: Allow the password to be bigger without resizing the passwordfield.
+		JPasswordField pass = new JPasswordField(MAXPASSWORDSIZE);
 		panel.add(pass);
-		//Place the 2 buttons for OK and Cancel and show the dialog
-		String[] options = new String[]{"OK", "Cancel"};
-		int option = JOptionPane.showOptionDialog(null, panel, "Enter password",
-			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-			null, options, options[0]);
-		//When OK was pressed
+		
+		// Place the 2 buttons for OK and Cancel and show the dialog
+		String[] options = new String[] { "OK", "Cancel" };
+		int option = JOptionPane.showOptionDialog(null, panel, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		// If OK was pressed
 		if (option == 0) {
 			return new String(pass.getPassword());
 		}
-		return "";
+		return null;
 	}
 
 }
