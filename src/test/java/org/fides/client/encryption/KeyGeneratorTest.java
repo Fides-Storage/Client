@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * Unit test for simple App.
+ * Unit test for the KeyGenerator class.
  */
 public class KeyGeneratorTest {
 
