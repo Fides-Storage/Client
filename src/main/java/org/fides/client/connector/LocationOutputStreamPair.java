@@ -7,9 +7,9 @@ import java.io.OutputStream;
  */
 public class LocationOutputStreamPair {
 
-	private OutputStream outputStream;
+	private final OutputStream outputStream;
 
-	private String location;
+	private final String location;
 
 	/**
 	 * Constructor
@@ -25,11 +25,11 @@ public class LocationOutputStreamPair {
 		this.location = location;
 	}
 
-	public OutputStream getOutputStream() {
+	public final OutputStream getOutputStream() {
 		return outputStream;
 	}
 
-	public String getLocation() {
+	public final String getLocation() {
 		return location;
 	}
 

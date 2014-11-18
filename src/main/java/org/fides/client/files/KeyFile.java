@@ -16,16 +16,34 @@ public class KeyFile implements Serializable {
 
 	private Collection<ClientFile> clientFiles;
 
+	/**
+	 * Return a {@link ClientFile} with the given name
+	 * 
+	 * @param name
+	 *            The name of the file
+	 * @return The {@link ClientFile} if existing
+	 */
 	public ClientFile getClientFileByName(String name) {
 		for (ClientFile clientFile : clientFiles) {
-
+			if (clientFile.getName().equals(name)) {
+				return clientFile;
+			}
 		}
 		return null;
 	}
 
+	/**
+	 * Return a {@link ClientFile} with the certain location
+	 * 
+	 * @param location
+	 *            The location of the file
+	 * @return The {@link ClientFile} if existing
+	 */
 	public ClientFile getClientFileByLocation(String location) {
 		for (ClientFile clientFile : clientFiles) {
-
+			if (clientFile.getLocation().equals(location)) {
+				return clientFile;
+			}
 		}
 		return null;
 	}

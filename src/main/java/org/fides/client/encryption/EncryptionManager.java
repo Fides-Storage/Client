@@ -20,6 +20,7 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.fides.client.connector.LocationEncryptedOutputStreamPair;
 import org.fides.client.connector.LocationOutputStreamPair;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
@@ -39,7 +40,7 @@ public class EncryptionManager {
 	private static final String ALGORITHM = "AES";
 
 	/** The algorithm used for encryption and decryption */
-	private static final int KEY_SIZE = 32;
+	private static final int KEY_SIZE = 32; // 256 bit
 
 	/** The mode of operation and padding for the cipher */
 	private static final String ALGORITHM_MODE = "/CBC/PKCS5Padding";
@@ -48,15 +49,15 @@ public class EncryptionManager {
 	private static final byte[] IV = { 0x46, 0x69, 0x64, 0x65, 0x73, 0x2, 0x69, 0x73, 0x20, 0x53, 0x65, 0x63, 0x75, 0x72, 0x65, 0x21 };
 
 	/** Size of the salt used in generating the master key, it should NEVER change */
-	private static final int SALT_SIZE = 16;
+	private static final int SALT_SIZE = 16; // 128 bit
 
-	private ServerConnector connector;
+	private final ServerConnector connector;
 
-	private String password;
+	private final String password;
 
-	private Cipher cipher;
+	private final Cipher cipher;
 
-	private KeyGenerator keyGenerator;
+	private final KeyGenerator keyGenerator;
 
 	/**
 	 * Constructor
@@ -71,6 +72,9 @@ public class EncryptionManager {
 	 *             Thrown if the padding is incorrect
 	 */
 	public EncryptionManager(ServerConnector connector, String password, KeyGenerator keyGenerator) throws NoSuchAlgorithmException, NoSuchPaddingException {
+		if (connector == null || password == null || password.isEmpty() || keyGenerator == null) {
+			throw new NullPointerException();
+		}
 		this.connector = connector;
 		this.password = password;
 		this.keyGenerator = keyGenerator;
@@ -167,9 +171,20 @@ public class EncryptionManager {
 	 * Encrypts a file and sends it to the {@link IServerConnector}
 	 * 
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws InvalidKeyException
 	 */
-	public LocationOutputStreamPair uploadFile(final KeyFile keyFile) {
-		return null;
+	public LocationEncryptedOutputStreamPair uploadFile(final KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException {
+		if (keyFile == null) {
+			throw new NullPointerException();
+		}
+
+		Key key = keyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
+		LocationOutputStreamPair losp = connector.uploadFile();
+
+		return new LocationEncryptedOutputStreamPair(getEncryptionStream(losp.getOutputStream(), key), losp.getLocation(), key);
 	}
 
 	/**
@@ -178,9 +193,24 @@ public class EncryptionManager {
 	 * @param location
 	 *            The location of the existing file on the server
 	 * @return The {@link OutputStream} used for writing
+	 * @throws FileNotFoundException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws InvalidKeyException
 	 */
-	public OutputStream updateFile(final String location, final KeyFile keyFile) {
-		return null;
+	public OutputStream updateFile(final String location, final KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
+		if (location == null || keyFile == null) {
+			throw new NullPointerException();
+		}
+
+		ClientFile clientFile = keyFile.getClientFileByLocation(location);
+		if (clientFile == null) {
+			throw new FileNotFoundException();
+		}
+
+		OutputStream out = connector.updateFile(location);
+		OutputStream encryptedOut = getEncryptionStream(out, clientFile.getKey());
+
+		return encryptedOut;
 	}
 
 	private InputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
