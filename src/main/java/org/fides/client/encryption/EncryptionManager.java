@@ -20,6 +20,7 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fides.client.connector.LocationEncryptedOutputStreamPair;
 import org.fides.client.connector.LocationOutputStreamPair;
 import org.fides.client.connector.ServerConnector;
@@ -72,7 +73,7 @@ public class EncryptionManager {
 	 *             Thrown if the padding is incorrect
 	 */
 	public EncryptionManager(ServerConnector connector, String password, KeyGenerator keyGenerator) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		if (connector == null || password == null || password.isEmpty() || keyGenerator == null) {
+		if (connector == null || StringUtils.isBlank(password) || keyGenerator == null) {
 			throw new NullPointerException();
 		}
 		this.connector = connector;
@@ -213,12 +214,12 @@ public class EncryptionManager {
 		return encryptedOut;
 	}
 
-	private InputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+	private CipherInputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
 		cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(IV));
 		return new CipherInputStream(in, cipher);
 	}
 
-	private OutputStream getEncryptionStream(OutputStream out, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+	private CipherOutputStream getEncryptionStream(OutputStream out, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
 		cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(IV));
 		return new CipherOutputStream(out, cipher);
 	}
