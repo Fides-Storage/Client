@@ -19,6 +19,7 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fides.client.connector.LocationEncryptedOutputStreamPair;
@@ -132,6 +133,8 @@ public class EncryptionManager {
 		int pbkdf2Rounds = KeyGenerator.getRounds();
 
 		Key key = keyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+
+		key = new SecretKeySpec(key.getEncoded(), "AES");
 
 		dout.write(saltBytes, 0, SALT_SIZE);
 		dout.writeLong(pbkdf2Rounds);
