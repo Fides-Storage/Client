@@ -96,7 +96,7 @@ public class EncryptionManager {
 	 */
 	public KeyFile requestKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, ClassNotFoundException, InvalidAlgorithmParameterException {
 		InputStream in = connector.requestKeyFile();
-		if (in != null) {
+		if (in == null) {
 			throw new NullPointerException();
 		}
 
@@ -131,7 +131,7 @@ public class EncryptionManager {
 		}
 
 		OutputStream out = connector.uploadKeyFile();
-		if (out != null) {
+		if (out == null) {
 			throw new NullPointerException();
 		}
 		DataOutputStream dout = new DataOutputStream(out);
@@ -217,7 +217,7 @@ public class EncryptionManager {
 		}
 
 		OutputStream out = connector.updateFile(location);
-		if (out != null) {
+		if (out == null) {
 			throw new NullPointerException();
 		}
 		OutputStream encryptedOut = getEncryptionStream(out, clientFile.getKey());
