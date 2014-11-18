@@ -1,7 +1,8 @@
 package org.fides.client;
 
 import static org.junit.Assert.assertEquals;
-import org.fides.client.algorithm.KeyGenerator;
+
+import org.fides.client.encryption.KeyGenerator;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;

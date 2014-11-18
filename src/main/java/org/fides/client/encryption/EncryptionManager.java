@@ -1,4 +1,4 @@
-package org.fides.client.connector;
+package org.fides.client.encryption;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -18,7 +18,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.fides.client.algorithm.KeyGenerator;
+import org.fides.client.connector.LocationOutputStreamPair;
+import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.KeyFile;
 
 /**

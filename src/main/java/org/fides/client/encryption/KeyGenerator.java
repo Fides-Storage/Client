@@ -1,4 +1,4 @@
-package org.fides.client.algorithm;
+package org.fides.client.encryption;
 
 import java.math.BigInteger;
 import java.security.Key;
