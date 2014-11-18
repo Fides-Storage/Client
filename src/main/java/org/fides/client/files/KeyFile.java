@@ -1,5 +1,6 @@
 package org.fides.client.files;
 
+import java.awt.RenderingHints.Key;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,14 @@ public class KeyFile implements Serializable {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Add a {@link ClientFile} to the {@link KeyFile}.
+	 * @param clientFile
+	 */
+	public void addClientFile(ClientFile clientFile) {
+		clientFiles.add(clientFile);
 	}
 
 }
