@@ -1,6 +1,15 @@
 package org.fides.client.encryption;
 
-import java.io.BufferedOutputStream;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -16,9 +25,6 @@ import org.fides.client.files.ClientFile;
 import org.fides.client.files.KeyFile;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 /**
  * The JUnit Test Case for the EncryptionManager
  */
@@ -30,7 +36,7 @@ public class EncryptionManagerTest {
 		+ "et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
 		+ "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non "
 		+ "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.").getBytes();
-	
+
 	/**
 	 * Tests the encryption of a key file.
 	 */
@@ -133,7 +139,8 @@ public class EncryptionManagerTest {
 	}
 
 	/**
-	 * Tests the decryption of a file by encrypting and decrypting the stream and checking if the message is the same before and after.
+	 * Tests the decryption of a file by encrypting and decrypting the stream and checking if the message is the same
+	 * before and after.
 	 */
 	@Test
 	public void testFileDecrypt() {
@@ -150,15 +157,13 @@ public class EncryptionManagerTest {
 			outputStreamData.getOutputStream().write(MESSAGE);
 			outputStreamData.getOutputStream().close();
 
-			KeyFile keyFile = new KeyFile();
 			ClientFile clientFile = new ClientFile("Name", outputStreamData.getLocation(), outputStreamData.getKey(), "Hash");
-			keyFile.addClientFile(clientFile);
 
 			InputStream mockIn = new ByteArrayInputStream(mockOut.toByteArray());
 
 			// Check if decrypting the file results in the original message.
 			when(mockConnector.requestFile(fileLocation)).thenReturn(mockIn);
-			InputStream inStream = manager.requestFile(fileLocation, keyFile);
+			InputStream inStream = manager.requestFile(clientFile);
 			ByteArrayOutputStream readBytes = new ByteArrayOutputStream();
 			IOUtils.copy(inStream, readBytes);
 			assertArrayEquals(MESSAGE, readBytes.toByteArray());
@@ -179,7 +184,7 @@ public class EncryptionManagerTest {
 		ByteArrayOutputStream mockUpdateOut = new ByteArrayOutputStream();
 		when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockUploadOut, fileLocation));
 		when(mockConnector.updateFile(fileLocation)).thenReturn(mockUpdateOut);
-		
+
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
 			EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
@@ -187,30 +192,28 @@ public class EncryptionManagerTest {
 			outputStreamData.getOutputStream().write(MESSAGE);
 			outputStreamData.getOutputStream().close();
 			byte[] uploadedBytes = mockUploadOut.toByteArray();
-	
-			KeyFile keyFile = new KeyFile();
+
 			ClientFile clientFile = new ClientFile("Name", outputStreamData.getLocation(), outputStreamData.getKey(), "Hash");
-			keyFile.addClientFile(clientFile);
-			
+
 			// Update the uploaded file with a new message.
-			OutputStream outStream = manager.updateFile(fileLocation, keyFile);
+			OutputStream outStream = manager.updateFile(clientFile);
 			outStream.write("A different message than the default message".getBytes());
 			outStream.close();
-			
+
 			// Check if the updated outputstream is different from the uploaded outputstream
 			assertTrue(mockUpdateOut.size() > 0);
 			assertFalse(Arrays.equals(uploadedBytes, mockUpdateOut.toByteArray()));
-			
+
 			// Update the uploaded file with the original message.
 			mockUpdateOut.reset();
-			outStream = manager.updateFile(fileLocation, keyFile);
+			outStream = manager.updateFile(clientFile);
 			outStream.write(MESSAGE);
 			outStream.close();
-			
+
 			// Check if the updated outputstream is the same as the original uploaded outputstream
 			assertTrue(mockUpdateOut.size() > 0);
 			assertArrayEquals(uploadedBytes, mockUpdateOut.toByteArray());
-			
+
 		} catch (Exception e) {
 			fail("An unexpected exception has occured: " + e.getMessage());
 		}

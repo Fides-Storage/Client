@@ -2,14 +2,11 @@ package org.fides.client.encryption;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -30,6 +27,7 @@ import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
+import org.fides.client.files.InvalidClientFileExeption;
 import org.fides.client.files.KeyFile;
 
 /**
@@ -68,10 +66,8 @@ public class EncryptionManager {
 	 *            The {@link ServerConnector} to use
 	 * @param password
 	 *            The user's password creating the master key for encryption of the {@link KeyFile}
-	 * @throws NoSuchAlgorithmException
-	 *             Thrown if the key's algorithm is incorrect
 	 */
-	public EncryptionManager(ServerConnector connector, String password) throws NoSuchAlgorithmException {
+	public EncryptionManager(ServerConnector connector, String password) {
 		if (connector == null || StringUtils.isBlank(password)) {
 			throw new NullPointerException();
 		}
@@ -86,13 +82,8 @@ public class EncryptionManager {
 	 * 
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeyException
-	 * @throws ClassNotFoundException
-	 * @throws InvalidAlgorithmParameterException
 	 */
-	public KeyFile requestKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, ClassNotFoundException {
+	public KeyFile requestKeyFile() throws IOException {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			throw new NullPointerException();
@@ -107,9 +98,14 @@ public class EncryptionManager {
 		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
 		ObjectInputStream inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
-		KeyFile keyFile = (KeyFile) inDecrypted.readObject();
-
-		return keyFile;
+		KeyFile keyFile;
+		try {
+			keyFile = (KeyFile) inDecrypted.readObject();
+			return keyFile;
+		} catch (ClassNotFoundException e) {
+			// The keyfile is not a keyfile, should not be posible unless something happens below this
+			return null;
+		}
 	}
 
 	/**
@@ -117,13 +113,9 @@ public class EncryptionManager {
 	 * 
 	 * @param keyFile
 	 *            The {@link KeyFile} to encrypt and send
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws InvalidKeyException
 	 * @throws IOException
 	 */
-	public void uploadKeyFile(final KeyFile keyFile) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
+	public void uploadKeyFile(final KeyFile keyFile) throws IOException {
 		if (keyFile == null) {
 			throw new NullPointerException();
 		}
@@ -151,25 +143,19 @@ public class EncryptionManager {
 	/**
 	 * Decrypts an {@link InputStream} from the {@link ServerConnector} of a requested file
 	 * 
-	 * @param location
-	 *            The location of the file on the server
-	 * @param keyFile
-	 *            The keyfile containing
+	 * @param clientFile
+	 *            The {@link ClientFile} containing the location of the file on the server and the key to decrypt it
 	 * @return An {@link InputStream} of the file
-	 * @throws FileNotFoundException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws InvalidKeyException
 	 */
-	public InputStream requestFile(final String location, final KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
-		if (location == null || keyFile == null) {
+	public InputStream requestFile(ClientFile clientFile) throws InvalidClientFileExeption {
+		if (clientFile == null) {
 			throw new NullPointerException();
 		}
-
-		InputStream in = connector.requestFile(location);
-		ClientFile clientFile = keyFile.getClientFileByLocation(location);
-		if (clientFile == null) {
-			throw new FileNotFoundException();
+		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
+			throw new InvalidClientFileExeption();
 		}
+
+		InputStream in = connector.requestFile(clientFile.getLocation());
 
 		Key key = clientFile.getKey();
 		return getDecryptionStream(in, key);
@@ -181,10 +167,8 @@ public class EncryptionManager {
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws InvalidKeyException
 	 */
-	public EncryptedOutputStreamData uploadFile() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException {
+	public EncryptedOutputStreamData uploadFile() throws NoSuchAlgorithmException, InvalidKeySpecException {
 		Key key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
@@ -198,24 +182,20 @@ public class EncryptionManager {
 	/**
 	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
 	 * 
-	 * @param location
-	 *            The location of the existing file on the server
+	 * @param clientFile
+	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
 	 * @return The {@link OutputStream} used for writing
-	 * @throws FileNotFoundException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws InvalidKeyException
+	 * @throws InvalidClientFileExeption
 	 */
-	public OutputStream updateFile(final String location, final KeyFile keyFile) throws FileNotFoundException, InvalidKeyException, InvalidAlgorithmParameterException {
-		if (location == null || keyFile == null) {
+	public OutputStream updateFile(ClientFile clientFile) throws InvalidClientFileExeption {
+		if (clientFile == null) {
 			throw new NullPointerException();
 		}
-
-		ClientFile clientFile = keyFile.getClientFileByLocation(location);
-		if (clientFile == null) {
-			throw new FileNotFoundException();
+		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
+			throw new InvalidClientFileExeption();
 		}
 
-		OutputStream out = connector.updateFile(location);
+		OutputStream out = connector.updateFile(clientFile.getLocation());
 		if (out == null) {
 			throw new NullPointerException();
 		}
@@ -224,7 +204,7 @@ public class EncryptionManager {
 		return encryptedOut;
 	}
 
-	private InputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+	private InputStream getDecryptionStream(InputStream in, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
@@ -235,7 +215,7 @@ public class EncryptionManager {
 		return new CipherInputStream(in, cipher);
 	}
 
-	private OutputStream getEncryptionStream(OutputStream out, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+	private OutputStream getEncryptionStream(OutputStream out, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
