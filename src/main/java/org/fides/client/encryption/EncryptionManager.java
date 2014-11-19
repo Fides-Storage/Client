@@ -15,14 +15,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.engines.CamelliaEngine;
+import org.bouncycastle.crypto.io.CipherInputStream;
+import org.bouncycastle.crypto.io.CipherOutputStream;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.PKCS7Padding;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
@@ -39,14 +42,14 @@ import org.fides.client.files.KeyFile;
  */
 public class EncryptionManager {
 
-	/** The algorithm used for encryption and decryption */
+	/**
+	 * The algorithm used for encryption and decryption, when changing it dont forgot to update the
+	 * {@link EncryptionManager#createCipher()}
+	 */
 	private static final String ALGORITHM = "Camellia";
 
 	/** The algorithm used for encryption and decryption */
-	private static final int KEY_SIZE = 16; // TODO: Eventually we want a 32byte keysize.
-
-	/** The mode of operation and padding for the cipher */
-	private static final String ALGORITHM_MODE = "/CBC/PKCS5Padding";
+	private static final int KEY_SIZE = 32; // 256 bit
 
 	/** The IV used to initiate the cipher */
 	private static final byte[] IV = { 0x46, 0x69, 0x64, 0x65, 0x73, 0x2, 0x69, 0x73, 0x20, 0x53, 0x65, 0x63, 0x75, 0x72, 0x65, 0x21 };
@@ -58,8 +61,6 @@ public class EncryptionManager {
 
 	private final String password;
 
-	private final Cipher cipher;
-
 	/**
 	 * Constructor
 	 * 
@@ -69,10 +70,8 @@ public class EncryptionManager {
 	 *            The user's password creating the master key for encryption of the {@link KeyFile}
 	 * @throws NoSuchAlgorithmException
 	 *             Thrown if the key's algorithm is incorrect
-	 * @throws NoSuchPaddingException
-	 *             Thrown if the padding is incorrect
 	 */
-	public EncryptionManager(ServerConnector connector, String password) throws NoSuchAlgorithmException, NoSuchPaddingException {
+	public EncryptionManager(ServerConnector connector, String password) throws NoSuchAlgorithmException {
 		if (connector == null || StringUtils.isBlank(password)) {
 			throw new NullPointerException();
 		}
@@ -80,11 +79,10 @@ public class EncryptionManager {
 
 		this.connector = connector;
 		this.password = password;
-		this.cipher = Cipher.getInstance(ALGORITHM + ALGORITHM_MODE);
 	}
 
 	/**
-	 * Requests the {@link KeyFile} from the {@link IServerConnector} and decrypts it
+	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
 	 * 
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
@@ -94,7 +92,7 @@ public class EncryptionManager {
 	 * @throws ClassNotFoundException
 	 * @throws InvalidAlgorithmParameterException
 	 */
-	public KeyFile requestKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, ClassNotFoundException, InvalidAlgorithmParameterException {
+	public KeyFile requestKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, ClassNotFoundException {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			throw new NullPointerException();
@@ -115,7 +113,7 @@ public class EncryptionManager {
 	}
 
 	/**
-	 * Encrypts the {@link KeyFile} and sends it to the {@link IServerConnector}
+	 * Encrypts the {@link KeyFile} and sends it to the {@link ServerConnector}
 	 * 
 	 * @param keyFile
 	 *            The {@link KeyFile} to encrypt and send
@@ -141,8 +139,6 @@ public class EncryptionManager {
 
 		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
-		key = new SecretKeySpec(key.getEncoded(), ALGORITHM);
-
 		dout.writeInt(pbkdf2Rounds);
 		dout.write(saltBytes, 0, SALT_SIZE);
 
@@ -153,7 +149,7 @@ public class EncryptionManager {
 	}
 
 	/**
-	 * Decrypts an {@link InputStream} from the {@link IServerConnector} of a requested file
+	 * Decrypts an {@link InputStream} from the {@link ServerConnector} of a requested file
 	 * 
 	 * @param location
 	 *            The location of the file on the server
@@ -180,7 +176,7 @@ public class EncryptionManager {
 	}
 
 	/**
-	 * Encrypts a file and sends it to the {@link IServerConnector}
+	 * Encrypts a file and sends it to the {@link ServerConnector}
 	 * 
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 * @throws InvalidKeySpecException
@@ -200,7 +196,7 @@ public class EncryptionManager {
 	}
 
 	/**
-	 * Encrypts a updated file and sends it to the {@link IServerConnector} so the server can update it
+	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
 	 * 
 	 * @param location
 	 *            The location of the existing file on the server
@@ -228,14 +224,31 @@ public class EncryptionManager {
 		return encryptedOut;
 	}
 
-	private CipherInputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
-		cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(IV));
+	private InputStream getDecryptionStream(InputStream in, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+		BufferedBlockCipher cipher = createCipher();
+
+		KeyParameter keyParam = new KeyParameter(key.getEncoded());
+		CipherParameters params = new ParametersWithIV(keyParam, IV);
+		cipher.reset();
+		cipher.init(false, params);
+
 		return new CipherInputStream(in, cipher);
 	}
 
-	private CipherOutputStream getEncryptionStream(OutputStream out, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
-		cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(IV));
+	private OutputStream getEncryptionStream(OutputStream out, Key key) throws InvalidKeyException, InvalidAlgorithmParameterException {
+		BufferedBlockCipher cipher = createCipher();
+
+		KeyParameter keyParam = new KeyParameter(key.getEncoded());
+		CipherParameters params = new ParametersWithIV(keyParam, IV);
+		cipher.reset();
+		cipher.init(true, params);
+
 		return new CipherOutputStream(out, cipher);
+	}
+
+	/** Create the cipher to use */
+	private BufferedBlockCipher createCipher() {
+		return new PaddedBufferedBlockCipher(new CBCBlockCipher(new CamelliaEngine()), new PKCS7Padding());
 	}
 
 }
