@@ -25,16 +25,15 @@ public class ServerConnector {
 	public ServerConnector() {
 		//For testing purposes only
 		Properties systemProps = System.getProperties();
-		systemProps.put( "javax.net.ssl.trustStore", "./truststore.ts");
+		systemProps.put("javax.net.ssl.trustStore", "./truststore.ts");
 		systemProps.put("javax.net.ssl.trustStorePassword", "");
 		System.setProperties(systemProps);
 	}
 
-	public boolean connect() {
+	public boolean connect(String ip, int port) throws UnknownHostException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			//TODO Change serverip and port
-			sslsocket = (SSLSocket) sslsocketfactory.createSocket("localhost", 4444);
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket(ip, port);
 
 			SSLContext context = SSLContext.getInstance("TLS");
 
@@ -44,10 +43,8 @@ public class ServerConnector {
 			OutputStream outToServer = sslsocket.getOutputStream();
 			DataOutputStream out = new DataOutputStream(outToServer);
 
-		} catch (UnknownHostException e) {
-			fail("UnknownHostException");
 		} catch (IOException e) {
-			fail("IOException");
+			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -55,6 +52,9 @@ public class ServerConnector {
 	}
 
 	public boolean isConnected() {
+		if (sslsocket != null) {
+			return sslsocket.isConnected();
+		}
 		return false;
 	}
 
@@ -81,6 +81,9 @@ public class ServerConnector {
 	}
 
 	public boolean isDisconnected() {
+		if (sslsocket != null) {
+			return sslsocket.isClosed();
+		}
 		return false;
 	}
 
