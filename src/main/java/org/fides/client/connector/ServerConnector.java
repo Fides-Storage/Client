@@ -1,23 +1,41 @@
 package org.fides.client.connector;
 
+import javax.net.ssl.SSLSocket;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ServerConnector {
 
-	private String username;
+	SSLSocket sslSocket;
 
-	private String passwordHash;
-
-	public ServerConnector(String username, String passwordHash) {
-
+	public ServerConnector() {
 	}
 
 	public boolean connect() {
 		return false;
 	}
 
+	public boolean isConnected() {
+		return false;
+	}
+
+	public boolean login(String username, String passwordHash) {
+		return false;
+	}
+
+	public boolean isLoggedIn() {
+		return false;
+	}
+
+	public boolean register(String username, String passwordHash) {
+		return false;
+	}
+
 	public boolean disconnect() {
+		return false;
+	}
+
+	public boolean isDisconnected() {
 		return false;
 	}
 
