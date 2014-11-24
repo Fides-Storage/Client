@@ -6,14 +6,14 @@ package org.fides.client.files;
  * @author Koen
  *
  */
-public class InvalidClientFileExeption extends Exception {
+public class InvalidClientFileException extends Exception {
 
 	private static final long serialVersionUID = -5396351565109464521L;
 
 	/**
-	 * Emptry Constructor
+	 * Empty Constructor
 	 */
-	public InvalidClientFileExeption() {
+	public InvalidClientFileException() {
 		super();
 	}
 
@@ -23,7 +23,7 @@ public class InvalidClientFileExeption extends Exception {
 	 * @param message
 	 *            The message
 	 */
-	public InvalidClientFileExeption(String message) {
+	public InvalidClientFileException(String message) {
 		super(message);
 	}
 

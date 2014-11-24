@@ -27,7 +27,7 @@ import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
-import org.fides.client.files.InvalidClientFileExeption;
+import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.KeyFile;
 
 /**
@@ -147,12 +147,12 @@ public class EncryptionManager {
 	 *            The {@link ClientFile} containing the location of the file on the server and the key to decrypt it
 	 * @return An {@link InputStream} of the file
 	 */
-	public InputStream requestFile(ClientFile clientFile) throws InvalidClientFileExeption {
+	public InputStream requestFile(ClientFile clientFile) throws InvalidClientFileException {
 		if (clientFile == null) {
 			throw new NullPointerException();
 		}
 		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
-			throw new InvalidClientFileExeption();
+			throw new InvalidClientFileException();
 		}
 
 		InputStream in = connector.requestFile(clientFile.getLocation());
@@ -185,14 +185,14 @@ public class EncryptionManager {
 	 * @param clientFile
 	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
 	 * @return The {@link OutputStream} used for writing
-	 * @throws InvalidClientFileExeption
+	 * @throws InvalidClientFileException
 	 */
-	public OutputStream updateFile(ClientFile clientFile) throws InvalidClientFileExeption {
+	public OutputStream updateFile(ClientFile clientFile) throws InvalidClientFileException {
 		if (clientFile == null) {
 			throw new NullPointerException();
 		}
 		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
-			throw new InvalidClientFileExeption();
+			throw new InvalidClientFileException();
 		}
 
 		OutputStream out = connector.updateFile(clientFile.getLocation());
