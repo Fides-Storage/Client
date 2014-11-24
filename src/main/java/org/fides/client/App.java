@@ -38,47 +38,58 @@ public class App {
       }
 
       if ((data[0]).equals("register")) {
-        if (serverConnector.register(data[1], data[2])) {
-          System.out.println("Register succesfull");
+
+        // checks if password and password confirmation is the same
+        if (data[2].equals(data[3])) {
+          // register on the server
+          if (serverConnector.register(data[1], data[2])) {
+            System.out.println("Register succesfull");
+          } else {
+            System.out.println("Register failed");
+          }
+        } else {
+          System.out.println("Register password confirmation is not valid.");
+        }
+      } else if ((data[0]).equals("login")) {
+        if (serverConnector.login(data[1], data[2])) {
           break;
         } else {
-          System.out.println("Register failed");
-          break;
-        }
-      } else if ((data[1]).equals("login")) {
-        if (!serverConnector.login(data[1], data[2])) {
           System.out.println("Login failed");
-          break;
         }
       }
 
-      // Continue program
+    }
+
+    if (serverConnector.isConnected()) {
+      // TODO: Do normal work
+    } else {
+      System.exit(1);
 
     }
 
   }
 
-	public static void FileManagerCheck() {
-		// TODO make it the real code, not half test code
-		Properties localHashes = new Properties();
-		try {
-			File file = new File(LOCAL_HASHSES_FILE);
-			if (file.exists()) {
-				localHashes.loadFromXML(new FileInputStream(LOCAL_HASHSES_FILE));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+  public static void FileManagerCheck() {
+    // TODO make it the real code, not half test code
+    Properties localHashes = new Properties();
+    try {
+      File file = new File(LOCAL_HASHSES_FILE);
+      if (file.exists()) {
+        localHashes.loadFromXML(new FileInputStream(LOCAL_HASHSES_FILE));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
-		FileManager manager = new FileManager(localHashes);
-		KeyFile keyFile = new KeyFile();
-		keyFile.addClientFile(new ClientFile("Server.file", "gasdfa", null, null));
-		keyFile.addClientFile(new ClientFile("SomeFiles2.txt", "gasdfa", null, null));
+    FileManager manager = new FileManager(localHashes);
+    KeyFile keyFile = new KeyFile();
+    keyFile.addClientFile(new ClientFile("Server.file", "gasdfa", null, null));
+    keyFile.addClientFile(new ClientFile("SomeFiles2.txt", "gasdfa", null, null));
 
-		Collection<FileCompareResult> results = manager.compareFiles(keyFile);
-		System.out.println(results);
+    Collection<FileCompareResult> results = manager.compareFiles(keyFile);
+    System.out.println(results);
 
-		System.out.println(UserSettings.getInstance().getFileDirectory());
-	}
+    System.out.println(UserSettings.getInstance().getFileDirectory());
+  }
 
 }
