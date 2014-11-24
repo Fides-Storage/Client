@@ -71,7 +71,11 @@ public class ServerConnector {
 	}
 
 	public boolean disconnect() {
-		sslsocket.close();
+		try {
+			sslsocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return false;
 	}
 
