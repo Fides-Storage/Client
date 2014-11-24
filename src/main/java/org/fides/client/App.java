@@ -26,9 +26,12 @@ public class App {
 	 */
 	public static void main(String[] args) {
 		System.out.println("Hello World!");
+
+		FileManagerCheck();
 	}
 
 	public static void FileManagerCheck() {
+		// TODO make it the real code, not half test code
 		Properties localHashes = new Properties();
 		try {
 			File file = new File(LOCAL_HASHSES_FILE);

@@ -72,6 +72,8 @@ public final class UserSettings {
 			out = new FileOutputStream(new File(USER_SETTINGS_FILE));
 			properties.store(out, "Fides user settings");
 		} catch (IOException e1) {
+			// Do nothing, can happen
+		} finally {
 			IOUtils.closeQuietly(out);
 		}
 	}
