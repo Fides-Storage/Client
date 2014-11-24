@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 
+import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.ClientFile;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.KeyFile;
+import org.fides.client.ui.UsernamePasswordScreen;
 
 /**
  * Hello world!
@@ -17,18 +19,44 @@ import org.fides.client.files.KeyFile;
  */
 public class App {
 
-	private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
+  private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
 
-	/**
-	 * Main
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		System.out.println("Hello World!");
+  /**
+   * Main
+   * 
+   * @param args
+   */
+  public static void main(String[] args) {
+    ServerConnector serverConnector = new ServerConnector();
 
-		FileManagerCheck();
-	}
+    while (true) {
+
+      String[] data = UsernamePasswordScreen.getUsernamePassword();
+
+      if (data == null) {
+        System.exit(1);
+      }
+
+      if ((data[0]).equals("register")) {
+        if (serverConnector.register(data[1], data[2])) {
+          System.out.println("Register succesfull");
+          break;
+        } else {
+          System.out.println("Register failed");
+          break;
+        }
+      } else if ((data[1]).equals("login")) {
+        if (!serverConnector.login(data[1], data[2])) {
+          System.out.println("Login failed");
+          break;
+        }
+      }
+
+      // Continue program
+
+    }
+
+  }
 
 	public static void FileManagerCheck() {
 		// TODO make it the real code, not half test code
@@ -52,4 +80,5 @@ public class App {
 
 		System.out.println(UserSettings.getInstance().getFileDirectory());
 	}
+
 }
