@@ -27,14 +27,16 @@ public class FileManager {
 	 * Constructor
 	 */
 	public FileManager(Properties localHashes) {
-		this.settings = UserSettings.getInstance();
+		settings = UserSettings.getInstance();
 		this.localHashes = localHashes;
 	}
 
 	/**
+	 * Compares the local files and the files on a server ({@link KeyFile})
 	 * 
 	 * @param keyFile
-	 * @return
+	 *            The {@link KeyFile} originating from the server
+	 * @return The collection of {@link FileCompareResult} with the differences between a server({@link KeyFile})
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
 		List<FileCompareResult> results = new ArrayList<>();
@@ -44,7 +46,7 @@ public class FileManager {
 		filesInDirectory(directory, files);
 		Set<String> clientFileNames = filesToNames(files, directory);
 
-		// We dont the files need it anymore, only the names
+		// We don't the files need it anymore, only the names
 		files.clear();
 		files = null;
 
@@ -57,7 +59,25 @@ public class FileManager {
 		// Lets start comparing
 		for (String serverName : serverFileNames) {
 			// Server has the file
-			if (!clientFileNames.contains(serverName)) {
+			if (clientFileNames.contains(serverName)) {
+				// We both have the file
+				String fileHash = FileUtil.generateFileHash(new File(directory, serverName));
+				String savedHash = localHashes.getProperty(serverName);
+				boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(serverName).getHash());
+				boolean localChanged = !savedHash.equals(fileHash);
+
+				if (localChanged && serverChanged) {
+					// Both server and client are changed
+					results.add(new FileCompareResult(serverName, CompareResultType.CONFLICTED));
+				} else if (localChanged) {
+					// Client are changed
+					results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_UPDATED));
+				} else if (serverChanged) {
+					// Server are changed
+					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_UPDATED));
+				}
+				// Else nothing changed
+			} else {
 				// I have not the file
 				if (localHashes.containsKey(serverName)) {
 					// Did exist local (its removed local)
@@ -66,10 +86,6 @@ public class FileManager {
 					// Did not exist here (its added on the server)
 					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_ADDED));
 				}
-			} else {
-				// We both have the file
-				// TODO check if hashes changed
-				// This will either result in a local or server changed or a conflict
 			}
 		}
 		for (String clientName : clientFileNames) {
@@ -87,48 +103,6 @@ public class FileManager {
 		}
 
 		return results;
-	}
-
-	/**
-	 * Add all files and {@link File} in subdirectories to a list;
-	 * 
-	 * @param directory
-	 *            The directory to look in
-	 * @param files
-	 *            The {@link List} to add the {@link File} to
-	 */
-	private static void filesInDirectory(File directory, List<File> files) {
-		File[] dirFiles = directory.listFiles();
-		for (File file : dirFiles) {
-			if (file.isDirectory()) {
-				filesInDirectory(file, files);
-			} else {
-				files.add(file);
-			}
-		}
-	}
-
-	/**
-	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
-	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files are save on a PC can be
-	 * different.
-	 * 
-	 * @param files
-	 * @param directory
-	 * @return
-	 */
-	private static Set<String> filesToNames(List<File> files, File directory) {
-		Set<String> fileNames = new HashSet<>();
-		String baseFilePath = directory.getPath() + "\\";
-		for (File file : files) {
-			String fileName = file.getPath();
-			if (fileName.startsWith(baseFilePath)) {
-				fileName = fileName.substring(baseFilePath.length());
-				fileNames.add(fileName);
-			}
-		}
-		return fileNames;
 	}
 
 	/**
@@ -175,6 +149,50 @@ public class FileManager {
 	 */
 	public InputStream readFile(String name) {
 		return null;
+	}
+
+	/**
+	 * Add all files and {@link File} in subdirectories to a list;
+	 * 
+	 * @param directory
+	 *            The directory to look in
+	 * @param files
+	 *            The {@link List} to add the {@link File} to
+	 */
+	private static void filesInDirectory(File directory, List<File> files) {
+		File[] dirFiles = directory.listFiles();
+		for (File file : dirFiles) {
+			if (file.isDirectory()) {
+				filesInDirectory(file, files);
+			} else {
+				files.add(file);
+			}
+		}
+	}
+
+	/**
+	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
+	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
+	 * "fruit/apple". This is used for the name stored on the server, the directory files are save on a PC can be
+	 * different.
+	 * 
+	 * @param files
+	 * @param directory
+	 * @return
+	 */
+	private static Set<String> filesToNames(List<File> files, File directory) {
+		Set<String> fileNames = new HashSet<>();
+		String baseFilePath = directory.getPath() + "\\";
+		for (File file : files) {
+			String fileName = file.getPath();
+			if (fileName.startsWith(baseFilePath)) {
+				fileName = fileName.substring(baseFilePath.length());
+				fileNames.add(fileName);
+			} else {
+				System.out.println(file.getPath() + " : " + directory.getPath());
+			}
+		}
+		return fileNames;
 	}
 
 }

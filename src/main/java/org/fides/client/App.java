@@ -3,10 +3,10 @@ package org.fides.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Properties;
 
-import org.fides.client.files.ClientFile;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.KeyFile;
@@ -17,6 +17,7 @@ import org.fides.client.files.KeyFile;
  */
 public class App {
 
+	/** Where to find the local hashes */
 	private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
 
 	/**
@@ -27,29 +28,29 @@ public class App {
 	public static void main(String[] args) {
 		System.out.println("Hello World!");
 
-		FileManagerCheck();
+		fileManagerCheck();
 	}
 
-	public static void FileManagerCheck() {
+	/**
+	 * Check the differences between the files local and on the server
+	 */
+	private static void fileManagerCheck() {
 		// TODO make it the real code, not half test code
 		Properties localHashes = new Properties();
-		try {
+		try (InputStream in = new FileInputStream(LOCAL_HASHSES_FILE)) {
 			File file = new File(LOCAL_HASHSES_FILE);
 			if (file.exists()) {
-				localHashes.loadFromXML(new FileInputStream(LOCAL_HASHSES_FILE));
+				localHashes.loadFromXML(in);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		FileManager manager = new FileManager(localHashes);
-		KeyFile keyFile = new KeyFile();
-		keyFile.addClientFile(new ClientFile("Server.file", "gasdfa", null, null));
-		keyFile.addClientFile(new ClientFile("SomeFiles2.txt", "gasdfa", null, null));
+		FileManager manager = new FileManager(localHashes); // TODO maybe remember it
+		KeyFile keyFile = new KeyFile(); // TODO get from the server
 
 		Collection<FileCompareResult> results = manager.compareFiles(keyFile);
 		System.out.println(results);
-
-		System.out.println(UserSettings.getInstance().getFileDirectory());
 	}
+
 }

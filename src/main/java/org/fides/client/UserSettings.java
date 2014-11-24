@@ -66,6 +66,9 @@ public final class UserSettings {
 		return fileDirectory;
 	}
 
+	/**
+	 * Save the properties
+	 */
 	private void saveProperties() {
 		OutputStream out = null;
 		try {
