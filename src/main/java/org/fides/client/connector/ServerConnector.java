@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
@@ -17,7 +18,9 @@ import static org.junit.Assert.fail;
 
 public class ServerConnector {
 
-	SSLSocket sslsocket;
+	private SSLSocket sslsocket;
+
+	private Certificate[] serverCertificates;
 
 	public ServerConnector() {
 		//For testing purposes only
@@ -36,13 +39,10 @@ public class ServerConnector {
 			SSLContext context = SSLContext.getInstance("TLS");
 
 			SSLSession session = sslsocket.getSession();
-			java.security.cert.Certificate[] servercerts = session.getPeerCertificates();
-
-
+			serverCertificates = session.getPeerCertificates();
 
 			OutputStream outToServer = sslsocket.getOutputStream();
 			DataOutputStream out = new DataOutputStream(outToServer);
-
 
 		} catch (UnknownHostException e) {
 			fail("UnknownHostException");
@@ -73,6 +73,7 @@ public class ServerConnector {
 	public boolean disconnect() {
 		try {
 			sslsocket.close();
+			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -81,6 +82,10 @@ public class ServerConnector {
 
 	public boolean isDisconnected() {
 		return false;
+	}
+
+	public Certificate[] getServerCertificates() {
+		return serverCertificates;
 	}
 
 	public InputStream requestKeyFile() {
