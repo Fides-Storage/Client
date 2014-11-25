@@ -28,10 +28,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
  *
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ UserSettings.class, FileUtil.class })
+@PrepareForTest({ UserSettings.class, FileUtil.class, LocalHashes.class })
 public class FileManagerCompareTest {
 
 	private UserSettings settingsMock;
+
+	private LocalHashes localHashesMock;
 
 	private KeyFile keyFile;
 
@@ -41,6 +43,11 @@ public class FileManagerCompareTest {
 
 	private FileManager fileManager;
 
+	/**
+	 * Setup before tests
+	 * 
+	 * @throws Exception
+	 */
 	@Before
 	public void setUp() throws Exception {
 		keyFile = new KeyFile();
@@ -71,6 +78,22 @@ public class FileManagerCompareTest {
 		PowerMockito.mockStatic(UserSettings.class);
 		Mockito.when(UserSettings.getInstance()).thenReturn(settingsMock);
 
+		localHashesMock = mock(LocalHashes.class);
+		PowerMockito.mockStatic(LocalHashes.class);
+		Mockito.when(LocalHashes.getInstance()).thenReturn(localHashesMock);
+		when(localHashesMock.containsHash(Matchers.anyString())).then(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock invocation) throws Throwable {
+				return localHashes.containsKey(invocation.getArgumentAt(0, String.class));
+			}
+		});
+		when(localHashesMock.getHash(Matchers.anyString())).then(new Answer<String>() {
+			@Override
+			public String answer(InvocationOnMock invocation) throws Throwable {
+				return localHashes.getProperty(invocation.getArgumentAt(0, String.class));
+			}
+		});
+
 		PowerMockito.mockStatic(FileUtil.class);
 		Mockito.when(FileUtil.generateFileHash((File) Matchers.any())).then(new Answer<String>() {
 			@Override
@@ -79,9 +102,14 @@ public class FileManagerCompareTest {
 			}
 		});
 
-		fileManager = new FileManager(localHashes);
+		fileManager = new FileManager();
 	}
 
+	/**
+	 * Tear down after tests
+	 * 
+	 * @throws Exception
+	 */
 	@After
 	public void tearDown() throws Exception {
 		settingsMock = null;
@@ -91,43 +119,63 @@ public class FileManagerCompareTest {
 		testDir = null;
 	}
 
+	/**
+	 * Test the check for a file being added on the server
+	 */
 	@Test
 	public void testCompareServerAdded() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
-		System.out.println(results);
 		assertTrue(results.contains(new FileCompareResult("File1.txt", CompareResultType.SERVER_ADDED)));
 	}
 
+	/**
+	 * Test the check for a file being added locally
+	 */
 	@Test
 	public void testCompareClientAdded() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		assertTrue(results.contains(new FileCompareResult("File2.txt", CompareResultType.LOCAL_ADDED)));
 	}
 
+	/**
+	 * Test the check for a file being removed on the server
+	 */
 	@Test
 	public void testCompareServerRemoved() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		assertTrue(results.contains(new FileCompareResult("File3.txt", CompareResultType.SERVER_REMOVED)));
 	}
 
+	/**
+	 * Test the check for a file being removed locally
+	 */
 	@Test
 	public void testCompareClientRemoved() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		assertTrue(results.contains(new FileCompareResult("File4.txt", CompareResultType.LOCAL_REMOVED)));
 	}
 
+	/**
+	 * Test the check for a file being updated on the server
+	 */
 	@Test
 	public void testCompareServerUpdated() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		assertTrue(results.contains(new FileCompareResult("File5.txt", CompareResultType.SERVER_UPDATED)));
 	}
 
+	/**
+	 * Test the check for a file being updated locally
+	 */
 	@Test
 	public void testCompareClientUpdated() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		assertTrue(results.contains(new FileCompareResult("File6.txt", CompareResultType.LOCAL_UPDATED)));
 	}
 
+	/**
+	 * Test the check for a file being updated on the server and local
+	 */
 	@Test
 	public void testCompareConflict() {
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);

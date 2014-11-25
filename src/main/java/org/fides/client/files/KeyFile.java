@@ -58,6 +58,15 @@ public class KeyFile implements Serializable {
 	}
 
 	/**
+	 * Removes a {@link ClientFile} from the {@link KeyFile}
+	 * 
+	 * @param name
+	 */
+	public void removeClientFileByName(ClientFile clientFile) {
+		clientFiles.remove(clientFile);
+	}
+
+	/**
 	 * Add a {@link ClientFile} to the {@link KeyFile}.
 	 * 
 	 * @param clientFile

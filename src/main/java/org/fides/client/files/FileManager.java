@@ -2,11 +2,11 @@ package org.fides.client.files;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.fides.client.UserSettings;
@@ -19,16 +19,16 @@ import org.fides.client.UserSettings;
  */
 public class FileManager {
 
-	private Properties localHashes;
+	private LocalHashes localHashes;
 
 	private UserSettings settings;
 
 	/**
 	 * Constructor
 	 */
-	public FileManager(Properties localHashes) {
-		settings = UserSettings.getInstance();
-		this.localHashes = localHashes;
+	public FileManager() {
+		this.settings = UserSettings.getInstance();
+		this.localHashes = LocalHashes.getInstance();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class FileManager {
 			if (clientFileNames.contains(serverName)) {
 				// We both have the file
 				String fileHash = FileUtil.generateFileHash(new File(directory, serverName));
-				String savedHash = localHashes.getProperty(serverName);
+				String savedHash = localHashes.getHash(serverName);
 				boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(serverName).getHash());
 				boolean localChanged = !savedHash.equals(fileHash);
 
@@ -77,22 +77,19 @@ public class FileManager {
 					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_UPDATED));
 				}
 				// Else nothing changed
+			} else if (localHashes.containsHash(serverName)) {
+				// Did exist local (its removed local)
+				results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED));
 			} else {
-				// I have not the file
-				if (localHashes.containsKey(serverName)) {
-					// Did exist local (its removed local)
-					results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED));
-				} else {
-					// Did not exist here (its added on the server)
-					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_ADDED));
-				}
+				// Did not exist here (its added on the server)
+				results.add(new FileCompareResult(serverName, CompareResultType.SERVER_ADDED));
 			}
 		}
 		for (String clientName : clientFileNames) {
 			// I have the file
 			if (!serverFileNames.contains(clientName)) {
 				// Server has not the file
-				if (localHashes.containsKey(clientName)) {
+				if (localHashes.containsHash(clientName)) {
 					// Did exist local (its remove on the server)
 					results.add(new FileCompareResult(clientName, CompareResultType.SERVER_REMOVED));
 				} else {
@@ -108,46 +105,44 @@ public class FileManager {
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 * 
-	 * @param instream
-	 *            The inputstream to read from
-	 * @param name
+	 * @param fileName
 	 *            The name of the file
-	 * @return
+	 * @return The {@link OutputStream} to write to the file
 	 */
-	public String addFile(InputStream instream, String name) {
+	public OutputStream addFile(String fileName) {
 		return null;
 	}
 
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 * 
-	 * @param instream
-	 * @param name
-	 * @return
+	 * @param fileName
+	 *            The name of the file to create
+	 * @return The {@link OutputStream} to write to the file
 	 */
-	public String updateFile(InputStream instream, String name) {
+	public OutputStream updateFile(String fileName) {
 		return null;
 	}
 
 	/**
 	 * Remove a file
 	 * 
-	 * @param name
-	 *            The name of the file
+	 * @param fileName
+	 *            The name of the file to update
 	 * @return true if removed
 	 */
-	public boolean removeFile(String name) {
+	public boolean removeFile(String fileName) {
 		return false;
 	}
 
 	/**
 	 * Read a file
 	 * 
-	 * @param name
+	 * @param fileName
 	 *            The name of the file to read
 	 * @return An {@link InputStream} reading form the file
 	 */
-	public InputStream readFile(String name) {
+	public InputStream readFile(String fileName) {
 		return null;
 	}
 

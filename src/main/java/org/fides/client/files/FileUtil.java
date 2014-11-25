@@ -29,23 +29,37 @@ public final class FileUtil {
 	public static String generateFileHash(File file) {
 		String fileHash = null;
 
-		try {
-			if (file.exists()) {
-				MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-				// In order to make the hash or checksum we have to read the entire file
-				try (DigestInputStream dis = new DigestInputStream(new FileInputStream(file), messageDigest)) {
-					while (dis.read() != -1) {
-						// Do nothing
-					}
-					dis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+		if (file.exists()) {
+			MessageDigest messageDigest = createFileDigest();
+			// In order to make the hash or checksum we have to read the entire file
+			try (DigestInputStream dis = new DigestInputStream(new FileInputStream(file), messageDigest)) {
+				while (dis.read() != -1) {
+					// Do nothing
 				}
-				fileHash = KeyGenerator.toHex(messageDigest.digest());
+				dis.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (NoSuchAlgorithmException e) {
-			// This should not happen since we made the choice for MD5 ourselves
+			fileHash = KeyGenerator.toHex(messageDigest.digest());
 		}
+
 		return fileHash;
 	}
+
+	/**
+	 * Create a {@link MessageDigest} for the use of creating hashes for files
+	 * 
+	 * @return
+	 */
+	public static MessageDigest createFileDigest() {
+		MessageDigest messageDigest = null;
+		try {
+			messageDigest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			// Should never happen
+			e.printStackTrace();
+		}
+		return messageDigest;
+	}
+
 }
