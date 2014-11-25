@@ -24,7 +24,7 @@ import com.google.gson.JsonObject;
  * @author Jesse
  * @author Niels
  * @author Tom
- *
+ * 
  */
 public class ServerConnector {
 
@@ -71,7 +71,7 @@ public class ServerConnector {
 
 	/**
 	 * Connect to the server with the given ip and port
-	 *
+	 * 
 	 * @param ip
 	 *            The server IP
 	 * @param port
@@ -167,7 +167,6 @@ public class ServerConnector {
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {
-		System.out.println("reg: conencted:" + isConnected());
 		if (isConnected()) {
 			try {
 
