@@ -13,21 +13,4 @@ import static org.junit.Assert.fail;
  */
 public class ServerConnectorTest {
 
-	/**
-	 * This will test the test function in the ServerConnector class
-	 */
-	@Test
-	public void testConnect() {
-		ServerConnector serverConnector = new ServerConnector();
-		try {
-			serverConnector.connect("localhost", 4444);
-			Thread.sleep(3000);
-
-			assertFalse(serverConnector.isConnected());
-		} catch (UnknownHostException e) {
-			fail("Connection to the given server failed");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 }
