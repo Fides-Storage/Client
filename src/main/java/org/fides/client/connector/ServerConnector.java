@@ -19,12 +19,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 /**
- * TODO: Tom, description of this class
- * 
+ * This class makes it possible to connect to a server and communicate with it
+ *
  * @author Jesse
  * @author Niels
  * @author Tom
- * 
  */
 public class ServerConnector {
 
@@ -34,7 +33,7 @@ public class ServerConnector {
 	private SSLSocket sslsocket;
 
 	/**
-	 * The retreived server sertificates
+	 * The retreived server certificates
 	 */
 	private Certificate[] serverCertificates;
 
@@ -71,19 +70,18 @@ public class ServerConnector {
 
 	/**
 	 * Connect to the server with the given ip and port
-	 * 
-	 * @param ip
-	 *            The server IP
-	 * @param port
-	 *            The port
+	 *
+	 * @param host The server IP
+	 * @param port The port
 	 * @return true if the connection was successfull
 	 * @throws UnknownHostException
 	 */
-	public boolean connect(String ip, int port) throws UnknownHostException {
+	public boolean connect(String host, int port) throws UnknownHostException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			sslsocket = (SSLSocket) sslsocketfactory.createSocket(ip, port);
-			sslsocket.setSoTimeout(2000);
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
+			//Set the socket timeout on 10 seconds, when changing this value change it also on the server
+			sslsocket.setSoTimeout(10000);
 
 			SSLContext context = SSLContext.getInstance("TLS");
 
@@ -97,9 +95,9 @@ public class ServerConnector {
 			in = new DataInputStream(inToServer);
 
 			return true;
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -107,23 +105,18 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is alive
-	 * 
+	 *
 	 * @return true if connected
 	 */
 	public boolean isConnected() {
-		if (sslsocket != null) {
-			return sslsocket.isConnected();
-		}
-		return false;
+			return sslsocket != null && sslsocket.isConnected();
 	}
 
 	/**
 	 * Login user with given username and passwordHash
-	 * 
-	 * @param username
-	 *            name of the user
-	 * @param passwordHash
-	 *            to login
+	 *
+	 * @param username     name of the user
+	 * @param passwordHash to login
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
@@ -159,11 +152,9 @@ public class ServerConnector {
 
 	/**
 	 * Register the user with given username and passwordHash
-	 * 
-	 * @param username
-	 *            the given username
-	 * @param passwordHash
-	 *            of the account
+	 *
+	 * @param username     the given username
+	 * @param passwordHash of the account
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {
@@ -195,7 +186,7 @@ public class ServerConnector {
 
 	/**
 	 * Disconnect the current connection
-	 * 
+	 *
 	 * @return true if disconnect was successfull
 	 */
 	public boolean disconnect() {
@@ -212,19 +203,16 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is inactive
-	 * 
+	 *
 	 * @return true if disconnected
 	 */
 	public boolean isDisconnected() {
-		if (sslsocket != null) {
-			return sslsocket.isClosed();
-		}
-		return false;
+		return sslsocket != null && sslsocket.isClosed();
 	}
 
 	/**
 	 * Get the server certificates
-	 * 
+	 *
 	 * @return the server certificates
 	 */
 	public Certificate[] getServerCertificates() {
