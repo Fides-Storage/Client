@@ -71,8 +71,10 @@ public class ServerConnector {
 	/**
 	 * Connect to the server with the given ip and port
 	 *
-	 * @param host The server IP
-	 * @param port The port
+	 * @param host
+	 *            The server IP
+	 * @param port
+	 *            The port
 	 * @return true if the connection was successfull
 	 * @throws UnknownHostException
 	 */
@@ -80,7 +82,7 @@ public class ServerConnector {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			//Set the socket timeout on 10 seconds, when changing this value change it also on the server
+			// Set the socket timeout on 10 seconds, when changing this value change it also on the server
 			sslsocket.setSoTimeout(10000);
 
 			SSLContext context = SSLContext.getInstance("TLS");
@@ -109,14 +111,16 @@ public class ServerConnector {
 	 * @return true if connected
 	 */
 	public boolean isConnected() {
-			return sslsocket != null && sslsocket.isConnected();
+		return sslsocket != null && sslsocket.isConnected();
 	}
 
 	/**
 	 * Login user with given username and passwordHash
 	 *
-	 * @param username     name of the user
-	 * @param passwordHash to login
+	 * @param username
+	 *            name of the user
+	 * @param passwordHash
+	 *            to login
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
@@ -153,8 +157,10 @@ public class ServerConnector {
 	/**
 	 * Register the user with given username and passwordHash
 	 *
-	 * @param username     the given username
-	 * @param passwordHash of the account
+	 * @param username
+	 *            the given username
+	 * @param passwordHash
+	 *            of the account
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {

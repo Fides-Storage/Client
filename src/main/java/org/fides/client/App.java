@@ -14,7 +14,7 @@ import org.fides.client.files.KeyFile;
 import org.fides.client.ui.UsernamePasswordScreen;
 
 /**
- * Hello world!
+ * Client application
  * 
  */
 public class App {
@@ -49,7 +49,7 @@ public class App {
 				if (data[2].equals(data[3])) {
 					// register on the server
 					if (serverConnector.register(data[1], data[2])) {
-						System.out.println("Register succesfull");
+						System.out.println("Register successful");
 					} else {
 						System.out.println("Register failed");
 					}
