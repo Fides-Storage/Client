@@ -111,6 +111,7 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream addFile(String fileName) throws FileNotFoundException {
+		// TODO update add stuff?
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		return new FileOutputStream(file);
@@ -125,6 +126,7 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream updateFile(String fileName) throws FileNotFoundException {
+		// TODO update specific stuff?
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		return new FileOutputStream(file);

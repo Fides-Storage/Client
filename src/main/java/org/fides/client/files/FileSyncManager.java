@@ -68,13 +68,13 @@ public class FileSyncManager {
 			handleLocalUpdated(result.getName());
 			break;
 		case SERVER_ADDED:
-			handleServerAdded(result.getName());
+			handleServerAddedOrUpdated(result.getName(), false);
 			break;
 		case SERVER_REMOVED:
 			handleServerRemoved(result.getName());
 			break;
 		case SERVER_UPDATED:
-			handleServerUpdated(result.getName());
+			handleServerAddedOrUpdated(result.getName(), true);
 			break;
 		case CONFLICTED:
 			handleConflict(result.getName());
@@ -120,12 +120,15 @@ public class FileSyncManager {
 	}
 
 	/**
-	 * Handle a {@link FileCompareResult}
+	 * Handle a update of a file or a file being added from the server.
 	 * 
-	 * @param result
+	 * @param fileName
+	 *            The name to add
+	 * @param update
+	 *            true if it is a file update, false when file is new
 	 */
-	private void handleServerAdded(final String fileName) {
-		// Almost thesame as handleServerUpdated
+	private void handleServerAddedOrUpdated(final String fileName, boolean update) {
+		// Almost the same as handleServerUpdated
 		KeyFile keyFile = null;
 		try {
 			keyFile = encManager.requestKeyFile();
@@ -139,7 +142,11 @@ public class FileSyncManager {
 
 		OutputStream outFile;
 		try {
-			outFile = fileManager.addFile(fileName);
+			if (update) {
+				outFile = fileManager.updateFile(fileName);
+			} else {
+				outFile = fileManager.addFile(fileName);
+			}
 		} catch (FileNotFoundException e) {
 			// TODO proper handling
 			e.printStackTrace();
@@ -163,43 +170,6 @@ public class FileSyncManager {
 
 	private void handleServerRemoved(final String fileName) {
 		// TODO handle removed on server
-	}
-
-	private void handleServerUpdated(final String fileName) {
-		// Almost thesame as handleServerAdded
-		KeyFile keyFile = null;
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
-			return;
-		}
-
-		MessageDigest messageDigest = FileUtil.createFileDigest();
-
-		OutputStream outFile;
-		try {
-			outFile = fileManager.updateFile(fileName);
-		} catch (FileNotFoundException e) {
-			// TODO proper handling
-			e.printStackTrace();
-			return;
-		}
-
-		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
-			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
-			IOUtils.copy(in, out);
-
-			String hexHash = KeyGenerator.toHex(messageDigest.digest());
-			LocalHashes.getInstance().setHash(fileName, hexHash);
-		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
-		} catch (InvalidClientFileException e) {
-			// TODO proper handling
-			e.printStackTrace();
-		}
 	}
 
 	private void handleConflict(final String fileName) {
