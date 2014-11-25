@@ -25,8 +25,9 @@ public final class KeyGenerator {
 
 	/**
 	 * Returns a random generated salt
-	 *
-	 * @param saltByteSize is the size of the salt
+	 * 
+	 * @param saltByteSize
+	 *            is the size of the salt
 	 * @return a salt as byte array
 	 */
 	public static byte[] getSalt(int saltByteSize) {
@@ -38,7 +39,7 @@ public final class KeyGenerator {
 
 	/**
 	 * Returns the default number of rounds used by PBKDF2
-	 *
+	 * 
 	 * @return the default number of rounds
 	 */
 	public static int getRounds() {
@@ -47,11 +48,15 @@ public final class KeyGenerator {
 
 	/**
 	 * Returns a Key which was generated with the given password, salt en rounds
-	 *
-	 * @param password    the password to hash
-	 * @param salt        the salt for PBKDF2
-	 * @param rounds      the amount of rounds PBKDF2 should use
-	 * @param keyByteSize is the size of the generated hash in bytes.
+	 * 
+	 * @param password
+	 *            the password to hash
+	 * @param salt
+	 *            the salt for PBKDF2
+	 * @param rounds
+	 *            the amount of rounds PBKDF2 should use
+	 * @param keyByteSize
+	 *            is the size of the generated hash in bytes.
 	 * @return a Key which was generated with PBKDF2
 	 */
 	public static Key generateKey(String password, byte[] salt, int rounds, int keyByteSize) {
@@ -61,8 +66,9 @@ public final class KeyGenerator {
 
 	/**
 	 * Generates a random key with the given algorithm and given size.
-	 *
-	 * @param keyByteSize the size of the generated key in bytes.
+	 * 
+	 * @param keyByteSize
+	 *            the size of the generated key in bytes.
 	 * @return a random generated Key
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
@@ -75,17 +81,22 @@ public final class KeyGenerator {
 
 	/**
 	 * Computes the PBKDF2 hash of a password.
-	 *
-	 * @param password   the password to hash.
-	 * @param salt       the salt
-	 * @param iterations the iteration count (slowness factor)
-	 * @param bytes      the length of the hash to compute in bytes
+	 * 
+	 * @param password
+	 *            the password to hash.
+	 * @param salt
+	 *            the salt
+	 * @param iterations
+	 *            the iteration count (slowness factor)
+	 * @param bytes
+	 *            the length of the hash to compute in bytes
 	 * @return the PBDKF2 hash of the password
 	 */
 	private static Key pbkdf2(char[] password, byte[] salt, int iterations, int bytes) {
 		PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, bytes * 8);
 		try {
-			//Get al SecretKeyFactory instance based on the given algorithm and generate the SecretKey based on the PBEKeySpec
+			// Get al SecretKeyFactory instance based on the given algorithm and generate the SecretKey based on the
+			// PBEKeySpec
 			return SecretKeyFactory.getInstance(PBKDF2_ALGORITHM).generateSecret(spec);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -97,8 +108,9 @@ public final class KeyGenerator {
 
 	/**
 	 * Converts a byte array into a hexadecimal string.
-	 *
-	 * @param array the byte array to convert
+	 * 
+	 * @param array
+	 *            the byte array to convert
 	 * @return a length*2 character string encoding the byte array
 	 */
 	public static String toHex(byte[] array) {
@@ -114,8 +126,9 @@ public final class KeyGenerator {
 
 	/**
 	 * Converts a string of hexadecimal characters into a byte array.
-	 *
-	 * @param hex the hex string
+	 * 
+	 * @param hex
+	 *            the hex string
 	 * @return the hex string decoded into a byte array
 	 */
 	public static byte[] fromHex(String hex) {

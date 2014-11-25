@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.util.Properties;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -20,7 +18,7 @@ import com.google.gson.JsonObject;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
- *
+ * 
  * @author Jesse
  * @author Niels
  * @author Tom
@@ -38,19 +36,9 @@ public class ServerConnector {
 	private Certificate[] serverCertificates;
 
 	/**
-	 * The output stream to the server
-	 */
-	private OutputStream outToServer;
-
-	/**
 	 * The data ouput stream to the server
 	 */
 	private DataOutputStream out;
-
-	/**
-	 * The input stream from the server
-	 */
-	private InputStream inToServer;
 
 	/**
 	 * The data input stream from the server
@@ -70,7 +58,7 @@ public class ServerConnector {
 
 	/**
 	 * Connect to the server with the given ip and port
-	 *
+	 * 
 	 * @param host
 	 *            The server IP
 	 * @param port
@@ -85,21 +73,14 @@ public class ServerConnector {
 			// Set the socket timeout on 10 seconds, when changing this value change it also on the server
 			sslsocket.setSoTimeout(10000);
 
-			SSLContext context = SSLContext.getInstance("TLS");
-
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
 
-			outToServer = sslsocket.getOutputStream();
-			out = new DataOutputStream(outToServer);
-
-			inToServer = sslsocket.getInputStream();
-			in = new DataInputStream(inToServer);
+			out = new DataOutputStream(sslsocket.getOutputStream());
+			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -107,7 +88,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is alive
-	 *
+	 * 
 	 * @return true if connected
 	 */
 	public boolean isConnected() {
@@ -116,7 +97,7 @@ public class ServerConnector {
 
 	/**
 	 * Login user with given username and passwordHash
-	 *
+	 * 
 	 * @param username
 	 *            name of the user
 	 * @param passwordHash
@@ -156,7 +137,7 @@ public class ServerConnector {
 
 	/**
 	 * Register the user with given username and passwordHash
-	 *
+	 * 
 	 * @param username
 	 *            the given username
 	 * @param passwordHash
@@ -192,7 +173,7 @@ public class ServerConnector {
 
 	/**
 	 * Disconnect the current connection
-	 *
+	 * 
 	 * @return true if disconnect was successfull
 	 */
 	public boolean disconnect() {
@@ -209,7 +190,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is inactive
-	 *
+	 * 
 	 * @return true if disconnected
 	 */
 	public boolean isDisconnected() {
@@ -218,7 +199,7 @@ public class ServerConnector {
 
 	/**
 	 * Get the server certificates
-	 *
+	 * 
 	 * @return the server certificates
 	 */
 	public Certificate[] getServerCertificates() {

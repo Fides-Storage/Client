@@ -29,8 +29,20 @@ public class App {
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
 		try {
-			// TODO IP and port number hard coded
+			// TODO: Check settings for IP&Port
+
+			// TODO: Ask user for IP&Port
+
 			serverConnector.connect("127.0.0.1", 4444);
+
+			// TODO: Get locally saved certificate
+
+			// TODO: Compare certificates
+
+			// TODO: If new: user prompt.
+
+			// TODO: If user doesn't accept certificate: return false.
+
 		} catch (Exception e) {
 			System.exit(1);
 		}
