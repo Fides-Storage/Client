@@ -28,216 +28,235 @@ import com.google.gson.JsonObject;
  */
 public class ServerConnector {
 
-  /**
-   * The SSLSocket that will be used
-   */
-  private SSLSocket sslsocket;
+	/**
+	 * The SSLSocket that will be used
+	 */
+	private SSLSocket sslsocket;
 
-  /**
-   * The retreived server sertificates
-   */
-  private Certificate[] serverCertificates;
+	/**
+	 * The retreived server sertificates
+	 */
+	private Certificate[] serverCertificates;
 
-  /**
-   * The constructor for het ServerConnector
-   */
-  public ServerConnector() {
-    // For testing purposes only
-    Properties systemProps = System.getProperties();
-    systemProps.put("javax.net.ssl.trustStore", "./truststore.ts");
-    systemProps.put("javax.net.ssl.trustStorePassword", "");
-    System.setProperties(systemProps);
-  }
+	/**
+	 * The output stream to the server
+	 */
+	private OutputStream outToServer;
 
-  /**
-   * Connect to the server with the given ip and port
-   *
-   * @param ip
-   *          The server IP
-   * @param port
-   *          The port
-   * @return true if the connection was successfull
-   * @throws UnknownHostException
-   */
-  public boolean connect(String ip, int port) throws UnknownHostException {
-    try {
-      SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-      sslsocket = (SSLSocket) sslsocketfactory.createSocket(ip, port);
-      sslsocket.setSoTimeout(2000);
+	/**
+	 * The data ouput stream to the server
+	 */
+	private DataOutputStream out;
 
-      SSLContext context = SSLContext.getInstance("TLS");
+	/**
+	 * The input stream from the server
+	 */
+	private InputStream inToServer;
 
-      SSLSession session = sslsocket.getSession();
-      serverCertificates = session.getPeerCertificates();
-      return true;
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return false;
-  }
+	/**
+	 * The data input stream from the server
+	 */
+	private DataInputStream in;
 
-  /**
-   * Returns if the connection is alive
-   * 
-   * @return true if connected
-   */
-  public boolean isConnected() {
-    if (sslsocket != null) {
-      return sslsocket.isConnected();
-    }
-    return false;
-  }
+	/**
+	 * The constructor for het ServerConnector
+	 */
+	public ServerConnector() {
+		// For testing purposes only
+		Properties systemProps = System.getProperties();
+		systemProps.put("javax.net.ssl.trustStore", "./truststore.ts");
+		systemProps.put("javax.net.ssl.trustStorePassword", "");
+		System.setProperties(systemProps);
+	}
 
-  /**
-   * Login user with given username and passwordHash
-   * 
-   * @param username
-   *          name of the user
-   * @param passwordHash
-   *          to login
-   * @return true if succeeded
-   */
-  public boolean login(String username, String passwordHash) {
-    if (isConnected()) {
-      try {
-        OutputStream outToServer = sslsocket.getOutputStream();
-        DataOutputStream out = new DataOutputStream(outToServer);
+	/**
+	 * Connect to the server with the given ip and port
+	 *
+	 * @param ip
+	 *            The server IP
+	 * @param port
+	 *            The port
+	 * @return true if the connection was successfull
+	 * @throws UnknownHostException
+	 */
+	public boolean connect(String ip, int port) throws UnknownHostException {
+		try {
+			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket(ip, port);
+			sslsocket.setSoTimeout(2000);
 
-        InputStream inToServer = sslsocket.getInputStream();
-        DataInputStream in = new DataInputStream(inToServer);
+			SSLContext context = SSLContext.getInstance("TLS");
 
-        JsonObject user = new JsonObject();
-        user.addProperty("action", "login");
-        user.addProperty("username", username);
-        user.addProperty("passwordHash", passwordHash);
+			SSLSession session = sslsocket.getSession();
+			serverCertificates = session.getPeerCertificates();
 
-        out.writeUTF(new Gson().toJson(user));
+			outToServer = sslsocket.getOutputStream();
+			out = new DataOutputStream(outToServer);
 
-        JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			inToServer = sslsocket.getInputStream();
+			in = new DataInputStream(inToServer);
 
-        if (userAnswer.has("succesfull")) {
-          return userAnswer.get("succesfull").getAsBoolean();
-        } else {
-          return false;
-        }
+			return true;
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
-      } catch (IOException e) {
-        System.err.println("IOException connection failed: " + e);
-      }
-    }
+	/**
+	 * Returns if the connection is alive
+	 * 
+	 * @return true if connected
+	 */
+	public boolean isConnected() {
+		if (sslsocket != null) {
+			return sslsocket.isConnected();
+		}
+		return false;
+	}
 
-    return false;
-  }
+	/**
+	 * Login user with given username and passwordHash
+	 * 
+	 * @param username
+	 *            name of the user
+	 * @param passwordHash
+	 *            to login
+	 * @return true if succeeded
+	 */
+	public boolean login(String username, String passwordHash) {
+		if (isConnected()) {
+			try {
 
-  public boolean isLoggedIn() {
-    return false;
-  }
+				JsonObject user = new JsonObject();
+				user.addProperty("action", "login");
+				user.addProperty("username", username);
+				user.addProperty("passwordHash", passwordHash);
 
-  /**
-   * Register the user with given username and passwordHash
-   * 
-   * @param username
-   *          the given username
-   * @param passwordHash
-   *          of the account
-   * @return if registered succeeded
-   */
-  public boolean register(String username, String passwordHash) {
-    System.out.println("reg: conencted:" + isConnected());
-    if (isConnected()) {
-      try {
-        OutputStream outToServer = sslsocket.getOutputStream();
-        DataOutputStream out = new DataOutputStream(outToServer);
+				out.writeUTF(new Gson().toJson(user));
 
-        InputStream inToServer = sslsocket.getInputStream();
-        DataInputStream in = new DataInputStream(inToServer);
+				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
-        JsonObject user = new JsonObject();
-        user.addProperty("action", "createUser");
-        user.addProperty("username", username);
-        user.addProperty("passwordHash", passwordHash);
+				if (userAnswer.has("succesfull")) {
+					return userAnswer.get("succesfull").getAsBoolean();
+				} else {
+					return false;
+				}
 
-        out.writeUTF(new Gson().toJson(user));
+			} catch (IOException e) {
+				System.err.println("IOException connection failed: " + e);
+			}
+		}
 
-        JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
+		return false;
+	}
 
-        if (userAnswer.has("succesfull")) {
-          return userAnswer.get("succesfull").getAsBoolean();
-        } else {
-          return false;
-        }
+	public boolean isLoggedIn() {
+		return false;
+	}
 
-      } catch (IOException e) {
-        System.err.println("IOException connection failed: " + e);
-      }
-    }
+	/**
+	 * Register the user with given username and passwordHash
+	 * 
+	 * @param username
+	 *            the given username
+	 * @param passwordHash
+	 *            of the account
+	 * @return if registered succeeded
+	 */
+	public boolean register(String username, String passwordHash) {
+		System.out.println("reg: conencted:" + isConnected());
+		if (isConnected()) {
+			try {
 
-    return false;
-  }
+				JsonObject user = new JsonObject();
+				user.addProperty("action", "createUser");
+				user.addProperty("username", username);
+				user.addProperty("passwordHash", passwordHash);
 
-  /**
-   * Disconnect the current connection
-   * 
-   * @return true if disconnect was successfull
-   */
-  public boolean disconnect() {
-    try {
-      sslsocket.close();
-      return true;
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return false;
-  }
+				out.writeUTF(new Gson().toJson(user));
 
-  /**
-   * Returns if the connection is inactive
-   * 
-   * @return true if disconnected
-   */
-  public boolean isDisconnected() {
-    if (sslsocket != null) {
-      return sslsocket.isClosed();
-    }
-    return false;
-  }
+				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
-  /**
-   * Get the server certificates
-   * 
-   * @return the server certificates
-   */
-  public Certificate[] getServerCertificates() {
-    return serverCertificates;
-  }
+				if (userAnswer.has("succesfull")) {
+					return userAnswer.get("succesfull").getAsBoolean();
+				} else {
+					return false;
+				}
 
-  public InputStream requestKeyFile() {
-    return null;
-  }
+			} catch (IOException e) {
+				System.err.println("IOException connection failed: " + e);
+			}
+		}
 
-  public OutputStream uploadKeyFile() {
-    return null;
-  }
+		return false;
+	}
 
-  /**
-   * Returns a stream of the encrypted requested file
-   */
-  public InputStream requestFile(String location) {
-    return null;
-  }
+	/**
+	 * Disconnect the current connection
+	 * 
+	 * @return true if disconnect was successfull
+	 */
+	public boolean disconnect() {
+		try {
+			in.close();
+			out.close();
+			sslsocket.close();
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
-  public OutputStreamData uploadFile() {
-    return null;
-  }
+	/**
+	 * Returns if the connection is inactive
+	 * 
+	 * @return true if disconnected
+	 */
+	public boolean isDisconnected() {
+		if (sslsocket != null) {
+			return sslsocket.isClosed();
+		}
+		return false;
+	}
 
-  public OutputStream updateFile(String location) {
-    return null;
-  }
+	/**
+	 * Get the server certificates
+	 * 
+	 * @return the server certificates
+	 */
+	public Certificate[] getServerCertificates() {
+		return serverCertificates;
+	}
 
-  public boolean removeFile(String location) {
-    return false;
-  }
+	public InputStream requestKeyFile() {
+		return null;
+	}
+
+	public OutputStream uploadKeyFile() {
+		return null;
+	}
+
+	/**
+	 * Returns a stream of the encrypted requested file
+	 */
+	public InputStream requestFile(String location) {
+		return null;
+	}
+
+	public OutputStreamData uploadFile() {
+		return null;
+	}
+
+	public OutputStream updateFile(String location) {
+		return null;
+	}
+
+	public boolean removeFile(String location) {
+		return false;
+	}
 
 }
