@@ -16,7 +16,7 @@ import java.util.Properties;
  */
 public final class LocalHashes {
 
-	private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
+	private static final String LOCAL_HASHSES_FILE = "./hashes.xml";
 
 	private static LocalHashes instance;
 

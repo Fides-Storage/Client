@@ -1,6 +1,9 @@
 package org.fides.client.files;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -9,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fides.client.UserSettings;
+import org.fides.client.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
@@ -19,16 +22,11 @@ import org.fides.client.UserSettings;
  */
 public class FileManager {
 
-	private LocalHashes localHashes;
-
-	private UserSettings settings;
-
 	/**
 	 * Constructor
 	 */
 	public FileManager() {
-		this.settings = UserSettings.getInstance();
-		this.localHashes = LocalHashes.getInstance();
+		// Does nothing
 	}
 
 	/**
@@ -39,6 +37,8 @@ public class FileManager {
 	 * @return The collection of {@link FileCompareResult} with the differences between a server({@link KeyFile})
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
+		UserProperties settings = UserProperties.getInstance();
+		LocalHashes localHashes = LocalHashes.getInstance();
 		List<FileCompareResult> results = new ArrayList<>();
 		// Get all the names of the local stored files
 		List<File> files = new ArrayList<>();
@@ -108,42 +108,53 @@ public class FileManager {
 	 * @param fileName
 	 *            The name of the file
 	 * @return The {@link OutputStream} to write to the file
+	 * @throws FileNotFoundException
 	 */
-	public OutputStream addFile(String fileName) {
-		return null;
+	public OutputStream addFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		return new FileOutputStream(file);
 	}
 
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 * 
 	 * @param fileName
-	 *            The name of the file to create
+	 *            The name of the file to create, in local space
 	 * @return The {@link OutputStream} to write to the file
+	 * @throws FileNotFoundException
 	 */
-	public OutputStream updateFile(String fileName) {
-		return null;
+	public OutputStream updateFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		return new FileOutputStream(file);
 	}
 
 	/**
-	 * Remove a file
+	 * Removes a file
 	 * 
 	 * @param fileName
-	 *            The name of the file to update
+	 *            The name of the file to update, in local space
 	 * @return true if removed
 	 */
 	public boolean removeFile(String fileName) {
-		return false;
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		return file.delete();
 	}
 
 	/**
-	 * Read a file
+	 * Reads a file
 	 * 
 	 * @param fileName
-	 *            The name of the file to read
-	 * @return An {@link InputStream} reading form the file
+	 *            The name of the file to read, in local space
+	 * @return An {@link InputStream} reading from the file
+	 * @throws FileNotFoundException
 	 */
-	public InputStream readFile(String fileName) {
-		return null;
+	public InputStream readFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		return new FileInputStream(file);
 	}
 
 	/**

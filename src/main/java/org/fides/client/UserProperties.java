@@ -16,22 +16,22 @@ import org.apache.commons.lang3.StringUtils;
  * @author Koen
  *
  */
-public final class UserSettings {
+public final class UserProperties {
 
-	private static final String USER_SETTINGS_FILE = "./fides.prop";
+	private static final String USER_SETTINGS_FILE = "./fides.properties";
 
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
-	private static UserSettings instance;
+	private static UserProperties instance;
 
 	private Properties properties;
 
 	private File fileDirectory;
 
 	/**
-	 * Constructor, reads the {@link UserSettings}
+	 * Constructor, reads the {@link UserProperties}
 	 */
-	private UserSettings() {
+	private UserProperties() {
 		properties = new Properties();
 
 		try {
@@ -46,7 +46,7 @@ public final class UserSettings {
 		// Create the a file referencing the the location were the files should be saved
 		String fileDirectoryName = properties.getProperty(FILE_DIRECTORY_KEY);
 		if (StringUtils.isBlank(fileDirectoryName)) {
-			fileDirectoryName = System.getProperty("user.home") + "/Fides";
+			fileDirectoryName = "./Fides";
 
 			try {
 				properties.setProperty(FILE_DIRECTORY_KEY, new File(fileDirectoryName).getCanonicalPath());
@@ -74,7 +74,7 @@ public final class UserSettings {
 		try {
 			out = new FileOutputStream(new File(USER_SETTINGS_FILE));
 			properties.store(out, "Fides user settings");
-		} catch (IOException e1) {
+		} catch (IOException e) {
 			// Do nothing, can happen
 		} finally {
 			IOUtils.closeQuietly(out);
@@ -82,14 +82,14 @@ public final class UserSettings {
 	}
 
 	/**
-	 * Returns the instance of the {@link UserSettings}, this is a singleton. If the {@link UserSettings} are not loaded
+	 * Returns the instance of the {@link UserProperties}, this is a singleton. If the {@link UserProperties} are not loaded
 	 * they will be.
 	 * 
-	 * @return The instance of the {@link UserSettings}
+	 * @return The instance of the {@link UserProperties}
 	 */
-	public static UserSettings getInstance() {
+	public static UserProperties getInstance() {
 		if (instance == null) {
-			instance = new UserSettings();
+			instance = new UserProperties();
 		}
 		return instance;
 	}

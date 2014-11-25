@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Properties;
 
-import org.fides.client.UserSettings;
+import org.fides.client.UserProperties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +28,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
  *
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ UserSettings.class, FileUtil.class, LocalHashes.class })
+@PrepareForTest({ UserProperties.class, FileUtil.class, LocalHashes.class })
 public class FileManagerCompareTest {
 
-	private UserSettings settingsMock;
+	private UserProperties settingsMock;
 
 	private LocalHashes localHashesMock;
 
@@ -73,10 +73,10 @@ public class FileManagerCompareTest {
 		new File(testDir, "File6.txt").createNewFile();
 		new File(testDir, "File7.txt").createNewFile();
 
-		settingsMock = mock(UserSettings.class);
+		settingsMock = mock(UserProperties.class);
 		when(settingsMock.getFileDirectory()).thenReturn(testDir);
-		PowerMockito.mockStatic(UserSettings.class);
-		Mockito.when(UserSettings.getInstance()).thenReturn(settingsMock);
+		PowerMockito.mockStatic(UserProperties.class);
+		Mockito.when(UserProperties.getInstance()).thenReturn(settingsMock);
 
 		localHashesMock = mock(LocalHashes.class);
 		PowerMockito.mockStatic(LocalHashes.class);

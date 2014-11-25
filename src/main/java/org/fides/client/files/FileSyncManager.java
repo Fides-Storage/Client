@@ -1,5 +1,6 @@
 package org.fides.client.files;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -124,6 +125,7 @@ public class FileSyncManager {
 	 * @param result
 	 */
 	private void handleServerAdded(final String fileName) {
+		// Almost thesame as handleServerUpdated
 		KeyFile keyFile = null;
 		try {
 			keyFile = encManager.requestKeyFile();
@@ -135,7 +137,14 @@ public class FileSyncManager {
 
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
-		OutputStream outFile = fileManager.addFile(fileName);
+		OutputStream outFile;
+		try {
+			outFile = fileManager.addFile(fileName);
+		} catch (FileNotFoundException e) {
+			// TODO proper handling
+			e.printStackTrace();
+			return;
+		}
 
 		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
@@ -157,6 +166,7 @@ public class FileSyncManager {
 	}
 
 	private void handleServerUpdated(final String fileName) {
+		// Almost thesame as handleServerAdded
 		KeyFile keyFile = null;
 		try {
 			keyFile = encManager.requestKeyFile();
@@ -168,7 +178,14 @@ public class FileSyncManager {
 
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
-		OutputStream outFile = fileManager.updateFile(fileName);
+		OutputStream outFile;
+		try {
+			outFile = fileManager.updateFile(fileName);
+		} catch (FileNotFoundException e) {
+			// TODO proper handling
+			e.printStackTrace();
+			return;
+		}
 
 		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
