@@ -4,13 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Properties;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.KeyFile;
+import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.UsernamePasswordScreen;
 
 /**
@@ -29,20 +33,7 @@ public class App {
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
 		try {
-			// TODO: Check settings for IP&Port
-
-			// TODO: Ask user for IP&Port
-
-			serverConnector.connect("127.0.0.1", 4444);
-
-			// TODO: Get locally saved certificate
-
-			// TODO: Compare certificates
-
-			// TODO: If new: user prompt.
-
-			// TODO: If user doesn't accept certificate: return false.
-
+			initConnection(serverConnector);
 		} catch (Exception e) {
 			System.exit(1);
 		}
@@ -84,7 +75,33 @@ public class App {
 			System.exit(1);
 
 		}
+	}
 
+	private static boolean initConnection(ServerConnector serverConnector) {
+		// TODO: Check settings for IP&Port
+		
+		// TODO: Ask user for IP&Port
+		
+		try {
+			serverConnector.connect("127.0.0.1", 4444);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+		// TODO: Get locally saved certificate
+
+		// TODO: Compare certificates
+
+		// TODO: If new: user prompt.
+		Certificate certificates[] = serverConnector.getServerCertificates();
+		boolean validated = CertificateValidationScreen.validateCertificate((X509Certificate) certificates[0]);
+		
+		
+		// TODO: If user doesn't accept certificate: return false.
+		serverConnector.disconnect();
+		return false;
 	}
 
 	/**
