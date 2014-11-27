@@ -45,7 +45,10 @@ public class App {
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
 		InetSocketAddress serverAddress = newServerConnection(serverConnector);
-
+		if (serverAddress == null) {
+			System.exit(1);
+		}
+		
 		// TODO: move this away from here, its pretty big
 		while (isRunning) {
 
