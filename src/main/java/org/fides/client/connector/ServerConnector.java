@@ -70,8 +70,7 @@ public class ServerConnector {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			// Set the socket timeout on 10 seconds, when changing this value change it also on the server
-			sslsocket.setSoTimeout(10000);
+			//TODO: Check if connection is correctly closed without a timeout
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
