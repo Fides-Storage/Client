@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class UserProperties {
 
-	private static final String USER_SETTINGS_FILE = "./fides.properties";
+	private static final String USER_SETTINGS_FILE = "./user.properties";
 
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
