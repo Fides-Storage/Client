@@ -93,9 +93,14 @@ public class App {
 
 		}
 
-		if (serverConnector.isConnected() && isRunning) {
+		if (serverConnector.isConnected() && serverConnector.isLoggedIn() && isRunning) {
 			// TODO Do normal work, we are going to loop here
-
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		serverConnector.disconnect();

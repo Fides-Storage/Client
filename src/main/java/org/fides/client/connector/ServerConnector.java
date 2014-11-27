@@ -53,6 +53,11 @@ public class ServerConnector {
 	private DataInputStream in;
 
 	/**
+	 * If you are logged in
+	 */
+	private boolean loggedIn = false;
+
+	/**
 	 * The constructor for the ServerConnector
 	 */
 	public ServerConnector() {
@@ -124,9 +129,9 @@ public class ServerConnector {
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
 				if (userAnswer.has("successful")) {
-					return userAnswer.get("successful").getAsBoolean();
+					loggedIn = userAnswer.get("successful").getAsBoolean();
 				} else {
-					return false;
+					loggedIn = false;
 				}
 
 			} catch (IOException e) {
@@ -134,11 +139,11 @@ public class ServerConnector {
 			}
 		}
 
-		return false;
+		return loggedIn;
 	}
 
 	public boolean isLoggedIn() {
-		return false;
+		return loggedIn;
 	}
 
 	/**
@@ -190,7 +195,10 @@ public class ServerConnector {
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			loggedIn = false;
 		}
+
 		return false;
 	}
 
