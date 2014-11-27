@@ -13,11 +13,11 @@ import org.bouncycastle.util.encoders.Base64;
  * @author jesse
  *
  */
-public class Utils {
+public class HashUtils {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(Utils.class);
+	private static Logger log = LogManager.getLogger(HashUtils.class);
 
 	/**
 	 * hash function to hash password

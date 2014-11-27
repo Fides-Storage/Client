@@ -17,7 +17,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.tools.Utils;
+import org.fides.client.tools.HashUtils;
 
 /**
  * UI where a username and password can be submitted by a user
@@ -85,14 +85,14 @@ public class UsernamePasswordScreen {
 			String[] result = new String[3];
 			result[0] = "login";
 			result[1] = username.getText();
-			result[2] = Utils.hash(new String(password.getPassword()));
+			result[2] = HashUtils.hash(new String(password.getPassword()));
 			return result;
 		} else if (option == 1) {
 			String[] result = new String[4];
 			result[0] = "register";
 			result[1] = username.getText();
-			result[2] = Utils.hash(new String(password.getPassword()));
-			result[3] = Utils.hash(new String(PasswordScreen.getPassword()));
+			result[2] = HashUtils.hash(new String(password.getPassword()));
+			result[3] = HashUtils.hash(new String(PasswordScreen.getPassword()));
 			return result;
 
 		}
