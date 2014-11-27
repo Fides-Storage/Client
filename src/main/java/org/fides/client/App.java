@@ -82,11 +82,14 @@ public class App {
 		}
 
 		if (serverConnector.isConnected()) {
-			// TODO: Do normal work
+			// TODO: Do normal work, we are going to loop here
+
 		} else {
 			System.exit(1);
 
 		}
+
+		serverConnector.disconnect();
 
 	}
 
