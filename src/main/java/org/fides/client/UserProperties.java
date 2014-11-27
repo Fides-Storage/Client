@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -70,20 +69,16 @@ public final class UserProperties {
 	 * Save the properties
 	 */
 	private void saveProperties() {
-		OutputStream out = null;
-		try {
-			out = new FileOutputStream(new File(USER_SETTINGS_FILE));
+		try (OutputStream out = new FileOutputStream(new File(USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {
 			// Do nothing, can happen
-		} finally {
-			IOUtils.closeQuietly(out);
 		}
 	}
 
 	/**
-	 * Returns the instance of the {@link UserProperties}, this is a singleton. If the {@link UserProperties} are not loaded
-	 * they will be.
+	 * Returns the instance of the {@link UserProperties}, this is a singleton. If the {@link UserProperties} are not
+	 * loaded they will be.
 	 * 
 	 * @return The instance of the {@link UserProperties}
 	 */

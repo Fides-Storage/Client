@@ -125,7 +125,7 @@ public class FileSyncManager {
 	 * @param fileName
 	 *            The name to add
 	 * @param update
-	 *            true if it is a file update, false when file is new
+	 *            true if it is a file update, false when file is added
 	 */
 	private void handleServerAddedOrUpdated(final String fileName, boolean update) {
 		// Almost the same as handleServerUpdated
