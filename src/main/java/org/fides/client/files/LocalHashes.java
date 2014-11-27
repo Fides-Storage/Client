@@ -51,13 +51,13 @@ public final class LocalHashes {
 	/**
 	 * Sets the hash for a file and saves the hashes
 	 * 
-	 * @param filename
+	 * @param fileName
 	 *            The filename of the file
 	 * @param hash
 	 *            The has of the file
 	 */
-	public void setHash(String filename, String hash) {
-		localHashes.setProperty(filename, hash);
+	public void setHash(String fileName, String hash) {
+		localHashes.setProperty(fileName, hash);
 		saveHashes();
 	}
 
@@ -74,12 +74,12 @@ public final class LocalHashes {
 	/**
 	 * Checks if a hash for a file exists
 	 * 
-	 * @param filename
+	 * @param fileName
 	 *            The name of the file
 	 * @return true if the hash exists
 	 */
-	public boolean containsHash(String filename) {
-		return localHashes.containsKey(filename);
+	public boolean containsHash(String fileName) {
+		return localHashes.containsKey(fileName);
 	}
 
 	/**

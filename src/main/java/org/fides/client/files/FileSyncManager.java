@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
+import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.encryption.KeyGenerator;
 
@@ -84,39 +85,102 @@ public class FileSyncManager {
 		}
 	}
 
+	/**
+	 * Handle a update of a file or a file being added local.
+	 * 
+	 * @param fileName
+	 *            The file to upload
+	 */
 	private void handleLocalAdded(final String fileName) {
-		// TODO handle removed added
+		// TODO TEST
 
-		// Sorry for starting this to early, this has to be done later in FS-10
-		// EncryptedOutputStreamData outData = encManager.uploadFile();
-		// KeyFile keyFile = null;
-		// try {
-		// keyFile = encManager.requestKeyFile();
-		// } catch (IOException e) {
-		// // TODO proper handling
-		// e.printStackTrace();
-		// return;
-		// }
-		// MessageDigest messageDigest = FileUtil.createFileDigest();
-		//
-		// try (InputStream in = fileManager.readFile(result.getName());
-		// OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
-		// IOUtils.copy(in, out);
-		// keyFile.addClientFile(new ClientFile(result.getName(), outData.getLocation(), outData.getKey(),
-		// KeyGenerator.toHex(messageDigest.digest())));
-		// encManager.uploadKeyFile(keyFile);
-		// } catch (IOException e) {
-		// // TODO proper handling
-		// e.printStackTrace();
-		// }
+		EncryptedOutputStreamData outData = encManager.uploadFile();
+		// Get the keyfile
+		KeyFile keyFile = null;
+		try {
+			keyFile = encManager.requestKeyFile();
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+			return;
+		}
+
+		// Upload the file
+		MessageDigest messageDigest = FileUtil.createFileDigest();
+		try (InputStream in = fileManager.readFile(fileName);
+			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
+			IOUtils.copy(in, out);
+			String hash = KeyGenerator.toHex(messageDigest.digest());
+			LocalHashes.getInstance().setHash(fileName, hash);
+			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+		}
+
+		// Update the keyfile
+		try {
+			encManager.uploadKeyFile(keyFile);
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+		}
 	}
 
 	private void handleLocalRemoved(final String fileName) {
 		// TODO handle removed local
 	}
 
+	/**
+	 * Handle a update of a file or a file being updated local.
+	 * 
+	 * @param fileName
+	 *            The file to update
+	 */
 	private void handleLocalUpdated(final String fileName) {
-		// TODO handle updated local
+		// TODO Test
+
+		// Get the keyfile
+		KeyFile keyFile = null;
+		try {
+			keyFile = encManager.requestKeyFile();
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+			return;
+		}
+
+		// Get a stream to write to
+		ClientFile clientFile = keyFile.getClientFileByName(fileName);
+		OutputStream outEnc = null;
+		try {
+			outEnc = encManager.updateFile(clientFile);
+		} catch (InvalidClientFileException e) {
+			// TODO proper handling
+			e.printStackTrace();
+			return;
+		}
+
+		// Do the update of the file
+		MessageDigest messageDigest = FileUtil.createFileDigest();
+		try (InputStream in = fileManager.readFile(fileName);
+			OutputStream out = new DigestOutputStream(outEnc, messageDigest)) {
+			IOUtils.copy(in, out);
+			String hash = KeyGenerator.toHex(messageDigest.digest());
+			clientFile.setHash(hash);
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+		}
+
+		// Update the keyfile
+		try {
+			encManager.uploadKeyFile(keyFile);
+		} catch (IOException e) {
+			// TODO proper handling
+			e.printStackTrace();
+		}
+
 	}
 
 	/**

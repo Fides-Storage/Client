@@ -9,14 +9,21 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests for the {@link FileSyncManager}
@@ -24,6 +31,8 @@ import org.junit.Test;
  * @author Koen
  *
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ LocalHashes.class })
 public class FileSyncManagerTest {
 
 	private Collection<FileCompareResult> compareResults;
@@ -40,6 +49,10 @@ public class FileSyncManagerTest {
 
 	private ByteArrayOutputStream outAdd;
 
+	private ByteArrayInputStream inUpdate;
+
+	private ByteArrayInputStream inAdd;
+
 	/**
 	 * Do before each test
 	 * 
@@ -51,6 +64,12 @@ public class FileSyncManagerTest {
 
 		outUpdate = new ByteArrayOutputStream();
 		outAdd = new ByteArrayOutputStream();
+		inUpdate = new ByteArrayInputStream("This is an in update file".getBytes());
+		inAdd = new ByteArrayInputStream("This is an in add file".getBytes());
+
+		LocalHashes localHashesMock = mock(LocalHashes.class);
+		PowerMockito.mockStatic(LocalHashes.class);
+		Mockito.when(LocalHashes.getInstance()).thenReturn(mock(LocalHashes.class));
 
 		fileManagerMock = mock(FileManager.class);
 		when(fileManagerMock.compareFiles((KeyFile) any())).thenReturn(compareResults);
@@ -89,10 +108,28 @@ public class FileSyncManagerTest {
 
 	/**
 	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#LOCAL_ADDED}
+	 * 
+	 * @throws FileNotFoundException
 	 */
 	@Test
-	public void testHandleLocalAdded() {
-		// TODO inplement when needed
+	public void testHandleLocalAdded() throws FileNotFoundException {
+		// Setup for this specific test
+		compareResults.add(new FileCompareResult("AddedLocalFile", CompareResultType.LOCAL_ADDED));
+		when(fileManagerMock.readFile("AddedLocalFile")).thenReturn(new ByteArrayInputStream("This is an in update file".getBytes()));
+
+		// Create output data for the file on the server
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		EncryptedOutputStreamData outData = new EncryptedOutputStreamData(out, "laf", null);
+		when(encManagerMock.uploadFile()).thenReturn(outData);
+
+		// The real test
+		try {
+			fileSyncManager.fileManagerCheck();
+			assertEquals("This is an in update file", new String(out.toByteArray()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Exception: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -105,10 +142,31 @@ public class FileSyncManagerTest {
 
 	/**
 	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#LOCAL_UPDATED}
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws InvalidClientFileException
 	 */
 	@Test
-	public void testHandleLocalUpdated() {
-		// TODO inplement when needed
+	public void testHandleLocalUpdated() throws FileNotFoundException, InvalidClientFileException {
+		// Setup for this specific test
+		compareResults.add(new FileCompareResult("UpdatedLocalFile", CompareResultType.LOCAL_UPDATED));
+		when(fileManagerMock.readFile("UpdatedLocalFile")).thenReturn(new ByteArrayInputStream("This is an in update file".getBytes()));
+
+		// The clientfile of the existing file on the server
+		ClientFile updatedFile = new ClientFile("UpdatedLocalFile", "ulf", null, "");
+		keyFile.addClientFile(updatedFile);
+		// Set an outputstream we can read
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		when(encManagerMock.updateFile(updatedFile)).thenReturn(out);
+
+		// The real test
+		try {
+			fileSyncManager.fileManagerCheck();
+			assertEquals("This is an in update file", new String(out.toByteArray()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Exception: " + e.getMessage());
+		}
 	}
 
 	/**
