@@ -15,18 +15,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * UI where a username and password can be submitted by a user
  */
 public class UsernamePasswordScreen {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(UsernamePasswordScreen.class);
-
 	/**
 	 * Show a dialog where the user can enter its username and password
 	 * 

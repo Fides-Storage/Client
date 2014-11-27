@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.security.Key;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Contains the information of the user's files on the servers
@@ -14,11 +12,6 @@ import org.apache.logging.log4j.Logger;
  * 
  */
 public class ClientFile implements Serializable {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(FileManager.class);
-
 	private static final long serialVersionUID = -2910237556924682964L;
 
 	private String name;

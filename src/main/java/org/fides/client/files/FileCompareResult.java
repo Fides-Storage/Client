@@ -1,7 +1,5 @@
 package org.fides.client.files;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A result of the {@link FileManager#compareFiles(KeyFile)} when comparing the local files and the files on the server
@@ -10,10 +8,6 @@ import org.apache.logging.log4j.Logger;
  * 
  */
 public class FileCompareResult {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(FileManager.class);
 
 	private String name;
 

@@ -13,8 +13,6 @@ import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.engines.CamelliaEngine;
@@ -41,11 +39,6 @@ import org.fides.client.files.KeyFile;
  * 
  */
 public class EncryptionManager {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(EncryptionManager.class);
-
 	/**
 	 * The algorithm used for encryption and decryption, when changing it dont forgot to update the
 	 * {@link EncryptionManager#createCipher()}

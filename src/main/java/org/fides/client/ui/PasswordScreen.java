@@ -13,18 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingUtilities;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * UI where a password can be submitted by a user
  */
 public class PasswordScreen {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(PasswordScreen.class);
-
 	/**
 	 * Show a dialog where the user can enter its password
 	 * 

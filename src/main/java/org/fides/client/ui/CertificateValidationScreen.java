@@ -13,19 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.fides.client.files.FileUtil;
-
 /**
  * UI where a password can be submitted by a user
  */
 public class CertificateValidationScreen {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(FileUtil.class);
-
 	/** An html tab */
 	private static final String TAB = "&#09;";
 

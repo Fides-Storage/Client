@@ -1,7 +1,5 @@
 package org.fides.client.files;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link Exception} thrown when no {@link ClientFile} or on invalid {@link ClientFile} is given
@@ -10,11 +8,6 @@ import org.apache.logging.log4j.Logger;
  * 
  */
 public class InvalidClientFileException extends Exception {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(InvalidClientFileException.class);
-
 	private static final long serialVersionUID = -5396351565109464521L;
 
 	/**
