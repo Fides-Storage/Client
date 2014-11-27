@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Properties;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +46,7 @@ public class App {
 		ServerConnector serverConnector = new ServerConnector();
 		InetSocketAddress serverAddress = newServerConnection(serverConnector);
 
-		// TODO: move this away from here, its pretty big
+		// TODO move this away from here, its pretty big
 		while (isRunning) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
