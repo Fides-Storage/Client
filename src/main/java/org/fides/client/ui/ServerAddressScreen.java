@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -31,9 +32,15 @@ public class ServerAddressScreen {
 	 * @return The InetSocketAddress the user selected. Will be null if the user pressed cancel.
 	 */
 	public static InetSocketAddress getAddress() {
+		JFrame frame = new JFrame();
+		frame.setUndecorated(true);
+		frame.setVisible(true);
+		frame.setLocationRelativeTo(null);
+		
 		// Create a Panel
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
 		// Add a panel where the inputfields can be added
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new GridLayout(2, 1, 0, 5));
@@ -81,7 +88,7 @@ public class ServerAddressScreen {
 
 		// While the user selects 'connect'
 		while (option == 0) {
-			option = JOptionPane.showOptionDialog(null, mainPanel, "Choose Fides Server", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+			option = JOptionPane.showOptionDialog(frame, mainPanel, "Choose Fides Server", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
 			ArrayList<String> errorMessages = new ArrayList<String>();
 			// Check for empty hostname
@@ -102,12 +109,14 @@ public class ServerAddressScreen {
 			}
 			// Check if there were any errors, if not, the address is returned.
 			if (errorMessages.isEmpty()) {
+				frame.dispose();
 				return new InetSocketAddress(hostName.getText(), Integer.parseInt(port.getText()));
 			} else {
 				// If there were errors, they are added to the dialog and it gets shown again.
 				setErrorLabels(errorPanel, errorMessages);
 			}
 		}
+		frame.dispose();
 		// The user pressed 'cancel' or the close button.
 		return null;
 	}

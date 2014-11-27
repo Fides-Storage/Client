@@ -90,7 +90,7 @@ public class App {
 				InetSocketAddress serverAddress = ServerAddressScreen.getAddress();
 				try {
 					if (serverAddress != null) {
-						connected = serverConnector.connect(serverAddress.getHostName(), serverAddress.getPort());
+						connected = serverConnector.connect(serverAddress);
 					} else {
 						break;
 					}

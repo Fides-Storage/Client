@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.util.Properties;
@@ -60,18 +62,16 @@ public class ServerConnector {
 	/**
 	 * Connect to the server with the given ip and port
 	 * 
-	 * @param host
-	 *            The server IP
-	 * @param port
-	 *            The port
+	 * @param address
+	 * 			The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
-	 * @throws UnknownHostException
 	 */
-	public boolean connect(String host, int port) throws UnknownHostException, ConnectException {
-		// TODO: Accept InetAddress instead of String and int.
+	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
+			sslsocket.connect(address);
+			
 			// Set the socket timeout on 10 seconds, when changing this value change it also on the server
 			sslsocket.setSoTimeout(10000);
 
@@ -112,7 +112,6 @@ public class ServerConnector {
 	public boolean login(String username, String passwordHash) {
 		if (isConnected()) {
 			try {
-
 				JsonObject user = new JsonObject();
 				user.addProperty("action", "login");
 				user.addProperty("username", username);

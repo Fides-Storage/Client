@@ -8,6 +8,7 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -27,6 +28,11 @@ public class UsernamePasswordScreen {
    *         entered
    */
   public static String[] getUsernamePassword() {
+	  JFrame frame = new JFrame();
+	  frame.setUndecorated(true);
+	  frame.setVisible(true);
+	  frame.setLocationRelativeTo(null);
+	  
     // Create a Panel with the correct dimensions
     JPanel panel = new JPanel();
     // TODO: Use boxlayout with BoxLayout.Y_AXIS
@@ -70,9 +76,10 @@ public class UsernamePasswordScreen {
 
     // Place the 2 buttons for OK and Cancel and show the dialog
     String[] options = new String[] { "Login", "Register" };
-    int option = JOptionPane.showOptionDialog(null, panel, "Enter credentials",
+    int option = JOptionPane.showOptionDialog(frame, panel, "Enter credentials",
       JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
+    frame.dispose();
     // If Login was pressed
     if (option == 0) {
       String[] result = new String[3];
