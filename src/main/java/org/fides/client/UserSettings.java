@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.cert.Certificate;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
@@ -92,5 +93,10 @@ public final class UserSettings {
 			instance = new UserSettings();
 		}
 		return instance;
+	}
+	
+	public static Certificate getSavedCertificate() {
+		// TODO: Fill this with correct code.
+		return null;
 	}
 }

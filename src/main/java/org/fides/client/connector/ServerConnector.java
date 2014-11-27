@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.util.Properties;
@@ -66,7 +67,8 @@ public class ServerConnector {
 	 * @return true if the connection was successfull
 	 * @throws UnknownHostException
 	 */
-	public boolean connect(String host, int port) throws UnknownHostException {
+	public boolean connect(String host, int port) throws UnknownHostException, ConnectException {
+		// TODO: Accept InetAddress instead of String and int.
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
@@ -80,10 +82,13 @@ public class ServerConnector {
 			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
+		} catch (ConnectException e) {
+			throw e;
+		} catch (UnknownHostException e) {
+			throw e;
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new ConnectException(e.getLocalizedMessage());
 		}
-		return false;
 	}
 
 	/**
