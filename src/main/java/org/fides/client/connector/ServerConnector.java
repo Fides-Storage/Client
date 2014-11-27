@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.util.Properties;
@@ -66,18 +68,16 @@ public class ServerConnector {
 	/**
 	 * Connect to the server with the given ip and port
 	 * 
-	 * @param host
-	 *            The server IP
-	 * @param port
-	 *            The port
+	 * @param address
+	 * 			The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
-	 * @throws UnknownHostException
 	 */
-	public boolean connect(String host, int port) throws UnknownHostException {
+	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			// TODO: Check if connection is correctly closed without a timeout
+
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
+			sslsocket.connect(address);
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -86,10 +86,13 @@ public class ServerConnector {
 			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
+		} catch (ConnectException e) {
+			throw e;
+		} catch (UnknownHostException e) {
+			throw e;
 		} catch (IOException e) {
-			log.error(e);
+			throw new ConnectException(e.getLocalizedMessage());
 		}
-		return false;
 	}
 
 	/**
@@ -113,7 +116,6 @@ public class ServerConnector {
 	public boolean login(String username, String passwordHash) {
 		if (isConnected()) {
 			try {
-
 				JsonObject user = new JsonObject();
 				user.addProperty("action", "login");
 				user.addProperty("username", username);

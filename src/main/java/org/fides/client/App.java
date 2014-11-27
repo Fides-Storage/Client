@@ -4,8 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Properties;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +18,9 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.KeyFile;
+import org.fides.client.ui.CertificateValidationScreen;
+import org.fides.client.ui.ErrorMessageScreen;
+import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UsernamePasswordScreen;
 
 /**
@@ -36,20 +44,9 @@ public class App {
 	 */
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
+		InetSocketAddress serverAddress = newServerConnection(serverConnector);
 
-		// TODO Check settings for IP&Port
-
-		// TODO Ask user for IP&Port
-
-		// TODO Get locally saved certificate
-
-		// TODO Compare certificates
-
-		// TODO If new: user prompt.
-
-		// TODO If user doesn't accept certificate: return false.
-
-		// TODO move this away from here, its pretty big
+		// TODO: move this away from here, its pretty big
 		while (isRunning) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
@@ -60,7 +57,7 @@ public class App {
 			}
 
 			try {
-				serverConnector.connect("127.0.0.1", 4444);
+				serverConnector.connect(serverAddress);
 			} catch (Exception e) {
 				log.error(e);
 				isRunning = false;
@@ -97,9 +94,39 @@ public class App {
 			// TODO Do normal work, we are going to loop here
 
 		}
+	}
 
-		serverConnector.disconnect();
+	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {
+		InetSocketAddress serverAddress = null;
+		boolean validCertificate = false;
+		while (!validCertificate) {
+			boolean connected = false;
+			while (!connected) {
+				serverAddress = ServerAddressScreen.getAddress();
+				try {
+					if (serverAddress != null) {
+						connected = serverConnector.connect(serverAddress);
+					} else {
+						break;
+					}
+				} catch (UnknownHostException e) {
+					ErrorMessageScreen.showErrorMessage("Could not connect to host " + serverAddress.getHostName());
+				} catch (ConnectException e) {
+					ErrorMessageScreen.showErrorMessage("Could not connect to " + serverAddress.getHostName() + ":" + serverAddress.getPort());
+				}
+			}
+			if (!connected) {
+				return null;
+			}
 
+			Certificate[] certificates = serverConnector.getServerCertificates();
+			serverConnector.disconnect();
+
+			if (certificates.length > 0) {
+				validCertificate = CertificateValidationScreen.validateCertificate((X509Certificate) certificates[0]);
+			}
+		}
+		return serverAddress;
 	}
 
 	/**

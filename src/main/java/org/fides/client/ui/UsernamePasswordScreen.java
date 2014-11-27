@@ -8,6 +8,7 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,6 +26,11 @@ public class UsernamePasswordScreen {
 	 * @return the entered username and password in a string array, returns an null if nothing was entered
 	 */
 	public static String[] getUsernamePassword() {
+		JFrame frame = new JFrame();
+		frame.setUndecorated(true);
+		frame.setVisible(true);
+		frame.setLocationRelativeTo(null);
+
 		// Create a Panel with the correct dimensions
 		JPanel panel = new JPanel();
 		// TODO: Use boxlayout with BoxLayout.Y_AXIS
@@ -68,8 +74,9 @@ public class UsernamePasswordScreen {
 
 		// Place the 2 buttons for OK and Cancel and show the dialog
 		String[] options = new String[] { "Login", "Register" };
-		int option = JOptionPane.showOptionDialog(null, panel, "Enter credentials",
+		int option = JOptionPane.showOptionDialog(frame, panel, "Enter credentials",
 			JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		frame.dispose();
 
 		// If Login was pressed
 		if (option == 0) {
@@ -98,6 +105,11 @@ public class UsernamePasswordScreen {
 	 * @return password or null if canceled
 	 */
 	private static String passwordConfirmation() {
+		JFrame frame = new JFrame();
+		frame.setUndecorated(true);
+		frame.setVisible(true);
+		frame.setLocationRelativeTo(null);
+		
 		// Create extra panel for password
 		JPanel panelConfirmPassword = new JPanel();
 		// TODO: Use boxlayout with BoxLayout.Y_AXIS
@@ -130,9 +142,10 @@ public class UsernamePasswordScreen {
 		});
 
 		String[] options = new String[] { "Ok", "Cancel" };
-		int option = JOptionPane.showOptionDialog(null, panelConfirmPassword, "Enter credentials",
+		int option = JOptionPane.showOptionDialog(frame, panelConfirmPassword, "Enter credentials",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-
+		frame.dispose();
+		
 		if (option == 0) {
 			return new String(confirmPassword.getPassword());
 		}
