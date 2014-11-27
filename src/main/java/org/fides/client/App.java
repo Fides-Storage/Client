@@ -27,6 +27,8 @@ public class App {
 
 	private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
 
+	private static boolean isRunning = true;
+
 	/**
 	 * Main
 	 * 
@@ -35,33 +37,33 @@ public class App {
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
 
-		// TODO: Check settings for IP&Port
+		// TODO Check settings for IP&Port
 
-		// TODO: Ask user for IP&Port
+		// TODO Ask user for IP&Port
 
-		// TODO: Get locally saved certificate
+		// TODO Get locally saved certificate
 
-		// TODO: Compare certificates
+		// TODO Compare certificates
 
-		// TODO: If new: user prompt.
+		// TODO If new: user prompt.
 
-		// TODO: If user doesn't accept certificate: return false.
+		// TODO If user doesn't accept certificate: return false.
 
 		// TODO move this away from here, its pretty big
-		// TODO use a boolean instead of a true and a break
-		while (true) {
+		while (isRunning) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
 
-			// TODO if something goes wrong, like login or connecting, make this clear to the user
+			// User ask to close application
 			if (data == null) {
-				System.exit(1);
+				isRunning = false;
 			}
 
 			try {
 				serverConnector.connect("127.0.0.1", 4444);
 			} catch (Exception e) {
-				System.exit(1);
+				log.error(e);
+				isRunning = false;
 			}
 
 			if ((data[0]).equals("register")) {
@@ -91,11 +93,8 @@ public class App {
 
 		}
 
-		if (serverConnector.isConnected()) {
-			// TODO: Do normal work, we are going to loop here
-
-		} else {
-			System.exit(1);
+		if (serverConnector.isConnected() && isRunning) {
+			// TODO Do normal work, we are going to loop here
 
 		}
 
