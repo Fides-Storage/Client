@@ -13,6 +13,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -24,6 +27,10 @@ import com.google.gson.JsonObject;
  * @author Tom
  */
 public class ServerConnector {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(ServerConnector.class);
 
 	/**
 	 * The SSLSocket that will be used
@@ -70,7 +77,7 @@ public class ServerConnector {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			//TODO: Check if connection is correctly closed without a timeout
+			// TODO: Check if connection is correctly closed without a timeout
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -80,7 +87,7 @@ public class ServerConnector {
 
 			return true;
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 		return false;
 	}
@@ -123,7 +130,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				System.err.println("IOException connection failed: " + e);
+				log.error("IOException connection failed: ", e);
 			}
 		}
 
@@ -163,7 +170,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				System.err.println("IOException connection failed: " + e);
+				log.error("IOException connection failed: ", e);
 			}
 		}
 

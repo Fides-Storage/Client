@@ -9,14 +9,20 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Contains the settings on where files should be saved.
  * 
  * @author Koen
- *
+ * 
  */
 public final class UserSettings {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(UserSettings.class);
 
 	private static final String USER_SETTINGS_FILE = "./fides.prop";
 
@@ -40,7 +46,7 @@ public final class UserSettings {
 				properties.load(new FileInputStream(USER_SETTINGS_FILE));
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 
 		// Create the a file referencing the the location were the files should be saved

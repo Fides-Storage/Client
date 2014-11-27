@@ -9,10 +9,17 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The KeyGenerator is a helper class for generating hashes from passwords These hashes will be generated with PBKDF2
  */
 public final class KeyGenerator {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(KeyGenerator.class);
 
 	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
@@ -99,9 +106,9 @@ public final class KeyGenerator {
 			// PBEKeySpec
 			return SecretKeyFactory.getInstance(PBKDF2_ALGORITHM).generateSecret(spec);
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			log.error(e);
 		} catch (InvalidKeySpecException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 		return null;
 	}

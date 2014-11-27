@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
@@ -18,6 +20,10 @@ import org.fides.client.ui.UsernamePasswordScreen;
  * 
  */
 public class App {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(App.class);
 
 	private static final String LOCAL_HASHSES_FILE = "./hashes.prop";
 
@@ -28,6 +34,7 @@ public class App {
 	 */
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
+
 		// TODO: Check settings for IP&Port
 
 		// TODO: Ask user for IP&Port
@@ -63,21 +70,21 @@ public class App {
 				if (data[2].equals(data[3])) {
 					// register on the server
 					if (serverConnector.register(data[1], data[2])) {
-						System.out.println("Register successful");
+						log.debug("Register successful");
 						serverConnector.disconnect();
 					} else {
-						System.out.println("Register failed");
+						log.debug("Register failed");
 						serverConnector.disconnect();
 					}
 				} else {
-					System.out.println("Register password confirmation is not valid.");
+					log.debug("Register password confirmation is not valid.");
 				}
 			} else if ((data[0]).equals("login")) {
 				if (serverConnector.login(data[1], data[2])) {
-					System.out.println("Login successful");
+					log.debug("login successful");
 					break;
 				} else {
-					System.out.println("Login failed");
+					log.debug("login failed");
 					serverConnector.disconnect();
 				}
 			}
@@ -108,14 +115,13 @@ public class App {
 				localHashes.loadFromXML(in);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 
 		FileManager manager = new FileManager(localHashes); // TODO maybe remember it
 		KeyFile keyFile = new KeyFile(); // TODO get from the server
 
 		Collection<FileCompareResult> results = manager.compareFiles(keyFile);
-		System.out.println(results);
+		log.debug(results);
 	}
-
 }

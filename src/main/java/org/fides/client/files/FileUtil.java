@@ -7,14 +7,20 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.KeyGenerator;
 
 /**
  * 
  * @author Koen
- *
+ * 
  */
 public final class FileUtil {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileUtil.class);
 
 	private FileUtil() {
 	}
@@ -39,12 +45,13 @@ public final class FileUtil {
 					}
 					dis.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error(e);
+
 				}
 				fileHash = KeyGenerator.toHex(messageDigest.digest());
 			}
 		} catch (NoSuchAlgorithmException e) {
-			// This should not happen since we made the choice for MD5 ourselves
+			log.debug("This should not happen since we made the choice for MD5 ourselves");
 		}
 		return fileHash;
 	}

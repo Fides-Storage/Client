@@ -36,10 +36,9 @@ import org.fides.client.files.KeyFile;
  * 
  * @author Koen
  * @author Thijs
- *
+ * 
  */
 public class EncryptionManager {
-
 	/**
 	 * The algorithm used for encryption and decryption, when changing it dont forgot to update the
 	 * {@link EncryptionManager#createCipher()}

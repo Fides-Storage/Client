@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
  * 
  */
 public class ClientFile implements Serializable {
-
 	private static final long serialVersionUID = -2910237556924682964L;
 
 	private String name;

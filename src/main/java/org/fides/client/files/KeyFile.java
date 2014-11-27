@@ -10,7 +10,7 @@ import java.util.Collections;
  * decrypt them.
  * 
  * @author Koen
- *
+ * 
  */
 public class KeyFile implements Serializable {
 
