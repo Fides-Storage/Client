@@ -9,15 +9,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.UserSettings;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
  * 
  * @author Koen
- *
+ * 
  */
 public class FileManager {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileManager.class);
 
 	private Properties localHashes;
 
@@ -189,7 +195,7 @@ public class FileManager {
 				fileName = fileName.substring(baseFilePath.length());
 				fileNames.add(fileName);
 			} else {
-				System.out.println(file.getPath() + " : " + directory.getPath());
+				log.debug(file.getPath() + " : " + directory.getPath());
 			}
 		}
 		return fileNames;

@@ -3,11 +3,18 @@ package org.fides.client.connector;
 import java.io.OutputStream;
 import java.security.Key;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Contains an {@link OutputStream} to a specific location on the server. This is and extension of the
  * {@link OutputStreamData}, but also contains the key for the encrypted stream
  */
 public class EncryptedOutputStreamData extends OutputStreamData {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(EncryptedOutputStreamData.class);
 
 	private Key key;
 

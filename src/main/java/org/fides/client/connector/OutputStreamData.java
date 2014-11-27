@@ -2,10 +2,17 @@ package org.fides.client.connector;
 
 import java.io.OutputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Contains an {@link OutputStream} to a specific location on the server
  */
 public class OutputStreamData {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(OutputStreamData.class);
 
 	private final OutputStream outputStream;
 

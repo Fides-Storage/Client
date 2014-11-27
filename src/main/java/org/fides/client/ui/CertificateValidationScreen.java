@@ -8,18 +8,27 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 import javax.swing.BoxLayout;
 import javax.swing.JEditorPane;
-import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.fides.client.files.FileUtil;
 
 /**
  * UI where a password can be submitted by a user
  */
 public class CertificateValidationScreen {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileUtil.class);
 
 	/** An html tab */
 	private static final String TAB = "&#09;";
+
 	/** An html whitespace */
 	private static final String WHITESPACE = "&nbsp;";
 
@@ -59,10 +68,11 @@ public class CertificateValidationScreen {
 		return false;
 	}
 
-	/** 
+	/**
 	 * Creates a userfriendly string with the certificate's information
 	 * 
-	 * @param certificate The certificate to convert to a pretty string.
+	 * @param certificate
+	 *            The certificate to convert to a pretty string.
 	 * @return The userfriendly string
 	 */
 	private static String readableCertificate(X509Certificate certificate) {
@@ -110,7 +120,8 @@ public class CertificateValidationScreen {
 	/**
 	 * Creates a userfriendly string with the certificate's information
 	 * 
-	 * @param principal The principal to convert to a pretty string.
+	 * @param principal
+	 *            The principal to convert to a pretty string.
 	 * @return The userfriendly string
 	 */
 	private static String readablePrincipal(X500Principal principal) {

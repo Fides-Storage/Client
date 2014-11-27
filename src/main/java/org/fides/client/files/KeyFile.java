@@ -5,14 +5,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The file containins a collection of {@link ClientFile} containing the location of files on the server and the key to
  * decrypt them.
  * 
  * @author Koen
- *
+ * 
  */
 public class KeyFile implements Serializable {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(KeyFile.class);
 
 	private static final long serialVersionUID = -3100793225474334464L;
 
