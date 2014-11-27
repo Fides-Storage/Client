@@ -1,13 +1,13 @@
 package org.fides.client.ui;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -42,27 +42,22 @@ public class UsernamePasswordScreen {
 
 		// Create a Panel with the correct dimensions
 		JPanel panel = new JPanel();
-		// TODO: Use boxlayout with BoxLayout.Y_AXIS
-		panel.setPreferredSize(new Dimension(200, 65));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		// Add a label to the panel
 		JLabel labelUsername = new JLabel("Username:");
-		labelUsername.setBounds(10, 10, 80, 25);
 		panel.add(labelUsername);
 
 		// Add a usernamefield to the panel with a coloumn with of 10
 		JTextField username = new JTextField(10);
-		username.setBounds(100, 10, 160, 25);
 		panel.add(username);
 
 		// Add a label to the panel
 		JLabel labelPassword = new JLabel("Password:");
-		labelPassword.setBounds(10, 40, 80, 25);
 		panel.add(labelPassword);
 
 		// Add a passwordfield to the panel with a coloumn with of 10
 		JPasswordField password = new JPasswordField(10);
-		password.setBounds(100, 40, 160, 25);
 		panel.add(password);
 
 		// Make sure that the username field is selected while it is still possible to press enter for
