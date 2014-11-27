@@ -40,10 +40,13 @@ public class App {
 
 		// TODO: If user doesn't accept certificate: return false.
 
+		// TODO move this away from here, its pretty big
+		// TODO use a boolean instead of a true and a break
 		while (true) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
 
+			// TODO if something goes wrong, like login or connecting, make this clear to the user
 			if (data == null) {
 				System.exit(1);
 			}
