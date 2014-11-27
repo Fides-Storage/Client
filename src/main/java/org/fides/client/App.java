@@ -28,30 +28,29 @@ public class App {
 	 */
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
-		try {
-			// TODO: Check settings for IP&Port
+		// TODO: Check settings for IP&Port
 
-			// TODO: Ask user for IP&Port
+		// TODO: Ask user for IP&Port
 
-			serverConnector.connect("127.0.0.1", 4444);
+		// TODO: Get locally saved certificate
 
-			// TODO: Get locally saved certificate
+		// TODO: Compare certificates
 
-			// TODO: Compare certificates
+		// TODO: If new: user prompt.
 
-			// TODO: If new: user prompt.
-
-			// TODO: If user doesn't accept certificate: return false.
-
-		} catch (Exception e) {
-			System.exit(1);
-		}
+		// TODO: If user doesn't accept certificate: return false.
 
 		while (true) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
 
 			if (data == null) {
+				System.exit(1);
+			}
+
+			try {
+				serverConnector.connect("127.0.0.1", 4444);
+			} catch (Exception e) {
 				System.exit(1);
 			}
 
@@ -62,17 +61,21 @@ public class App {
 					// register on the server
 					if (serverConnector.register(data[1], data[2])) {
 						System.out.println("Register successful");
+						serverConnector.disconnect();
 					} else {
 						System.out.println("Register failed");
+						serverConnector.disconnect();
 					}
 				} else {
 					System.out.println("Register password confirmation is not valid.");
 				}
 			} else if ((data[0]).equals("login")) {
 				if (serverConnector.login(data[1], data[2])) {
+					System.out.println("Login successful");
 					break;
 				} else {
 					System.out.println("Login failed");
+					serverConnector.disconnect();
 				}
 			}
 

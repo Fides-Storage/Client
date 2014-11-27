@@ -46,7 +46,7 @@ public class ServerConnector {
 	private DataInputStream in;
 
 	/**
-	 * The constructor for het ServerConnector
+	 * The constructor for the ServerConnector
 	 */
 	public ServerConnector() {
 		// For testing purposes only
@@ -117,8 +117,8 @@ public class ServerConnector {
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
-				if (userAnswer.has("succesfull")) {
-					return userAnswer.get("succesfull").getAsBoolean();
+				if (userAnswer.has("successful")) {
+					return userAnswer.get("successful").getAsBoolean();
 				} else {
 					return false;
 				}
@@ -157,8 +157,8 @@ public class ServerConnector {
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
-				if (userAnswer.has("succesfull")) {
-					return userAnswer.get("succesfull").getAsBoolean();
+				if (userAnswer.has("successful")) {
+					return userAnswer.get("successful").getAsBoolean();
 				} else {
 					return false;
 				}
@@ -174,7 +174,7 @@ public class ServerConnector {
 	/**
 	 * Disconnect the current connection
 	 * 
-	 * @return true if disconnect was successfull
+	 * @return true if disconnect was successful
 	 */
 	public boolean disconnect() {
 		try {
