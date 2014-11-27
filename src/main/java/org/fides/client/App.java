@@ -63,7 +63,7 @@ public class App {
 				isRunning = false;
 			}
 
-			if ((data[0]).equals("register")) {
+			if (isRunning && (data[0]).equals("register")) {
 
 				// checks if password and password confirmation is the same
 				if (data[2].equals(data[3])) {
@@ -78,7 +78,7 @@ public class App {
 				} else {
 					log.debug("Register password confirmation is not valid.");
 				}
-			} else if ((data[0]).equals("login")) {
+			} else if (isRunning && (data[0]).equals("login")) {
 				if (serverConnector.login(data[1], data[2])) {
 					log.debug("login successful");
 					break;
@@ -90,9 +90,14 @@ public class App {
 
 		}
 
-		if (serverConnector.isConnected() && isRunning) {
+		if (serverConnector.isConnected() && serverConnector.isLoggedIn() && isRunning) {
 			// TODO Do normal work, we are going to loop here
-
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
