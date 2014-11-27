@@ -66,7 +66,7 @@ public class App {
 				isRunning = false;
 			}
 
-			if ((data[0]).equals("register")) {
+			if (isRunning && (data[0]).equals("register")) {
 
 				// checks if password and password confirmation is the same
 				if (data[2].equals(data[3])) {
@@ -81,7 +81,7 @@ public class App {
 				} else {
 					log.debug("Register password confirmation is not valid.");
 				}
-			} else if ((data[0]).equals("login")) {
+			} else if (isRunning && (data[0]).equals("login")) {
 				if (serverConnector.login(data[1], data[2])) {
 					log.debug("login successful");
 					break;
