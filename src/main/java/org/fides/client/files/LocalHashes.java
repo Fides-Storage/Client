@@ -8,6 +8,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.fides.client.UserProperties;
+import org.fides.client.encryption.EncryptionManager;
+
 /**
  * Used for loading and storing local hashes
  * 
@@ -15,9 +20,12 @@ import java.util.Properties;
  *
  */
 public final class LocalHashes {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(EncryptionManager.class);
 
-	//TODO: move to Properties
-	private static final String LOCAL_HASHSES_FILE = "./hashes.xml";
+	private static final String LOCAL_HASHSES_FILE = "hashes.xml";
 
 	private static LocalHashes instance;
 
@@ -27,14 +35,13 @@ public final class LocalHashes {
 	 * Constuctor
 	 */
 	private LocalHashes() {
-		try (InputStream in = new FileInputStream(LOCAL_HASHSES_FILE)) {
-			File file = new File(LOCAL_HASHSES_FILE);
-			if (file.exists()) {
+		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
+		if (file.exists()) {
+			try (InputStream in = new FileInputStream(file)) {
 				localHashes.loadFromXML(in);
+			} catch (IOException e) {
+				log.error(e);
 			}
-		} catch (IOException e) {
-			//TODO: Log4j
-			e.printStackTrace();
 		}
 	}
 
@@ -63,13 +70,12 @@ public final class LocalHashes {
 	}
 
 	private synchronized void saveHashes() {
-		File file = new File(LOCAL_HASHSES_FILE);
+		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
 		try (OutputStream out = new FileOutputStream(file)) {
 			localHashes.storeToXML(out, "Local file hashes");
 		} catch (IOException e) {
 			// We accept this
-			e.printStackTrace();
-			//TODO: Log4j
+			log.warn(e);
 		}
 	}
 

@@ -16,7 +16,8 @@ import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.encryption.KeyGenerator;
 
 /**
- * Handles the synchronizing of files
+ * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
+ * functional {@link FileManager}.
  * 
  * @author Koen
  *
@@ -47,14 +48,44 @@ public class FileSyncManager {
 	/**
 	 * Compare the local files and server files and sync them
 	 * 
+	 * @return true is successful
 	 * @throws IOException
 	 */
-	public void fileManagerCheck() throws IOException {
-		KeyFile keyFile = encManager.requestKeyFile();
+	public boolean fileManagerCheck() {
+		KeyFile keyFile;
+		try {
+			keyFile = encManager.requestKeyFile();
+		} catch (IOException e) {
+			log.error(e);
+			return false;
+		}
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		for (FileCompareResult result : results) {
 			handleCompareResult(result);
 		}
+		return true;
+	}
+
+	/**
+	 * Compare the local files and server files and sync them
+	 * 
+	 * @return true is successful
+	 * @throws IOException
+	 */
+	public boolean checkClientFile(String fileName) {
+		KeyFile keyFile;
+		try {
+			keyFile = encManager.requestKeyFile();
+		} catch (IOException e) {
+			log.error(e);
+			return false;
+		}
+
+		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
+		if (result != null) {
+			handleCompareResult(result);
+		}
+		return true;
 	}
 
 	/**
@@ -221,6 +252,14 @@ public class FileSyncManager {
 
 	private void handleConflict(final String fileName) {
 		// TODO handle conflict
+	}
+
+	public FileManager getFileManager() {
+		return fileManager;
+	}
+
+	public EncryptionManager getEncManager() {
+		return encManager;
 	}
 
 }

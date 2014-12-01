@@ -34,7 +34,7 @@ import org.fides.client.files.KeyFile;
 
 /**
  * The {@link EncryptionManager} handles the encryption and decryption of an {@link InputStream} before it is passed on
- * to the {@link ServerConnector}
+ * to the {@link ServerConnector}. It expects a fully connected {@link ServerConnector}.
  * 
  * @author Koen
  * @author Thijs
@@ -92,7 +92,8 @@ public class EncryptionManager {
 	public KeyFile requestKeyFile() throws IOException {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			throw new NullPointerException();
+			log.error("Server connector does not give an InputStream");
+			return null;
 		}
 
 		DataInputStream din = new DataInputStream(in);
@@ -121,31 +122,35 @@ public class EncryptionManager {
 	 *            The {@link KeyFile} to encrypt and send
 	 * @throws IOException
 	 */
-	public void uploadKeyFile(final KeyFile keyFile) {
+	public boolean uploadKeyFile(final KeyFile keyFile) {
+		boolean completed = false;
 		if (keyFile == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("No KeyFile");
 		}
 
 		OutputStream out = connector.uploadKeyFile();
 		if (out == null) {
-			throw new NullPointerException();
+			log.error("ServerConnector does not profide an OutputStream");
+		} else {
+			try (DataOutputStream dout = new DataOutputStream(out)) {
+
+				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
+				int pbkdf2Rounds = KeyGenerator.getRounds();
+
+				Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+
+				dout.writeInt(pbkdf2Rounds);
+				dout.write(saltBytes, 0, SALT_SIZE);
+
+				OutputStream outEncrypted = getEncryptionStream(dout, key);
+				ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
+				objectOut.writeObject(keyFile);
+				completed = true;
+			} catch (IOException e) {
+				log.error(e);
+			}
 		}
-		try (DataOutputStream dout = new DataOutputStream(out)) {
-
-			byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
-			int pbkdf2Rounds = KeyGenerator.getRounds();
-
-			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
-
-			dout.writeInt(pbkdf2Rounds);
-			dout.write(saltBytes, 0, SALT_SIZE);
-
-			OutputStream outEncrypted = getEncryptionStream(dout, key);
-			ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
-			objectOut.writeObject(keyFile);
-		} catch (IOException e) {
-			log.error(e);
-		}
+		return completed;
 	}
 
 	/**

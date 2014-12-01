@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.KeyGenerator;
 
 /**
- * //TODO: javadoc
+ * Some utilities which have to do with files
  * 
  * @author Koen
  * 

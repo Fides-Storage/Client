@@ -125,7 +125,8 @@ public class FileManager {
 	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
 		FileCompareResult result = null;
 		// Does the local file exist
-		if (new File(UserProperties.getInstance().getFileDirectory(), clientName).exists()) {
+		File file = new File(UserProperties.getInstance().getFileDirectory(), clientName);
+		if (file.exists()) {
 			// I have the file
 			if (serverFileNames.contains(clientName)) {
 				// We both have the file

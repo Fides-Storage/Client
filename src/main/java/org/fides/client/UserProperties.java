@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Contains the settings on where files should be saved.
@@ -17,9 +19,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class UserProperties {
 
+	/**
+	 * The directory to store settings
+	 */
+	public static final String SETTINGS_DIRECTORY = "./Settings/";
+
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(UserProperties.class);
+
 	private static final String DEFAULT_FILE_DIR = "./Fides";
 
-	private static final String USER_SETTINGS_FILE = "./user.properties";
+	private static final String USER_SETTINGS_FILE = "user.properties";
 
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
@@ -35,8 +47,13 @@ public final class UserProperties {
 	private UserProperties() {
 		properties = new Properties();
 
+		File settingsDir = new File(SETTINGS_DIRECTORY);
+		if (!settingsDir.exists()) {
+			settingsDir.mkdirs();
+		}
+
 		try {
-			File file = new File(USER_SETTINGS_FILE);
+			File file = new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE);
 			if (file.exists()) {
 				properties.load(new FileInputStream(file));
 			}
@@ -52,15 +69,16 @@ public final class UserProperties {
 			try {
 				properties.setProperty(FILE_DIRECTORY_KEY, new File(fileDirectoryName).getCanonicalPath());
 			} catch (IOException e) {
-				// Do Nothing
+				log.debug(e);
 			}
 
 			saveProperties();
 		}
 		fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
-			//TODO: check if the mkdir was successful
-			fileDirectory.mkdirs();
+			if (!fileDirectory.mkdirs()) {
+				log.error("File directory can not be created");
+			}
 		}
 	}
 
@@ -72,10 +90,10 @@ public final class UserProperties {
 	 * Save the properties
 	 */
 	private void saveProperties() {
-		try (OutputStream out = new FileOutputStream(new File(USER_SETTINGS_FILE))) {
+		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {
-			// Do nothing, can happen
+			log.debug(e);
 		}
 	}
 
