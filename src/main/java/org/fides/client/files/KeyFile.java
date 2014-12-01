@@ -1,9 +1,9 @@
 package org.fides.client.files;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The file contains a collection of {@link ClientFile} containing the location of files on the server and the key to
@@ -16,8 +16,7 @@ public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = -3100793225474334464L;
 
-	//TODO: Map
-	private Collection<ClientFile> clientFiles = new ArrayList<>();
+	private Map<String, ClientFile> clientFiles = new HashMap<>();
 
 	/**
 	 * Return a {@link ClientFile} with the given name
@@ -27,12 +26,7 @@ public class KeyFile implements Serializable {
 	 * @return The {@link ClientFile} if existing
 	 */
 	public ClientFile getClientFileByName(String name) {
-		for (ClientFile clientFile : clientFiles) {
-			if (clientFile.getName().equals(name)) {
-				return clientFile;
-			}
-		}
-		return null;
+		return clientFiles.get(name);
 	}
 
 	/**
@@ -43,7 +37,7 @@ public class KeyFile implements Serializable {
 	 * @return The {@link ClientFile} if existing
 	 */
 	public ClientFile getClientFileByLocation(String location) {
-		for (ClientFile clientFile : clientFiles) {
+		for (ClientFile clientFile : clientFiles.values()) {
 			if (clientFile.getLocation().equals(location)) {
 				return clientFile;
 			}
@@ -53,31 +47,31 @@ public class KeyFile implements Serializable {
 
 	/**
 	 * Removes a {@link ClientFile} from the {@link KeyFile}
-	 *
-	 * //TODO: javadoc
+	 * 
 	 * @param name
+	 *            The name of the {@link ClientFile} to remove
 	 */
-	public void removeClientFileByName(ClientFile clientFile) {
-		clientFiles.remove(clientFile);
+	public void removeClientFileByName(String name) {
+		clientFiles.remove(name);
 	}
 
 	/**
 	 * Add a {@link ClientFile} to the {@link KeyFile}.
 	 * 
 	 * @param clientFile
-	 * //TODO: javadoc
+	 *            THe client file to add
 	 */
 	public void addClientFile(ClientFile clientFile) {
-		clientFiles.add(clientFile);
+		clientFiles.put(clientFile.getName(), clientFile);
 	}
 
 	/**
-	 * Returns the {@link Collection} of {@link ClientFile} as and unmodifiable collection
+	 * Returns the {@link Map} of {@link ClientFile} as and unmodifiable map
 	 * 
-	 * @return The {@link Collection} of {@link ClientFile} as and unmodifiable collection
+	 * @return The {@link Map} of {@link ClientFile} as and unmodifiable map
 	 */
-	public Collection<ClientFile> getAllClientFiles() {
-		return Collections.unmodifiableCollection(clientFiles);
+	public Map<String, ClientFile> getAllClientFiles() {
+		return Collections.unmodifiableMap(clientFiles);
 	}
 
 }

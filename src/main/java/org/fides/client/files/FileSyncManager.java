@@ -9,6 +9,8 @@ import java.security.MessageDigest;
 import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.encryption.KeyGenerator;
@@ -20,6 +22,10 @@ import org.fides.client.encryption.KeyGenerator;
  *
  */
 public class FileSyncManager {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileSyncManager.class);
 
 	private FileManager fileManager;
 
@@ -92,16 +98,13 @@ public class FileSyncManager {
 	 *            The file to upload
 	 */
 	private void handleLocalAdded(final String fileName) {
-		// TODO TEST
-
 		EncryptedOutputStreamData outData = encManager.uploadFile();
 		// Get the keyfile
 		KeyFile keyFile = null;
 		try {
 			keyFile = encManager.requestKeyFile();
 		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
+			log.error(e);
 			return;
 		}
 
@@ -114,17 +117,11 @@ public class FileSyncManager {
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
+			log.error(e);
 		}
 
 		// Update the keyfile
-		try {
-			encManager.uploadKeyFile(keyFile);
-		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
-		}
+		encManager.uploadKeyFile(keyFile);
 	}
 
 	private void handleLocalRemoved(final String fileName) {
@@ -138,15 +135,12 @@ public class FileSyncManager {
 	 *            The file to update
 	 */
 	private void handleLocalUpdated(final String fileName) {
-		// TODO Test
-
 		// Get the keyfile
 		KeyFile keyFile = null;
 		try {
 			keyFile = encManager.requestKeyFile();
 		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
+			log.error(e);
 			return;
 		}
 
@@ -156,8 +150,7 @@ public class FileSyncManager {
 		try {
 			outEnc = encManager.updateFile(clientFile);
 		} catch (InvalidClientFileException e) {
-			// TODO proper handling
-			e.printStackTrace();
+			log.error(e);
 			return;
 		}
 
@@ -169,17 +162,11 @@ public class FileSyncManager {
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
 		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
+			log.error(e);
 		}
 
 		// Update the keyfile
-		try {
-			encManager.uploadKeyFile(keyFile);
-		} catch (IOException e) {
-			// TODO proper handling
-			e.printStackTrace();
-		}
+		encManager.uploadKeyFile(keyFile);
 
 	}
 
@@ -197,8 +184,7 @@ public class FileSyncManager {
 		try {
 			keyFile = encManager.requestKeyFile();
 		} catch (IOException e) {
-			// TODO: proper handling with Log4j
-			e.printStackTrace();
+			log.error(e);
 			return;
 		}
 
@@ -212,8 +198,7 @@ public class FileSyncManager {
 				outFile = fileManager.addFile(fileName);
 			}
 		} catch (FileNotFoundException e) {
-			// TODO: proper handling with Log4j
-			e.printStackTrace();
+			log.error(e);
 			return;
 		}
 
@@ -224,11 +209,9 @@ public class FileSyncManager {
 			String hexHash = KeyGenerator.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {
-			// TODO: proper handling with Log4j
-			e.printStackTrace();
+			log.error(e);
 		} catch (InvalidClientFileException e) {
-			// TODO: proper handling with Log4j
-			e.printStackTrace();
+			log.error(e);
 		}
 	}
 

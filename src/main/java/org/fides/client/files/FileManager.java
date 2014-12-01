@@ -12,14 +12,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
  * 
  * @author Koen
+ * 
  */
 public class FileManager {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileManager.class);
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
@@ -43,7 +50,7 @@ public class FileManager {
 
 		// Get all the name of the server stored files
 		Set<String> serverFileNames = new HashSet<>();
-		for (ClientFile clientFile : keyFile.getAllClientFiles()) {
+		for (ClientFile clientFile : keyFile.getAllClientFiles().values()) {
 			serverFileNames.add(clientFile.getName());
 		}
 
@@ -109,7 +116,7 @@ public class FileManager {
 	 */
 	public FileCompareResult checkClientSideFile(String clientName, KeyFile keyFile) {
 		Set<String> serverFileNames = new HashSet<>();
-		for (ClientFile clientFile : keyFile.getAllClientFiles()) {
+		for (ClientFile clientFile : keyFile.getAllClientFiles().values()) {
 			serverFileNames.add(clientFile.getName());
 		}
 		return checkClientSideFile(clientName, serverFileNames, keyFile);
@@ -168,10 +175,12 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.exists()) {
-			return null; // TODO: use Log4j
+			log.error("File does already exist: " + file);
+			return null;
 		}
 		if (!file.canWrite()) {
-			return null; // TODO: use Log4j
+			log.error("File can not be written: " + file);
+			return null;
 		}
 		return new FileOutputStream(file);
 	}
@@ -188,10 +197,12 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.exists()) {
-			return null; // // TODO: use Log4j
+			log.error("File does not exist: " + file);
+			return null;
 		}
 		if (!file.canWrite()) {
-			return null; // TODO: use Log4j
+			log.error("File can not be written: " + file);
+			return null;
 		}
 		return new FileOutputStream(file);
 	}
@@ -207,7 +218,8 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canWrite()) {
-			return false; // TODO: use Log4j
+			log.error("File can not be written: " + file);
+			return false;
 		}
 		return file.delete();
 	}
@@ -224,7 +236,8 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canRead()) {
-			return null; // TODO: use Log4j
+			log.error("File can not be read: " + file);
+			return null;
 		}
 		return new FileInputStream(file);
 	}
@@ -269,11 +282,9 @@ public class FileManager {
 				fileName = fileName.substring(baseFilePath.length());
 				fileNames.add(fileName);
 			} else {
-				// TODO: use Log4j
-				System.out.println(file.getPath() + " : " + directory.getPath());
+				log.debug("File does not match with base directoy: " + file.getPath() + " ; " + directory.getPath());
 			}
 		}
 		return fileNames;
 	}
-
 }

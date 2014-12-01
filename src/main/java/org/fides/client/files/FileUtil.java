@@ -7,14 +7,21 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.KeyGenerator;
 
 /**
  * //TODO: javadoc
+ * 
  * @author Koen
- *
+ * 
  */
 public final class FileUtil {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(FileUtil.class);
 
 	private FileUtil() {
 	}
@@ -33,14 +40,12 @@ public final class FileUtil {
 			MessageDigest messageDigest = createFileDigest();
 			// In order to make the hash or checksum we have to read the entire file
 			try (DigestInputStream dis = new DigestInputStream(new FileInputStream(file), messageDigest)) {
-				//TODO: Bufferoverflow?
 				while (dis.read() != -1) {
 					// Do nothing
 				}
-				//TODO: don't close DigestInputStream when using "Try with resources"
-				dis.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				// Should never happen
+				log.error(e);
 			}
 			fileHash = KeyGenerator.toHex(messageDigest.digest());
 		}
@@ -51,8 +56,7 @@ public final class FileUtil {
 	/**
 	 * Create a {@link MessageDigest} for the use of creating hashes for files
 	 * 
-	 * @return
-	 * //TODO: javadoc
+	 * @return A {@link MessageDigest} for hashing files
 	 */
 	public static MessageDigest createFileDigest() {
 		MessageDigest messageDigest = null;
@@ -60,8 +64,7 @@ public final class FileUtil {
 			messageDigest = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
 			// Should never happen
-			e.printStackTrace();
-			//TODO: Log4j?
+			log.error(e);
 		}
 		return messageDigest;
 	}

@@ -1,10 +1,12 @@
 package org.fides.client.ui;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingUtilities;
 import javax.swing.JOptionPane;
+
 import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.HierarchyEvent;
@@ -19,10 +21,15 @@ public class PasswordScreen {
 
 	/**
 	 * Show a dialog where the user can enter its password
-	 *
+	 * 
 	 * @return the entered password, returns null if nothing was entered
 	 */
 	public static String getPassword() {
+		JFrame frame = new JFrame();
+		frame.setUndecorated(true);
+		frame.setVisible(true);
+		frame.setLocationRelativeTo(null);
+
 		// Create a Panel
 		JPanel panel = new JPanel();
 
@@ -51,7 +58,9 @@ public class PasswordScreen {
 
 		// Place the 2 buttons for OK and Cancel and show the dialog
 		String[] options = new String[] { "OK", "Cancel" };
-		int option = JOptionPane.showOptionDialog(null, panel, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		int option = JOptionPane.showOptionDialog(frame, panel, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		frame.dispose();
+
 		// If OK was pressed
 		if (option == 0) {
 			return new String(pass.getPassword());

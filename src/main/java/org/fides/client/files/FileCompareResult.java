@@ -1,10 +1,11 @@
 package org.fides.client.files;
 
+
 /**
  * A result of the {@link FileManager#compareFiles(KeyFile)} when comparing the local files and the files on the server
  * 
  * @author Koen
- *
+ * 
  */
 public class FileCompareResult {
 

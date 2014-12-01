@@ -13,6 +13,8 @@ import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.engines.CamelliaEngine;
@@ -39,6 +41,10 @@ import org.fides.client.files.KeyFile;
  *
  */
 public class EncryptionManager {
+	/**
+	 * Log for this class
+	 */
+	private static Logger log = LogManager.getLogger(EncryptionManager.class);
 
 	/**
 	 * The algorithm used for encryption and decryption, when changing it dont forgot to update the
@@ -103,7 +109,7 @@ public class EncryptionManager {
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
 		} catch (ClassNotFoundException e) {
-			// The keyfile is not a keyfile, should not be posible unless something happens below this
+			log.error(e);
 			return null;
 		}
 	}
@@ -115,7 +121,7 @@ public class EncryptionManager {
 	 *            The {@link KeyFile} to encrypt and send
 	 * @throws IOException
 	 */
-	public void uploadKeyFile(final KeyFile keyFile) throws IOException {
+	public void uploadKeyFile(final KeyFile keyFile) {
 		if (keyFile == null) {
 			throw new NullPointerException();
 		}
@@ -124,20 +130,22 @@ public class EncryptionManager {
 		if (out == null) {
 			throw new NullPointerException();
 		}
-		DataOutputStream dout = new DataOutputStream(out);
+		try (DataOutputStream dout = new DataOutputStream(out)) {
 
-		byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
-		int pbkdf2Rounds = KeyGenerator.getRounds();
+			byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
+			int pbkdf2Rounds = KeyGenerator.getRounds();
 
-		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
 
-		dout.writeInt(pbkdf2Rounds);
-		dout.write(saltBytes, 0, SALT_SIZE);
+			dout.writeInt(pbkdf2Rounds);
+			dout.write(saltBytes, 0, SALT_SIZE);
 
-		OutputStream outEncrypted = getEncryptionStream(dout, key);
-		ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
-		objectOut.writeObject(keyFile);
-		objectOut.close();
+			OutputStream outEncrypted = getEncryptionStream(dout, key);
+			ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
+			objectOut.writeObject(keyFile);
+		} catch (IOException e) {
+			log.error(e);
+		}
 	}
 
 	/**
@@ -174,10 +182,10 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			e.printStackTrace();
+			log.error(e);
 		} catch (InvalidKeySpecException e) {
 			// Should not happen
-			e.printStackTrace();
+			log.error(e);
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
