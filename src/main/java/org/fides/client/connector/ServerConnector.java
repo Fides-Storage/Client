@@ -137,6 +137,7 @@ public class ServerConnector {
 
 			} catch (IOException e) {
 				log.error("IOException connection failed: ", e);
+				loggedIn = false;
 			}
 		}
 
