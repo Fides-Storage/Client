@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * The file containins a collection of {@link ClientFile} containing the location of files on the server and the key to
+ * The file contains a collection of {@link ClientFile} containing the location of files on the server and the key to
  * decrypt them.
  * 
  * @author Koen
@@ -16,14 +16,8 @@ public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = -3100793225474334464L;
 
-	private Collection<ClientFile> clientFiles;
-
-	/**
-	 * Constructor
-	 */
-	public KeyFile() {
-		clientFiles = new ArrayList<>();
-	}
+	//TODO: Map
+	private Collection<ClientFile> clientFiles = new ArrayList<>();
 
 	/**
 	 * Return a {@link ClientFile} with the given name
@@ -59,7 +53,8 @@ public class KeyFile implements Serializable {
 
 	/**
 	 * Removes a {@link ClientFile} from the {@link KeyFile}
-	 * 
+	 *
+	 * //TODO: javadoc
 	 * @param name
 	 */
 	public void removeClientFileByName(ClientFile clientFile) {
@@ -70,6 +65,7 @@ public class KeyFile implements Serializable {
 	 * Add a {@link ClientFile} to the {@link KeyFile}.
 	 * 
 	 * @param clientFile
+	 * //TODO: javadoc
 	 */
 	public void addClientFile(ClientFile clientFile) {
 		clientFiles.add(clientFile);

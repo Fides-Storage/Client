@@ -18,16 +18,8 @@ import org.fides.client.UserProperties;
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
  * 
  * @author Koen
- *
  */
 public class FileManager {
-
-	/**
-	 * Constructor
-	 */
-	public FileManager() {
-		// Does nothing
-	}
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
@@ -92,7 +84,6 @@ public class FileManager {
 		FileCompareResult result = null;
 		// Does the file exist on the server
 		if (keyFile.getClientFileByName(serverName) != null) {
-			File directory = UserProperties.getInstance().getFileDirectory();
 			// Server has the file
 			if (clientFileNames.contains(serverName)) {
 				// We both have the file
@@ -174,9 +165,14 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream addFile(String fileName) throws FileNotFoundException {
-		// TODO add specific stuff?
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
+		if (file.exists()) {
+			return null; // TODO: use Log4j
+		}
+		if (!file.canWrite()) {
+			return null; // TODO: use Log4j
+		}
 		return new FileOutputStream(file);
 	}
 
@@ -189,9 +185,14 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream updateFile(String fileName) throws FileNotFoundException {
-		// TODO update specific stuff?
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.exists()) {
+			return null; // // TODO: use Log4j
+		}
+		if (!file.canWrite()) {
+			return null; // TODO: use Log4j
+		}
 		return new FileOutputStream(file);
 	}
 
@@ -205,6 +206,9 @@ public class FileManager {
 	public boolean removeFile(String fileName) {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.canWrite()) {
+			return false; // TODO: use Log4j
+		}
 		return file.delete();
 	}
 
@@ -219,6 +223,9 @@ public class FileManager {
 	public InputStream readFile(String fileName) throws FileNotFoundException {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.canRead()) {
+			return null; // TODO: use Log4j
+		}
 		return new FileInputStream(file);
 	}
 
@@ -232,11 +239,13 @@ public class FileManager {
 	 */
 	private static void filesInDirectory(File directory, List<File> files) {
 		File[] dirFiles = directory.listFiles();
-		for (File file : dirFiles) {
-			if (file.isDirectory()) {
-				filesInDirectory(file, files);
-			} else {
-				files.add(file);
+		if (dirFiles != null) {
+			for (File file : dirFiles) {
+				if (file.isDirectory()) {
+					filesInDirectory(file, files);
+				} else {
+					files.add(file);
+				}
 			}
 		}
 	}
@@ -244,8 +253,8 @@ public class FileManager {
 	/**
 	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files are save on a PC can be
-	 * different.
+	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
+	 * different PCs
 	 * 
 	 * @param files
 	 * @param directory
@@ -260,6 +269,7 @@ public class FileManager {
 				fileName = fileName.substring(baseFilePath.length());
 				fileNames.add(fileName);
 			} else {
+				// TODO: use Log4j
 				System.out.println(file.getPath() + " : " + directory.getPath());
 			}
 		}

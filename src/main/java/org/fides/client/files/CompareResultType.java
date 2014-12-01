@@ -31,6 +31,6 @@ public enum CompareResultType {
 	/**
 	 * Both the files on the server and locally are changed
 	 */
-	CONFLICTED;
+	CONFLICTED
 
 }

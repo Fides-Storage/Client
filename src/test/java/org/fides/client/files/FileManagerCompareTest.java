@@ -57,15 +57,18 @@ public class FileManagerCompareTest {
 
 		localHashes = new Properties();
 
+		// Create a directory for test files
 		testDir = new File("./testDir");
 		testDir.mkdir();
 		testDir.deleteOnExit();
 
+		// Mock the UserProperties so it returns the test directory
 		settingsMock = mock(UserProperties.class);
 		when(settingsMock.getFileDirectory()).thenReturn(testDir);
 		PowerMockito.mockStatic(UserProperties.class);
 		Mockito.when(UserProperties.getInstance()).thenReturn(settingsMock);
 
+		// Mock the LocalHashes so it uses our own hashes
 		localHashesMock = mock(LocalHashes.class);
 		PowerMockito.mockStatic(LocalHashes.class);
 		Mockito.when(LocalHashes.getInstance()).thenReturn(localHashesMock);
@@ -82,6 +85,7 @@ public class FileManagerCompareTest {
 			}
 		});
 
+		// Mock the FileUtil hash function
 		PowerMockito.mockStatic(FileUtil.class);
 		Mockito.when(FileUtil.generateFileHash((File) Matchers.any())).then(new Answer<String>() {
 			@Override

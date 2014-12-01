@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class UserProperties {
 
+	private static final String DEFAULT_FILE_DIR = "./Fides";
+
 	private static final String USER_SETTINGS_FILE = "./user.properties";
 
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
@@ -36,7 +38,7 @@ public final class UserProperties {
 		try {
 			File file = new File(USER_SETTINGS_FILE);
 			if (file.exists()) {
-				properties.load(new FileInputStream(USER_SETTINGS_FILE));
+				properties.load(new FileInputStream(file));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -45,7 +47,7 @@ public final class UserProperties {
 		// Create the a file referencing the the location were the files should be saved
 		String fileDirectoryName = properties.getProperty(FILE_DIRECTORY_KEY);
 		if (StringUtils.isBlank(fileDirectoryName)) {
-			fileDirectoryName = "./Fides";
+			fileDirectoryName = DEFAULT_FILE_DIR;
 
 			try {
 				properties.setProperty(FILE_DIRECTORY_KEY, new File(fileDirectoryName).getCanonicalPath());
@@ -57,6 +59,7 @@ public final class UserProperties {
 		}
 		fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
+			//TODO: check if the mkdir was successful
 			fileDirectory.mkdirs();
 		}
 	}
