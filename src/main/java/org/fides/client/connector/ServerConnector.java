@@ -120,6 +120,7 @@ public class ServerConnector {
 
 				out.writeUTF(new Gson().toJson(user));
 
+				// TODO: Check server response for null
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has("successful")) {
 					return userAnswer.get("successful").getAsBoolean();
@@ -159,6 +160,7 @@ public class ServerConnector {
 
 				out.writeUTF(new Gson().toJson(user));
 
+				// TODO: Check server response for null
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has("successful")) {
 					return userAnswer.get("successful").getAsBoolean();

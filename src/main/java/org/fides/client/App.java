@@ -49,7 +49,7 @@ public class App {
 
 		// TODO If user doesn't accept certificate: return false.
 
-		// TODO move this away from here, its pretty big
+		// TODO: move this away from here, its pretty big
 		while (isRunning) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
@@ -69,15 +69,16 @@ public class App {
 			if ((data[0]).equals("register")) {
 
 				// checks if password and password confirmation is the same
+				// TODO: use switch for data[0].equals
+				// TODO: Put the data[] results in String vars (for readability)
 				if (data[2].equals(data[3])) {
 					// register on the server
 					if (serverConnector.register(data[1], data[2])) {
 						log.debug("Register successful");
-						serverConnector.disconnect();
 					} else {
 						log.debug("Register failed");
-						serverConnector.disconnect();
 					}
+					serverConnector.disconnect();
 				} else {
 					log.debug("Register password confirmation is not valid.");
 				}
@@ -94,7 +95,10 @@ public class App {
 		}
 
 		if (serverConnector.isConnected() && isRunning) {
-			// TODO Do normal work, we are going to loop here
+
+			// TODO: Do normal work, we are going to loop here
+			// TODO: Do this in a function.
+			serverConnector.disconnect();
 
 		}
 
