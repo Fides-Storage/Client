@@ -45,8 +45,11 @@ public class App {
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
 		InetSocketAddress serverAddress = newServerConnection(serverConnector);
-
 		// TODO move this away from here, its pretty big
+		if (serverAddress == null) {
+			System.exit(1);
+		}
+
 		while (isRunning) {
 
 			String[] data = UsernamePasswordScreen.getUsernamePassword();
