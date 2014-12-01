@@ -172,4 +172,50 @@ public class ServerConnectorTest {
 		// Asserts false, will be returned when trying to login with an invalid user name and password combination
 		assertFalse(connector.login("usernameTest", "passwordTest"));
 	}
+
+	/**
+	 * Test whether the IOException will be caught and false will be returned properly
+	 */
+	@Test
+	public void testRegisterCatchIOException() {
+		ByteArrayOutputStream byteArrayOutput = new ByteArrayOutputStream();
+		DataOutputStream writeJson = new DataOutputStream(byteArrayOutput);
+		Mockito.when(connector.register(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
+
+		try {
+			byteArrayOutput.close();
+			writeJson.close();
+		} catch (IOException e) {
+			log.error(e);
+			fail(e.getMessage());
+		}
+		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
+		Whitebox.setInternalState(connector, "in", mockedDataInputStream);
+
+		// Assert false when no data is given by the server
+		assertFalse(connector.register("usernameTest", "passwordTest"));
+	}
+
+	/**
+	 * Test whether the IOException will be caught and false will be returned properly
+	 */
+	@Test
+	public void testLoginCatchIOException() {
+		ByteArrayOutputStream byteArrayOutput = new ByteArrayOutputStream();
+		DataOutputStream writeJson = new DataOutputStream(byteArrayOutput);
+		Mockito.when(connector.login(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
+
+		try {
+			byteArrayOutput.close();
+			writeJson.close();
+		} catch (IOException e) {
+			log.error(e);
+			fail(e.getMessage());
+		}
+		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
+		Whitebox.setInternalState(connector, "in", mockedDataInputStream);
+
+		// Assert false when no data is given by the server
+		assertFalse(connector.login("usernameTest", "passwordTest"));
+	}
 }
