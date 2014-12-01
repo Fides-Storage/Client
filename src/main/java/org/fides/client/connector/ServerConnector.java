@@ -70,14 +70,14 @@ public class ServerConnector {
 	 *            The server IP
 	 * @param port
 	 *            The port
-	 * @return true if the connection was successfull
+	 * @return true if the connection was successful
 	 * @throws UnknownHostException
 	 */
 	public boolean connect(String host, int port) throws UnknownHostException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			// TODO: Check if connection is correctly closed without a timeout
+			// TODO Check if connection is correctly closed without a timeout
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -113,7 +113,6 @@ public class ServerConnector {
 	public boolean login(String username, String passwordHash) {
 		if (isConnected()) {
 			try {
-
 				JsonObject user = new JsonObject();
 				user.addProperty("action", "login");
 				user.addProperty("username", username);
@@ -122,7 +121,6 @@ public class ServerConnector {
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-
 				if (userAnswer.has("successful")) {
 					return userAnswer.get("successful").getAsBoolean();
 				} else {
@@ -162,7 +160,6 @@ public class ServerConnector {
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-
 				if (userAnswer.has("successful")) {
 					return userAnswer.get("successful").getAsBoolean();
 				} else {
