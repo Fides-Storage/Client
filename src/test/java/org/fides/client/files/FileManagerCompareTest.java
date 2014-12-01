@@ -48,8 +48,10 @@ public class FileManagerCompareTest {
 	 * 
 	 * @throws Exception
 	 */
+	//TODO: Beforeclass possible?
 	@Before
 	public void setUp() throws Exception {
+		//TODO: inline comments
 		keyFile = new KeyFile();
 		keyFile.addClientFile(new ClientFile("File1.txt", "", null, "File1.txt"));
 		keyFile.addClientFile(new ClientFile("File4.txt", "", null, "File4.txt"));

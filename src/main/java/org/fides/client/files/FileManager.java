@@ -18,16 +18,9 @@ import org.fides.client.UserProperties;
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
  * 
  * @author Koen
- *
+ * TODO: prevent for SecurityException.
  */
 public class FileManager {
-
-	/**
-	 * Constructor
-	 */
-	public FileManager() {
-		// Does nothing
-	}
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
@@ -111,7 +104,6 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream addFile(String fileName) throws FileNotFoundException {
-		// TODO update add stuff?
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		return new FileOutputStream(file);
@@ -126,7 +118,7 @@ public class FileManager {
 	 * @throws FileNotFoundException
 	 */
 	public OutputStream updateFile(String fileName) throws FileNotFoundException {
-		// TODO update specific stuff?
+		// TODO: check if file exists
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		return new FileOutputStream(file);
@@ -169,6 +161,7 @@ public class FileManager {
 	 */
 	private static void filesInDirectory(File directory, List<File> files) {
 		File[] dirFiles = directory.listFiles();
+		//TODO: Nullcheck on dirFiles
 		for (File file : dirFiles) {
 			if (file.isDirectory()) {
 				filesInDirectory(file, files);
@@ -181,12 +174,13 @@ public class FileManager {
 	/**
 	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files are save on a PC can be
-	 * different.
+	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently
+	 * on different PCs
 	 * 
 	 * @param files
 	 * @param directory
 	 * @return
+	 * TODO: Javadoc
 	 */
 	private static Set<String> filesToNames(List<File> files, File directory) {
 		Set<String> fileNames = new HashSet<>();
@@ -197,6 +191,7 @@ public class FileManager {
 				fileName = fileName.substring(baseFilePath.length());
 				fileNames.add(fileName);
 			} else {
+				//TODO: use Log4j
 				System.out.println(file.getPath() + " : " + directory.getPath());
 			}
 		}

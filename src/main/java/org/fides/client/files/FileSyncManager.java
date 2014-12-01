@@ -133,7 +133,7 @@ public class FileSyncManager {
 		try {
 			keyFile = encManager.requestKeyFile();
 		} catch (IOException e) {
-			// TODO proper handling
+			// TODO: proper handling with Log4j
 			e.printStackTrace();
 			return;
 		}
@@ -148,7 +148,7 @@ public class FileSyncManager {
 				outFile = fileManager.addFile(fileName);
 			}
 		} catch (FileNotFoundException e) {
-			// TODO proper handling
+			// TODO: proper handling with Log4j
 			e.printStackTrace();
 			return;
 		}
@@ -160,10 +160,10 @@ public class FileSyncManager {
 			String hexHash = KeyGenerator.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {
-			// TODO proper handling
+			// TODO: proper handling with Log4j
 			e.printStackTrace();
 		} catch (InvalidClientFileException e) {
-			// TODO proper handling
+			// TODO: proper handling with Log4j
 			e.printStackTrace();
 		}
 	}

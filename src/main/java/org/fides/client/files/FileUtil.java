@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import org.fides.client.encryption.KeyGenerator;
 
 /**
- * 
+ * //TODO: javadoc
  * @author Koen
  *
  */
@@ -33,9 +33,11 @@ public final class FileUtil {
 			MessageDigest messageDigest = createFileDigest();
 			// In order to make the hash or checksum we have to read the entire file
 			try (DigestInputStream dis = new DigestInputStream(new FileInputStream(file), messageDigest)) {
+				//TODO: Bufferoverflow?
 				while (dis.read() != -1) {
 					// Do nothing
 				}
+				//TODO: don't close DigestInputStream when using "Try with resources"
 				dis.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -50,6 +52,7 @@ public final class FileUtil {
 	 * Create a {@link MessageDigest} for the use of creating hashes for files
 	 * 
 	 * @return
+	 * //TODO: javadoc
 	 */
 	public static MessageDigest createFileDigest() {
 		MessageDigest messageDigest = null;
@@ -58,6 +61,7 @@ public final class FileUtil {
 		} catch (NoSuchAlgorithmException e) {
 			// Should never happen
 			e.printStackTrace();
+			//TODO: Log4j?
 		}
 		return messageDigest;
 	}

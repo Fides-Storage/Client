@@ -16,23 +16,24 @@ import java.util.Properties;
  */
 public final class LocalHashes {
 
+	//TODO: move to Properties
 	private static final String LOCAL_HASHSES_FILE = "./hashes.xml";
 
 	private static LocalHashes instance;
 
-	private Properties localHashes;
+	private Properties localHashes = new Properties();
 
 	/**
 	 * Constuctor
 	 */
 	private LocalHashes() {
-		localHashes = new Properties();
 		try (InputStream in = new FileInputStream(LOCAL_HASHSES_FILE)) {
 			File file = new File(LOCAL_HASHSES_FILE);
 			if (file.exists()) {
 				localHashes.loadFromXML(in);
 			}
 		} catch (IOException e) {
+			//TODO: Log4j
 			e.printStackTrace();
 		}
 	}
@@ -68,6 +69,7 @@ public final class LocalHashes {
 		} catch (IOException e) {
 			// We accept this
 			e.printStackTrace();
+			//TODO: Log4j
 		}
 	}
 
