@@ -10,10 +10,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -23,7 +22,6 @@ import org.mockito.internal.util.reflection.Whitebox;
  * The serverconnector unit test
  */
 public class ServerConnectorTest {
-	private static Logger log = LogManager.getLogger(ServerConnector.class);
 
 	private ServerConnector connector;
 
@@ -44,7 +42,6 @@ public class ServerConnectorTest {
 		try {
 			mockedOutputStream.close();
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 
@@ -63,9 +60,7 @@ public class ServerConnectorTest {
 			writeJson.writeUTF("{successful:true}");
 			byteArrayOutput.close();
 			writeJson.close();
-
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 
@@ -81,7 +76,6 @@ public class ServerConnectorTest {
 		try {
 			assertEquals("{\"action\":\"createUser\",\"username\":\"usernameTest\",\"passwordHash\":\"passwordTest\"}", readByteArrayAsData.readUTF());
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 
@@ -100,9 +94,7 @@ public class ServerConnectorTest {
 			writeJson.writeUTF("{successful:true}");
 			byteArrayOutput.close();
 			writeJson.close();
-
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
@@ -118,7 +110,6 @@ public class ServerConnectorTest {
 			assertEquals("{\"action\":\"login\",\"username\":\"usernameTest\",\"passwordHash\":\"passwordTest\"}",
 				readByteArrayAsData.readUTF());
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 	}
@@ -136,9 +127,7 @@ public class ServerConnectorTest {
 			writeJson.writeUTF("{successful:false}");
 			byteArrayOutput.close();
 			writeJson.close();
-
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
@@ -163,7 +152,6 @@ public class ServerConnectorTest {
 			writeJson.close();
 
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
@@ -186,7 +174,6 @@ public class ServerConnectorTest {
 			byteArrayOutput.close();
 			writeJson.close();
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
@@ -209,7 +196,6 @@ public class ServerConnectorTest {
 			byteArrayOutput.close();
 			writeJson.close();
 		} catch (IOException e) {
-			log.error(e);
 			fail(e.getMessage());
 		}
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
