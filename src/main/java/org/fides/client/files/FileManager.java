@@ -38,7 +38,6 @@ public class FileManager {
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
 		UserProperties settings = UserProperties.getInstance();
-		LocalHashes localHashes = LocalHashes.getInstance();
 		List<FileCompareResult> results = new ArrayList<>();
 		// Get all the names of the local stored files
 		List<File> files = new ArrayList<>();
@@ -56,50 +55,114 @@ public class FileManager {
 			serverFileNames.add(clientFile.getName());
 		}
 
-		// Lets start comparing
 		for (String serverName : serverFileNames) {
-			// Server has the file
-			if (clientFileNames.contains(serverName)) {
-				// We both have the file
-				String fileHash = FileUtil.generateFileHash(new File(directory, serverName));
-				String savedHash = localHashes.getHash(serverName);
-				boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(serverName).getHash());
-				boolean localChanged = !savedHash.equals(fileHash);
-
-				if (localChanged && serverChanged) {
-					// Both server and client are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.CONFLICTED));
-				} else if (localChanged) {
-					// Client are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_UPDATED));
-				} else if (serverChanged) {
-					// Server are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_UPDATED));
-				}
-				// Else nothing changed
-			} else if (localHashes.containsHash(serverName)) {
-				// Did exist local (its removed local)
-				results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED));
-			} else {
-				// Did not exist here (its added on the server)
-				results.add(new FileCompareResult(serverName, CompareResultType.SERVER_ADDED));
+			FileCompareResult result = checkServerSideFile(serverName, clientFileNames, keyFile);
+			if (result != null) {
+				results.add(result);
 			}
 		}
 		for (String clientName : clientFileNames) {
-			// I have the file
-			if (!serverFileNames.contains(clientName)) {
-				// Server has not the file
-				if (localHashes.containsHash(clientName)) {
-					// Did exist local (its remove on the server)
-					results.add(new FileCompareResult(clientName, CompareResultType.SERVER_REMOVED));
-				} else {
-					// Did not exist here (its added local)
-					results.add(new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED));
-				}
+			FileCompareResult result = checkClientSideFile(clientName, serverFileNames, keyFile);
+			if (result != null) {
+				results.add(result);
 			}
 		}
 
+		System.out.println(results);
+
 		return results;
+	}
+
+	/**
+	 * The compare check for a file on the server
+	 * 
+	 * @param serverName
+	 * @param keyFile
+	 * @return
+	 */
+	public FileCompareResult checkServerSideFile(String serverName, KeyFile keyFile) {
+		List<File> files = new ArrayList<>();
+		File directory = UserProperties.getInstance().getFileDirectory();
+		filesInDirectory(directory, files);
+		Set<String> clientFileNames = filesToNames(files, directory);
+		return checkServerSideFile(serverName, clientFileNames, keyFile);
+	}
+
+	private FileCompareResult checkServerSideFile(String serverName, Collection<String> clientFileNames, KeyFile keyFile) {
+		FileCompareResult result = null;
+		// Does the file exist on the server
+		if (keyFile.getClientFileByName(serverName) != null) {
+			File directory = UserProperties.getInstance().getFileDirectory();
+			// Server has the file
+			if (clientFileNames.contains(serverName)) {
+				// We both have the file
+				result = checkMatchingFile(serverName, keyFile);
+			} else if (LocalHashes.getInstance().containsHash(serverName)) {
+				// Did exist local (its removed local)
+				result = new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED);
+			} else {
+				// Did not exist here (its added on the server)
+				result = new FileCompareResult(serverName, CompareResultType.SERVER_ADDED);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * The compare check for a local file
+	 * 
+	 * @param clientName
+	 * @param keyFile
+	 * @return
+	 */
+	public FileCompareResult checkClientSideFile(String clientName, KeyFile keyFile) {
+		Set<String> serverFileNames = new HashSet<>();
+		for (ClientFile clientFile : keyFile.getAllClientFiles()) {
+			serverFileNames.add(clientFile.getName());
+		}
+		return checkClientSideFile(clientName, serverFileNames, keyFile);
+	}
+
+	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
+		FileCompareResult result = null;
+		// Does the local file exist
+		if (new File(UserProperties.getInstance().getFileDirectory(), clientName).exists()) {
+			// I have the file
+			if (serverFileNames.contains(clientName)) {
+				// We both have the file
+				result = checkMatchingFile(clientName, keyFile);
+			} else if (LocalHashes.getInstance().containsHash(clientName)) {
+				// Did exist local (its remove on the server)
+				result = new FileCompareResult(clientName, CompareResultType.SERVER_REMOVED);
+			} else {
+				// Did not exist here (its added local)
+				result = new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED);
+			}
+		}
+		return result;
+	}
+
+	private FileCompareResult checkMatchingFile(String fileName, KeyFile keyFile) {
+		// We both have the file
+		FileCompareResult result = null;
+		String fileHash = FileUtil.generateFileHash(new File(UserProperties.getInstance().getFileDirectory(), fileName));
+		String savedHash = LocalHashes.getInstance().getHash(fileName);
+		boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
+		boolean localChanged = !savedHash.equals(fileHash);
+
+		if (localChanged && serverChanged) {
+			// Both server and client are changed
+			result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+		} else if (localChanged) {
+			// Client are changed
+			result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
+		} else if (serverChanged) {
+			// Server are changed
+			result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+		}
+		// Else nothing changed
+		return result;
 	}
 
 	/**

@@ -3,7 +3,6 @@ package org.fides.client.files;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,14 +44,6 @@ public class FileSyncManagerTest {
 
 	private KeyFile keyFile;
 
-	private ByteArrayOutputStream outUpdate;
-
-	private ByteArrayOutputStream outAdd;
-
-	private ByteArrayInputStream inUpdate;
-
-	private ByteArrayInputStream inAdd;
-
 	/**
 	 * Do before each test
 	 * 
@@ -61,26 +52,16 @@ public class FileSyncManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		compareResults = new HashSet<>();
-
-		outUpdate = new ByteArrayOutputStream();
-		outAdd = new ByteArrayOutputStream();
-		inUpdate = new ByteArrayInputStream("This is an in update file".getBytes());
-		inAdd = new ByteArrayInputStream("This is an in add file".getBytes());
-
-		LocalHashes localHashesMock = mock(LocalHashes.class);
 		PowerMockito.mockStatic(LocalHashes.class);
 		Mockito.when(LocalHashes.getInstance()).thenReturn(mock(LocalHashes.class));
 
 		fileManagerMock = mock(FileManager.class);
 		when(fileManagerMock.compareFiles((KeyFile) any())).thenReturn(compareResults);
-		when(fileManagerMock.addFile("AddedServerFile")).thenReturn(outAdd);
-		when(fileManagerMock.updateFile("UpdatedServerFile")).thenReturn(outUpdate);
-		when(fileManagerMock.readFile(anyString())).thenReturn(null); // TODO for later tests
 
 		keyFile = new KeyFile();
 
 		encManagerMock = mock(EncryptionManager.class);
-		when(encManagerMock.requestKeyFile()).thenReturn(keyFile); // TODO for later tests
+		when(encManagerMock.requestKeyFile()).thenReturn(keyFile);
 
 		fileSyncManager = new FileSyncManager(fileManagerMock, encManagerMock);
 	}
@@ -98,12 +79,6 @@ public class FileSyncManagerTest {
 		encManagerMock = null;
 		fileSyncManager = null;
 		keyFile = null;
-		outUpdate.close();
-		outUpdate.reset();
-		outUpdate = null;
-		outAdd.close();
-		outAdd.reset();
-		outAdd = null;
 	}
 
 	/**
@@ -175,6 +150,8 @@ public class FileSyncManagerTest {
 	@Test
 	public void testHandleServerAdded() throws Exception {
 		// Setup for this specific test
+		ByteArrayOutputStream outAdd = new ByteArrayOutputStream();
+		when(fileManagerMock.addFile("AddedServerFile")).thenReturn(outAdd);
 		ClientFile addedFile = new ClientFile("AddedServerFile", "asf", null, "");
 		keyFile.addClientFile(addedFile);
 		compareResults.add(new FileCompareResult("AddedServerFile", CompareResultType.SERVER_ADDED));
@@ -184,7 +161,6 @@ public class FileSyncManagerTest {
 		try {
 			fileSyncManager.fileManagerCheck();
 			assertEquals("This is the added file", new String(outAdd.toByteArray()));
-			assertEquals(0, outUpdate.toByteArray().length);
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("Exception: " + e.getMessage());
@@ -205,6 +181,8 @@ public class FileSyncManagerTest {
 	@Test
 	public void testHandleServerUpdated() throws Exception {
 		// Setup for this specific test
+		ByteArrayOutputStream outUpdate = new ByteArrayOutputStream();
+		when(fileManagerMock.updateFile("UpdatedServerFile")).thenReturn(outUpdate);
 		ClientFile updatedFile = new ClientFile("UpdatedServerFile", "usf", null, "");
 		keyFile.addClientFile(updatedFile);
 		compareResults.add(new FileCompareResult("UpdatedServerFile", CompareResultType.SERVER_UPDATED));
@@ -214,7 +192,6 @@ public class FileSyncManagerTest {
 		try {
 			fileSyncManager.fileManagerCheck();
 			assertEquals("This is the updated file", new String(outUpdate.toByteArray()));
-			assertEquals(0, outAdd.toByteArray().length);
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("Exception: " + e.getMessage());
