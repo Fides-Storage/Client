@@ -8,9 +8,10 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 import javax.swing.BoxLayout;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -29,6 +30,11 @@ public class CertificateValidationScreen {
 	 * @return wether the user accepts the server certificate
 	 */
 	public static boolean validateCertificate(X509Certificate certificate) {
+		JFrame frame = new JFrame();
+		frame.setUndecorated(true);
+		frame.setVisible(true);
+		frame.setLocationRelativeTo(null);
+		
 		// Create a Panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -50,8 +56,9 @@ public class CertificateValidationScreen {
 
 		// Place the 2 buttons for Decline and Accept and show the dialog
 		String[] options = new String[] { "Decline", "Accept" };
-		int option = JOptionPane.showOptionDialog(null, panel, "Validate Server Certificate", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		int option = JOptionPane.showOptionDialog(frame, panel, "Validate Server Certificate", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
+		frame.dispose();
 		// If Accept was pressed, return true
 		if (option >= 0 && options[option].equals("Accept")) {
 			return true;

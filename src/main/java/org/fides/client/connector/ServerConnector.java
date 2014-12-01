@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.util.Properties;
@@ -53,6 +55,11 @@ public class ServerConnector {
 	private DataInputStream in;
 
 	/**
+	 * If you are logged in
+	 */
+	private boolean loggedIn = false;
+
+	/**
 	 * The constructor for the ServerConnector
 	 */
 	public ServerConnector() {
@@ -66,18 +73,16 @@ public class ServerConnector {
 	/**
 	 * Connect to the server with the given ip and port
 	 * 
-	 * @param host
-	 *            The server IP
-	 * @param port
-	 *            The port
-	 * @return true if the connection was successful
-	 * @throws UnknownHostException
+	 * @param address
+	 *            The {@link InetSocketAddress} with the server's address
+	 * @return true if the connection was successfull
 	 */
-	public boolean connect(String host, int port) throws UnknownHostException {
+	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			sslsocket = (SSLSocket) sslsocketfactory.createSocket(host, port);
-			// TODO Check if connection is correctly closed without a timeout
+
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
+			sslsocket.connect(address);
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -86,10 +91,13 @@ public class ServerConnector {
 			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
+		} catch (ConnectException e) {
+			throw e;
+		} catch (UnknownHostException e) {
+			throw e;
 		} catch (IOException e) {
-			log.error(e);
+			throw new ConnectException(e.getLocalizedMessage());
 		}
-		return false;
 	}
 
 	/**
@@ -122,9 +130,9 @@ public class ServerConnector {
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has("successful")) {
-					return userAnswer.get("successful").getAsBoolean();
+					loggedIn = userAnswer.get("successful").getAsBoolean();
 				} else {
-					return false;
+					loggedIn = false;
 				}
 
 			} catch (IOException e) {
@@ -132,11 +140,11 @@ public class ServerConnector {
 			}
 		}
 
-		return false;
+		return loggedIn;
 	}
 
 	public boolean isLoggedIn() {
-		return false;
+		return loggedIn;
 	}
 
 	/**
@@ -186,7 +194,10 @@ public class ServerConnector {
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			loggedIn = false;
 		}
+
 		return false;
 	}
 
