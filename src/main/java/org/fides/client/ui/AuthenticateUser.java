@@ -25,12 +25,25 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.tools.HashUtils;
 
+/**
+ * Authenticate user by asking username and password, or ask to register
+ * 
+ * @author jesse
+ *
+ */
 public class AuthenticateUser {
 	/**
 	 * Log for this class
 	 */
 	private static Logger log = LogManager.getLogger(AuthenticateUser.class);
 
+	/**
+	 * Authenticate user, you can login or register
+	 * 
+	 * @param serverConnector
+	 *            connection to server
+	 * @return if authenticated
+	 */
 	public static boolean authenticateUser(ServerConnector serverConnector) {
 
 		JFrame frame = new JFrame();
@@ -44,7 +57,7 @@ public class AuthenticateUser {
 
 		// Add a panel where the inputfields can be added
 		JPanel inputPanel = new JPanel();
-		inputPanel.setLayout(new GridLayout(2, 1, 0, 5));
+		inputPanel.setLayout(new GridLayout(3, 1, 0, 5));
 
 		// Add a panel where errors can be shown later
 		JPanel errorPanel = new JPanel();
@@ -69,11 +82,20 @@ public class AuthenticateUser {
 		JPasswordField password = new JPasswordField(10);
 		inputPanel.add(password);
 
+		// Add a label to the panel
+		JLabel labelPasswordConfirmation = new JLabel("Password confirmation:");
+		labelPasswordConfirmation.setVisible(false);
+		inputPanel.add(labelPasswordConfirmation);
+
+		// Add a passwordfield to the panel with a coloumn with of 10
+		JPasswordField passwordConfirmation = new JPasswordField(10);
+		passwordConfirmation.setVisible(false);
+		inputPanel.add(passwordConfirmation);
+
 		// Combines the inputpanel with the mainpanel
 		mainPanel.add(inputPanel);
 
-		// Make sure that the username field is selected while it is still possible to press enter for
-		// OK
+		// Make sure that the username field is selected while it is still possible to press enter for OK
 		username.addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				final Component c = e.getComponent();
@@ -92,75 +114,113 @@ public class AuthenticateUser {
 		String[] options = new String[] { "Login", "Register", "Cancel" };
 		int option = 0;
 
-		while (option == 0 || option == 1) {
-			option = JOptionPane.showOptionDialog(frame, mainPanel, "Enter credentials",
-				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		while (option == 0 || option == 1 || option == 2) {
+			option = JOptionPane.showOptionDialog(frame, mainPanel, "Enter credentials", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
-			ArrayList<String> errorMessages = new ArrayList<String>();
+			Boolean login = option == 0;
+			Boolean register = option == 1;
+			Boolean cancel = option == 2;
 
 			// Get values from form
 			String usernameString = username.getText();
 			String passwordString = new String(password.getPassword());
+			String confirmPassword = new String(passwordConfirmation.getPassword());
 
-			// Ask for confirm password if needed
-			String confirmPassword = null;
-			if (option == 1) {
-				confirmPassword = PasswordScreen.getPassword();
-				// Check for confirm password
-				if (StringUtils.isBlank(confirmPassword)) {
-					errorMessages.add("Confirm password can not be blank");
+			if (cancel) {
+				if (labelPasswordConfirmation.isVisible()) {
+					labelPasswordConfirmation.setVisible(false);
+					passwordConfirmation.setVisible(false);
+					passwordConfirmation.setText(null);
+				} else {
+					frame.dispose();
+					return false;
 				}
-				if (!confirmPassword.equals(passwordString)) {
-					errorMessages.add("Password not confirmed");
-				}
+			} else {
+				labelPasswordConfirmation.setVisible(!login);
+				passwordConfirmation.setVisible(!login);
 			}
 
-			// Check for empty username
-			if (StringUtils.isBlank(usernameString)) {
-				errorMessages.add("Username can not be blank");
-			}
-			// Check for empty port and if the port is an integer
-			if (StringUtils.isBlank(passwordString)) {
-				errorMessages.add("Password can not be blank");
-			}
+			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
-			// Check if there were any errors, if not, the address is returned.
-			if (errorMessages.isEmpty()) {
-				passwordString = HashUtils.hash(passwordString);
+			Boolean authenticated = excute(option, errorMessages, serverConnector, usernameString, passwordString);
 
-				if (option == 0) {
+			if (authenticated) {
+				if (login) {
+					frame.dispose();
+					return true;
 
-					if (serverConnector.login(usernameString, passwordString)) {
-						log.debug("login successful");
-						frame.dispose();
-						return true;
-					} else {
-						log.debug("login failed");
-						errorMessages.add("login failed");
-					}
-
-				} else if (option == 1) {
-					if (serverConnector.register(usernameString, passwordString)) {
-						log.debug("Register successful");
-						errorMessages.add("Register successful");
-
-					} else {
-						log.debug("Register failed");
-						errorMessages.add("Register failed");
-					}
+				} else if (register) {
+					labelPasswordConfirmation.setVisible(false);
+					passwordConfirmation.setVisible(false);
 				}
 			}
 
-			if (!errorMessages.isEmpty()) {
-				// If there were errors, they are added to the dialog and it gets shown again.
-				setErrorLabels(errorPanel, errorMessages);
-			}
+			// If there were errors, they are added to the dialog and it gets shown again.
+			setErrorLabels(errorPanel, errorMessages);
 		}
 
 		frame.dispose();
 
 		return false;
 
+	}
+
+	private static Boolean excute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordString) {
+		Boolean login = option == 0;
+		Boolean register = option == 1;
+		// Boolean cancel = option == 2;
+
+		// Check if there were any errors
+		if (errorMessages.isEmpty()) {
+			if (login) {
+
+				if (serverConnector.login(usernameString, HashUtils.hash(passwordString))) {
+					log.debug("login successful");
+					return true;
+				} else {
+					log.debug("login failed");
+					errorMessages.add("login failed");
+				}
+			}
+			if (register) {
+				if (serverConnector.register(usernameString, HashUtils.hash(passwordString))) {
+					log.debug("Register successful");
+					errorMessages.add("Register successful");
+					return true;
+				} else {
+					log.debug("Register failed");
+					errorMessages.add("Register failed");
+				}
+			}
+		}
+		return false;
+	}
+
+	private static ArrayList<String> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
+
+		ArrayList<String> errorMessages = new ArrayList<String>();
+
+		// Check for empty username
+		if (StringUtils.isBlank(usernameString)) {
+			errorMessages.add("Username can not be blank");
+		}
+		// Check for empty port and if the port is an integer
+		if (StringUtils.isBlank(passwordString)) {
+			errorMessages.add("Password can not be blank");
+		}
+
+		// Ask for confirm password if needed
+		if (option == 1) {
+			// Check for confirm password
+			if (StringUtils.isBlank(confirmPassword)) {
+				errorMessages.add("Please confirm your password");
+			}
+			if (!StringUtils.isBlank(confirmPassword) && !confirmPassword.equals(passwordString)) {
+				errorMessages.add("Password not confirmed");
+			}
+		}
+
+		return errorMessages;
 	}
 
 	private static void setErrorLabels(JPanel errorPanel, ArrayList<String> errors)
