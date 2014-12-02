@@ -29,7 +29,7 @@ import org.fides.client.tools.HashUtils;
  * Authenticate user by asking username and password, or ask to register
  * 
  * @author jesse
- *
+ * 
  */
 public class AuthenticateUser {
 	/**
@@ -38,11 +38,11 @@ public class AuthenticateUser {
 	private static Logger log = LogManager.getLogger(AuthenticateUser.class);
 
 	/**
-	 * Authenticate user, you can login or register
+	 * Authenticate user, you can login and register
 	 * 
 	 * @param serverConnector
 	 *            connection to server
-	 * @return if authenticated
+	 * @return whether the user is authenticated or not
 	 */
 	public static boolean authenticateUser(ServerConnector serverConnector) {
 
@@ -110,7 +110,7 @@ public class AuthenticateUser {
 			}
 		});
 
-		// Place the 2 buttons for OK and Cancel and show the dialog
+		// Place the three buttons for login, register and cancel and show the dialog
 		String[] options = new String[] { "Login", "Register", "Cancel" };
 		int option = 0;
 
@@ -142,7 +142,7 @@ public class AuthenticateUser {
 
 			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
-			Boolean authenticated = excute(option, errorMessages, serverConnector, usernameString, passwordString);
+			Boolean authenticated = execute(option, errorMessages, serverConnector, usernameString, passwordString);
 
 			if (authenticated) {
 				if (login) {
@@ -165,7 +165,7 @@ public class AuthenticateUser {
 
 	}
 
-	private static Boolean excute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordString) {
+	private static Boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordString) {
 		Boolean login = option == 0;
 		Boolean register = option == 1;
 		// Boolean cancel = option == 2;
