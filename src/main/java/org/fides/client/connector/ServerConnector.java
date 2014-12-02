@@ -31,6 +31,17 @@ import com.google.gson.JsonObject;
  * @author Tom
  */
 public class ServerConnector {
+
+	private static final String SUCCESSFUL = "successful";
+
+	private static final String ERROR = "error";
+
+	private static final String ACTION = "action";
+
+	private static final String USERNAME = "username";
+
+	private static final String PASSWORD_HASH = "passwordHash";
+
 	/**
 	 * Log for this class
 	 */
@@ -129,18 +140,18 @@ public class ServerConnector {
 		if (isConnected()) {
 			try {
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "login");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(ACTION, "login");
+				user.addProperty(USERNAME, username);
+				user.addProperty(PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-				if (userAnswer.has("successful")) {
-					if (userAnswer.has("error")) {
-						errorMessages.put("login", userAnswer.get("error").getAsString());
+				if (userAnswer.has(SUCCESSFUL)) {
+					if (userAnswer.has(ERROR)) {
+						errorMessages.put("login", userAnswer.get(ERROR).getAsString());
 					}
-					loggedIn = userAnswer.get("successful").getAsBoolean();
+					loggedIn = userAnswer.get(SUCCESSFUL).getAsBoolean();
 
 				} else {
 					loggedIn = false;
@@ -173,18 +184,18 @@ public class ServerConnector {
 			try {
 
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "createUser");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(ACTION, "createUser");
+				user.addProperty(USERNAME, username);
+				user.addProperty(PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-				if (userAnswer.has("successful")) {
-					if (userAnswer.has("error")) {
-						errorMessages.put("register", userAnswer.get("error").getAsString());
+				if (userAnswer.has(SUCCESSFUL)) {
+					if (userAnswer.has(ERROR)) {
+						errorMessages.put("register", userAnswer.get(ERROR).getAsString());
 					}
-					return userAnswer.get("successful").getAsBoolean();
+					return userAnswer.get(SUCCESSFUL).getAsBoolean();
 				} else {
 					return false;
 				}
