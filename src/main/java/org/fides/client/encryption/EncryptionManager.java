@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -112,6 +113,10 @@ public class EncryptionManager {
 		} catch (ClassNotFoundException e) {
 			log.error(e);
 			return null;
+		} finally {
+			IOUtils.closeQuietly(inDecrypted);
+			IOUtils.closeQuietly(din);
+			IOUtils.closeQuietly(in);
 		}
 	}
 
@@ -132,7 +137,9 @@ public class EncryptionManager {
 		if (out == null) {
 			log.error("ServerConnector does not profide an OutputStream");
 		} else {
-			try (DataOutputStream dout = new DataOutputStream(out)) {
+			DataOutputStream dout = new DataOutputStream(out);
+			OutputStream outEncrypted = null;
+			try {
 
 				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 				int pbkdf2Rounds = KeyGenerator.getRounds();
@@ -142,12 +149,19 @@ public class EncryptionManager {
 				dout.writeInt(pbkdf2Rounds);
 				dout.write(saltBytes, 0, SALT_SIZE);
 
-				OutputStream outEncrypted = getEncryptionStream(dout, key);
+				outEncrypted = getEncryptionStream(dout, key);
 				ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
 				objectOut.writeObject(keyFile);
+				outEncrypted.flush();
+				dout.flush();
+				out.flush();
 				completed = true;
 			} catch (IOException e) {
 				log.error(e);
+			} finally {
+				IOUtils.closeQuietly(outEncrypted);
+				IOUtils.closeQuietly(dout);
+				IOUtils.closeQuietly(out);
 			}
 		}
 		return completed;

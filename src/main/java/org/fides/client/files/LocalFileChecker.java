@@ -64,7 +64,7 @@ public class LocalFileChecker extends Thread {
 						EventPair pair = eventsQueue.take();
 						handleEvent(pair.event, pair.dir);
 					} catch (InterruptedException e) {
-						log.debug(e);
+						log.error(e);
 					}
 				}
 			}
@@ -165,14 +165,9 @@ public class LocalFileChecker extends Thread {
 				log.error(e);
 			}
 		} else if (Files.isRegularFile(child)) {
-			// Change is a file
-			String childName = child.toString();
-			String basePathName = basePath.toString();
-
 			// Transform string to local space and upload (or remove)
-			if (childName.startsWith(basePathName)) {
-				String localName = childName.substring(basePathName.length() + 1);
-				log.debug("Local name: " + localName);
+			String localName = FileManager.fileToLocalName(child.toFile());
+			if (localName != null) {
 				syncManager.checkClientFile(localName);
 			}
 		}

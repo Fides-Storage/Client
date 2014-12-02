@@ -71,8 +71,6 @@ public class FileManager {
 			}
 		}
 
-		System.out.println(results);
-
 		return results;
 	}
 
@@ -291,5 +289,25 @@ public class FileManager {
 			}
 		}
 		return fileNames;
+	}
+
+	/**
+	 * Transform a file to a local file name
+	 * 
+	 * @param file
+	 *            The file
+	 * @return The local file name
+	 */
+	public static String fileToLocalName(File file) {
+		File baseDir = UserProperties.getInstance().getFileDirectory();
+		String baseFilePath = baseDir.getPath() + "\\";
+		String fileName = file.getPath();
+		if (fileName.startsWith(baseFilePath)) {
+			fileName = fileName.substring(baseFilePath.length());
+			return fileName;
+		} else {
+			log.debug("File does not match with base directoy: " + file.getPath() + " ; " + baseDir.getPath());
+		}
+		return null;
 	}
 }
