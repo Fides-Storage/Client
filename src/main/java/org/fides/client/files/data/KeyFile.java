@@ -1,4 +1,4 @@
-package org.fides.client.files;
+package org.fides.client.files.data;
 
 import java.io.Serializable;
 import java.util.Collections;

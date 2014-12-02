@@ -21,8 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
-import org.fides.client.files.ClientFile;
-import org.fides.client.files.KeyFile;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.KeyFile;
 import org.junit.Test;
 
 /**
@@ -96,6 +96,7 @@ public class EncryptionManagerTest {
 			assertNotNull(requestedKeyFile);
 			assertEquals(clientFile, requestedKeyFile.getClientFileByName(clientFile.getName()));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail("An unexpected exception has occured: " + e.getMessage());
 		}
 	}

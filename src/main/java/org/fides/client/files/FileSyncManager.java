@@ -14,6 +14,9 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.encryption.KeyGenerator;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.FileCompareResult;
+import org.fides.client.files.data.KeyFile;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -28,9 +31,9 @@ public class FileSyncManager {
 	 */
 	private static Logger log = LogManager.getLogger(FileSyncManager.class);
 
-	private FileManager fileManager;
+	private final FileManager fileManager;
 
-	private EncryptionManager encManager;
+	private final EncryptionManager encManager;
 
 	/**
 	 * 
@@ -51,8 +54,9 @@ public class FileSyncManager {
 	 * @return true is successful
 	 * @throws IOException
 	 */
-	public boolean fileManagerCheck() {
+	public synchronized boolean fileManagerCheck() {
 		KeyFile keyFile;
+
 		try {
 			keyFile = encManager.requestKeyFile();
 		} catch (IOException e) {
@@ -63,6 +67,7 @@ public class FileSyncManager {
 		for (FileCompareResult result : results) {
 			handleCompareResult(result);
 		}
+
 		return true;
 	}
 
@@ -72,7 +77,7 @@ public class FileSyncManager {
 	 * @return true is successful
 	 * @throws IOException
 	 */
-	public boolean checkClientFile(String fileName) {
+	public synchronized boolean checkClientFile(String fileName) {
 		KeyFile keyFile;
 		try {
 			keyFile = encManager.requestKeyFile();

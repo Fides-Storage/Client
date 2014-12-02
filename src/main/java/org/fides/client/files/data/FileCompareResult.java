@@ -1,4 +1,6 @@
-package org.fides.client.files;
+package org.fides.client.files.data;
+
+import org.fides.client.files.FileManager;
 
 
 /**

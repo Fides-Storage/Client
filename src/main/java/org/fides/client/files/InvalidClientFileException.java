@@ -1,5 +1,7 @@
 package org.fides.client.files;
 
+import org.fides.client.files.data.ClientFile;
+
 /**
  * An {@link Exception} thrown when no {@link ClientFile} or an invalid {@link ClientFile} is given
  * 

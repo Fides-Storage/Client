@@ -12,6 +12,10 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.fides.client.UserProperties;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.CompareResultType;
+import org.fides.client.files.data.FileCompareResult;
+import org.fides.client.files.data.KeyFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

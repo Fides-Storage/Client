@@ -28,9 +28,9 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
-import org.fides.client.files.ClientFile;
 import org.fides.client.files.InvalidClientFileException;
-import org.fides.client.files.KeyFile;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.KeyFile;
 
 /**
  * The {@link EncryptionManager} handles the encryption and decryption of an {@link InputStream} before it is passed on

@@ -1,7 +1,6 @@
 package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,12 +8,15 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.CompareResultType;
+import org.fides.client.files.data.FileCompareResult;
+import org.fides.client.files.data.KeyFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,13 +100,8 @@ public class FileSyncManagerTest {
 		when(encManagerMock.uploadFile()).thenReturn(outData);
 
 		// The real test
-		try {
-			fileSyncManager.fileManagerCheck();
-			assertEquals("This is an in update file", new String(out.toByteArray()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Exception: " + e.getMessage());
-		}
+		fileSyncManager.fileManagerCheck();
+		assertEquals("This is an in update file", new String(out.toByteArray()));
 	}
 
 	/**
@@ -135,13 +132,8 @@ public class FileSyncManagerTest {
 		when(encManagerMock.updateFile(updatedFile)).thenReturn(out);
 
 		// The real test
-		try {
-			fileSyncManager.fileManagerCheck();
-			assertEquals("This is an in update file", new String(out.toByteArray()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Exception: " + e.getMessage());
-		}
+		fileSyncManager.fileManagerCheck();
+		assertEquals("This is an in update file", new String(out.toByteArray()));
 	}
 
 	/**
@@ -158,13 +150,8 @@ public class FileSyncManagerTest {
 		when(encManagerMock.requestFile(addedFile)).thenReturn(new ByteArrayInputStream("This is the added file".getBytes()));
 
 		// The real test
-		try {
-			fileSyncManager.fileManagerCheck();
-			assertEquals("This is the added file", new String(outAdd.toByteArray()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Exception: " + e.getMessage());
-		}
+		fileSyncManager.fileManagerCheck();
+		assertEquals("This is the added file", new String(outAdd.toByteArray()));
 	}
 
 	/**
@@ -189,13 +176,8 @@ public class FileSyncManagerTest {
 		when(encManagerMock.requestFile(updatedFile)).thenReturn(new ByteArrayInputStream("This is the updated file".getBytes()));
 
 		// The real test
-		try {
-			fileSyncManager.fileManagerCheck();
-			assertEquals("This is the updated file", new String(outUpdate.toByteArray()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Exception: " + e.getMessage());
-		}
+		fileSyncManager.fileManagerCheck();
+		assertEquals("This is the updated file", new String(outUpdate.toByteArray()));
 	}
 
 	/**

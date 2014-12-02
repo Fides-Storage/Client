@@ -1,4 +1,4 @@
-package org.fides.client.files;
+package org.fides.client.files.data;
 
 /**
  * This enum contains the type of results is a {@link FileCompareResult} when comparing files

@@ -15,6 +15,10 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.UserProperties;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.CompareResultType;
+import org.fides.client.files.data.FileCompareResult;
+import org.fides.client.files.data.KeyFile;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.

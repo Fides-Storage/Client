@@ -22,6 +22,4 @@ target/
 .classpath
 .settings/
 
-/hashes.xml
-
-/user.properties
+/Settings/

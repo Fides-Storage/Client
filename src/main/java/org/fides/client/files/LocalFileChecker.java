@@ -17,6 +17,8 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +31,7 @@ import org.fides.client.encryption.EncryptionManager;
  * @author Koen
  *
  */
-public class LocalFileChecker implements Runnable {
+public class LocalFileChecker extends Thread {
 	/**
 	 * Log for this class
 	 */
@@ -38,6 +40,10 @@ public class LocalFileChecker implements Runnable {
 	private final FileSyncManager syncManager;
 
 	private final Map<WatchKey, Path> keys = new HashMap<>();
+
+	private BlockingQueue<EventPair> eventsQueue = new LinkedBlockingQueue<>();
+
+	private final Thread handleThread;
 
 	private WatchService watcher;
 
@@ -50,17 +56,31 @@ public class LocalFileChecker implements Runnable {
 	 */
 	public LocalFileChecker(FileSyncManager syncManager) {
 		this.syncManager = syncManager;
+		handleThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (;;) {
+					try {
+						EventPair pair = eventsQueue.take();
+						handleEvent(pair.event, pair.dir);
+					} catch (InterruptedException e) {
+						log.debug(e);
+					}
+				}
+			}
+		}, "HandleThread");
 	}
 
 	@Override
 	public void run() {
+		// start the handling thread
+		handleThread.start();
 		try {
 			setup();
 		} catch (IOException e) {
 			log.error(e);
 			return;
 		}
-
 		for (;;) {
 			// wait for key to be signaled
 			WatchKey key;
@@ -71,49 +91,8 @@ public class LocalFileChecker implements Runnable {
 				return;
 			}
 
-			Path dir = keys.get(key);
-			if (dir == null) {
-				System.err.println("WatchKey not recognized!!");
-				continue;
-			}
-
-			for (WatchEvent<?> event : key.pollEvents()) {
-				@SuppressWarnings("unchecked")
-				WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
-				WatchEvent.Kind<?> kind = watchEvent.kind();
-				if (kind == OVERFLOW) {
-					continue;
-				}
-
-				Path file = watchEvent.context();
-				Path child = dir.resolve(file);
-				log.debug(kind + " : " + file + " : " + child);
-
-				if (Files.isDirectory(child)) {
-					// Change is a directory
-					try {
-						WatchKey newKey = child.register(watcher,
-							ENTRY_CREATE,
-							ENTRY_DELETE,
-							ENTRY_MODIFY);
-						keys.put(newKey, child);
-					} catch (IOException e) {
-						e.printStackTrace();
-						log.error(e);
-					}
-				} else if (Files.isRegularFile(child) || kind == ENTRY_DELETE) {
-					// It is a file
-					String childName = child.toString();
-					String basePathName = basePath.toString();
-
-					// Transform string to local space and upload (or remove)
-					if (childName.startsWith(basePathName)) {
-						String localName = childName.substring(basePathName.length() + 1);
-						log.debug("Local name: " + localName);
-						syncManager.checkClientFile(localName);
-					}
-				}
-			}
+			// eventsQueue.add(key);
+			handleKey(key);
 
 			// Reset the key -- this step is critical if you want to
 			// receive further watch events. If the key is no longer valid,
@@ -131,12 +110,87 @@ public class LocalFileChecker implements Runnable {
 
 	} // End run
 
+	/**
+	 * Handles the even in a {@link WatchKey}
+	 * 
+	 * @param key
+	 *            The key to handle
+	 */
+	private void handleKey(WatchKey key) {
+		Path dir = keys.get(key);
+		if (dir == null) {
+			log.error("WatchKey not recognized!!");
+			return;
+		}
+
+		for (WatchEvent<?> event : key.pollEvents()) {
+			// handleEvent(event, dir);
+			eventsQueue.add(new EventPair(event, dir));
+		}
+	}
+
+	/**
+	 * Handles a {@link WatchEvent}
+	 * 
+	 * @param event
+	 *            The event to handle
+	 * @param dir
+	 *            The location of the event
+	 */
+	private void handleEvent(WatchEvent<?> event, Path dir) {
+		@SuppressWarnings("unchecked")
+		WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
+		WatchEvent.Kind<?> kind = watchEvent.kind();
+		// We can ignore an Overflow
+		if (kind == OVERFLOW) {
+			return;
+		}
+
+		// Get he right location
+		Path file = watchEvent.context();
+		Path child = dir.resolve(file);
+		log.debug(kind + " : " + file + " : " + child);
+
+		if (Files.isDirectory(child)) {
+			// Change is a directory
+			// We want to watch it from now on
+			try {
+				WatchKey newKey = child.register(watcher,
+					ENTRY_CREATE,
+					ENTRY_DELETE,
+					ENTRY_MODIFY);
+				keys.put(newKey, child);
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.error(e);
+			}
+		} else if (Files.isRegularFile(child)) {
+			// Change is a file
+			String childName = child.toString();
+			String basePathName = basePath.toString();
+
+			// Transform string to local space and upload (or remove)
+			if (childName.startsWith(basePathName)) {
+				String localName = childName.substring(basePathName.length() + 1);
+				log.debug("Local name: " + localName);
+				syncManager.checkClientFile(localName);
+			}
+		}
+	}
+
+	/**
+	 * Setup the listening
+	 * 
+	 * @throws IOException
+	 */
 	private void setup() throws IOException {
+		// Create a watchter and watch the file directory
 		basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 		keys.put(key, basePath);
 
+		// Also watch all sub directories
 		Files.walkFileTree(basePath, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -145,6 +199,29 @@ public class LocalFileChecker implements Runnable {
 				return FileVisitResult.CONTINUE;
 			}
 		});
+	}
+
+	@Override
+	public void interrupt() {
+		super.interrupt();
+		handleThread.interrupt();
+	}
+
+	/**
+	 * A class containing and {@link WatchEvent} and a {@link Path}
+	 * 
+	 * @author Koen
+	 *
+	 */
+	private class EventPair {
+		private WatchEvent<?> event;
+
+		private Path dir;
+
+		public EventPair(WatchEvent<?> event, Path dir) {
+			this.event = event;
+			this.dir = dir;
+		}
 	}
 
 }
