@@ -178,8 +178,8 @@ public class AuthenticateUser {
 					log.debug("login successful");
 					return true;
 				} else {
-					log.debug("login failed");
-					errorMessages.add("login failed");
+					log.debug(serverConnector.getErrorMessage("login"));
+					errorMessages.add("Login failed: " + serverConnector.getErrorMessage("login"));
 				}
 			}
 			if (register) {
@@ -188,8 +188,8 @@ public class AuthenticateUser {
 					errorMessages.add("Register successful");
 					return true;
 				} else {
-					log.debug("Register failed");
-					errorMessages.add("Register failed");
+					log.debug(serverConnector.getErrorMessage("register"));
+					errorMessages.add("Register failed: " + serverConnector.getErrorMessage("register"));
 				}
 			}
 		}

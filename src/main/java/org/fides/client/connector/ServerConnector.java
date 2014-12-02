@@ -9,6 +9,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLSession;
@@ -33,6 +35,11 @@ public class ServerConnector {
 	 * Log for this class
 	 */
 	private static Logger log = LogManager.getLogger(ServerConnector.class);
+
+	/**
+	 * The collection to store the error messages received from the server
+	 */
+	private Map<String, String> errorMessages = new HashMap<>();
 
 	/**
 	 * The SSLSocket that will be used
@@ -130,7 +137,11 @@ public class ServerConnector {
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has("successful")) {
+					if (userAnswer.has("error")) {
+						errorMessages.put("login", userAnswer.get("error").getAsString());
+					}
 					loggedIn = userAnswer.get("successful").getAsBoolean();
+
 				} else {
 					loggedIn = false;
 				}
@@ -170,6 +181,9 @@ public class ServerConnector {
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has("successful")) {
+					if (userAnswer.has("error")) {
+						errorMessages.put("register", userAnswer.get("error").getAsString());
+					}
 					return userAnswer.get("successful").getAsBoolean();
 				} else {
 					return false;
@@ -180,6 +194,17 @@ public class ServerConnector {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Getter to get the error message received from the server
+	 * 
+	 * @param key
+	 *            of the map to get the corresponding value
+	 * @return the value
+	 */
+	public String getErrorMessage(String key) {
+		return errorMessages.get(key);
 	}
 
 	/**
