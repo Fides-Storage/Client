@@ -100,7 +100,6 @@ public class LocalFileCheckTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	// TODO: test
 	public void test() throws IOException, InterruptedException {
 		File fileChange = new File(testDir, "fileChange.txt");
 		fileChange.createNewFile();
@@ -144,8 +143,8 @@ public class LocalFileCheckTest {
 		assertEquals(5, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));
 		assertTrue(calledFiles.contains("fileChange.txt"));
-		assertTrue(calledFiles.contains("subDir\\File2.txt"));
-		assertTrue(calledFiles.contains("subDir\\subDir2\\File3.txt"));
-		assertTrue(calledFiles.contains("preSubDir\\File4.txt"));
+		assertTrue(calledFiles.contains("subDir/File2.txt"));
+		assertTrue(calledFiles.contains("subDir/subDir2/File3.txt"));
+		assertTrue(calledFiles.contains("preSubDir/File4.txt"));
 	}
 }

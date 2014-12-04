@@ -46,7 +46,7 @@ public class FileManager {
 		List<File> files = new ArrayList<>();
 		File directory = settings.getFileDirectory();
 		filesInDirectory(directory, files);
-		Set<String> clientFileNames = filesToNames(files, directory);
+		Set<String> clientFileNames = filesToLocalNames(files, directory);
 
 		// We don't the files need it anymore, only the names
 		files.clear();
@@ -87,7 +87,7 @@ public class FileManager {
 		List<File> files = new ArrayList<>();
 		File directory = UserProperties.getInstance().getFileDirectory();
 		filesInDirectory(directory, files);
-		Set<String> clientFileNames = filesToNames(files, directory);
+		Set<String> clientFileNames = filesToLocalNames(files, directory);
 		return checkServerSideFile(serverName, clientFileNames, keyFile);
 	}
 
@@ -302,36 +302,51 @@ public class FileManager {
 	}
 
 	/**
-	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
+	 * Relativizes a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
 	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
 	 * different PCs
 	 * 
 	 * @param files
+	 *            The file to turn to local space
 	 * @param directory
+	 *            The directory to relativize to
 	 * @return
 	 */
-	private static Set<String> filesToNames(List<File> files, File directory) {
+	private static Set<String> filesToLocalNames(List<File> files, File basedir) {
 		Set<String> fileNames = new HashSet<>();
-		// TODO: test
 		for (File file : files) {
-			File relativeFile = directory.toPath().relativize(file.toPath()).toFile();
-			fileNames.add(relativeFile.getPath());
+			// File relativeFile = directory.toPath().relativize(file.toPath()).toFile();
+			// fileNames.add(relativeFile.getPath().replace('\\', '/')); // we always want '/'
+			fileNames.add(fileToLocalName(file, basedir));
 		}
 		return fileNames;
 	}
 
 	/**
-	 * Transform a file to a local file name
+	 * Relativizes a file to a local file name
 	 * 
 	 * @param file
-	 *            The file
+	 *            The file to turn to local space
 	 * @return The local file name
 	 */
 	public static String fileToLocalName(File file) {
 		File baseDir = UserProperties.getInstance().getFileDirectory();
-		// TODO: test
+		return fileToLocalName(file, baseDir);
+	}
+
+	/**
+	 * Relativizes a file to a local file name
+	 * 
+	 * @param file
+	 *            The file to turn to local space
+	 * @param basedir
+	 *            The directory to relativize to
+	 * @return The local file name
+	 */
+	private static String fileToLocalName(File file, File basedir) {
+		File baseDir = UserProperties.getInstance().getFileDirectory();
 		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
-		return relativeFile.getPath();
+		return relativeFile.getPath().replace('\\', '/'); // we always want '/'
 	}
 }

@@ -95,7 +95,6 @@ public final class UserProperties {
 				log.debug(e);
 			}
 
-			// TODO: saving if above try fails?
 			saveProperties();
 		}
 		fileDirectory = new File(fileDirectoryName);
