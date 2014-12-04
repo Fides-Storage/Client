@@ -260,6 +260,11 @@ public class ServerConnector {
 		return serverCertificates;
 	}
 
+	/**
+	 * Requests a keyfile from the server
+	 * 
+	 * @return An inputstream with the keyfile. If something went wrong, this will be <code>null</code>
+	 */
 	public InputStream requestKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
@@ -283,6 +288,11 @@ public class ServerConnector {
 
 	}
 
+	/**
+	 * Requests a stream from the server for updating the keyfile
+	 * 
+	 * @return An outputstream to write the keyfile to. If something went wrong, this will be <code>null</code>
+	 */
 	public OutputStream updateKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
@@ -336,6 +346,12 @@ public class ServerConnector {
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for uploading a file
+	 * 
+	 * @return An outputdatastream containing a stream to write the file to and the location of the new file on the
+	 *         server. If something went wrong, this will be <code>null</code>
+	 */
 	public OutputStreamData uploadFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
@@ -359,6 +375,13 @@ public class ServerConnector {
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for updating a file
+	 * 
+	 * @param location
+	 *            The location of the file you want to update
+	 * @return An outputstream to write the file to. If something went wrong, this will be <code>null</code>
+	 */
 	public OutputStream updateFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
