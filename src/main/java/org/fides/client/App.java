@@ -7,6 +7,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
@@ -17,6 +18,7 @@ import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
+import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UsernamePasswordScreen;
 
@@ -25,6 +27,9 @@ import org.fides.client.ui.UsernamePasswordScreen;
  * 
  */
 public class App {
+	/**
+	 * The time used to check changes with hte server
+	 */
 	private static final long CHECK_TIME = 5 * 60 * 1000;
 
 	/**
@@ -93,8 +98,13 @@ public class App {
 		if (serverConnector.isConnected() && serverConnector.isLoggedIn() && isRunning) {
 			// TODO Do normal work, we are going to loop here
 
+			String passwordString = null;
+			while (StringUtils.isBlank(passwordString)) {
+				passwordString = PasswordScreen.getPassword();
+			}
+
 			FileManager fileManager = new FileManager();
-			EncryptionManager encManager = new EncryptionManager(serverConnector, "Default");
+			EncryptionManager encManager = new EncryptionManager(serverConnector, passwordString);
 
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
