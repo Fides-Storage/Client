@@ -311,7 +311,6 @@ public class ServerConnector {
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
-			System.out.println("IO Exception");
 		}
 		return null;
 	}

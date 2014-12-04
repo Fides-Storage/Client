@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,6 +23,7 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * The JUnit Test Case for the EncryptionManager
@@ -45,7 +45,7 @@ public class EncryptionManagerTest {
 		// Create a mock of the ServerConnector to catch the call to uploadKeyFile.
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.updateKeyFile()).thenReturn(mockOut);
+		Mockito.when(mockConnector.updateKeyFile()).thenReturn(mockOut);
 
 		KeyFile keyfile = new KeyFile();
 		ClientFile clientFile = new ClientFile("Name", "Location", null, "Hash");
@@ -76,7 +76,7 @@ public class EncryptionManagerTest {
 		// uploadKeyFile.
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.updateKeyFile()).thenReturn(mockOut);
+		Mockito.when(mockConnector.updateKeyFile()).thenReturn(mockOut);
 
 		KeyFile keyfile = new KeyFile();
 		ClientFile clientFile = new ClientFile("Name", "Location", null, "Hash");
@@ -89,7 +89,7 @@ public class EncryptionManagerTest {
 
 			// Use the mock ServerConnector to replace the call to requestKeyFile to return the encrypted key file.
 			ByteArrayInputStream mockIn = new ByteArrayInputStream(mockOut.toByteArray());
-			when(mockConnector.requestKeyFile()).thenReturn(mockIn);
+			Mockito.when(mockConnector.requestKeyFile()).thenReturn(mockIn);
 			KeyFile requestedKeyFile = manager.requestKeyFile();
 
 			// Check if the Key File was correctly decrypted
@@ -109,7 +109,7 @@ public class EncryptionManagerTest {
 		String fileLocation = "Location";
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockOut, fileLocation));
+		Mockito.when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockOut, fileLocation));
 
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector
@@ -148,7 +148,7 @@ public class EncryptionManagerTest {
 		String fileLocation = "Location";
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockOut, fileLocation));
+		Mockito.when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockOut, fileLocation));
 
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector
@@ -162,7 +162,7 @@ public class EncryptionManagerTest {
 			InputStream mockIn = new ByteArrayInputStream(mockOut.toByteArray());
 
 			// Check if decrypting the file results in the original message.
-			when(mockConnector.requestFile(fileLocation)).thenReturn(mockIn);
+			Mockito.when(mockConnector.requestFile(fileLocation)).thenReturn(mockIn);
 			InputStream inStream = manager.requestFile(clientFile);
 			ByteArrayOutputStream readBytes = new ByteArrayOutputStream();
 			IOUtils.copy(inStream, readBytes);
@@ -182,8 +182,8 @@ public class EncryptionManagerTest {
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockUploadOut = new ByteArrayOutputStream();
 		ByteArrayOutputStream mockUpdateOut = new ByteArrayOutputStream();
-		when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockUploadOut, fileLocation));
-		when(mockConnector.updateFile(fileLocation)).thenReturn(mockUpdateOut);
+		Mockito.when(mockConnector.uploadFile()).thenReturn(new OutputStreamData(mockUploadOut, fileLocation));
+		Mockito.when(mockConnector.updateFile(fileLocation)).thenReturn(mockUpdateOut);
 
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
