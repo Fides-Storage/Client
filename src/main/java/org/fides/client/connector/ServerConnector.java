@@ -22,8 +22,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.fides.client.tools.Actions;
-import org.fides.client.tools.Responses;
+import org.fides.components.Actions;
+import org.fides.components.Responses;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
