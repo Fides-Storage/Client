@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.fides.client.connector.EncryptedOutputStreamData;
+import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.CompareResultType;
@@ -43,6 +44,8 @@ public class FileSyncManagerTest {
 
 	private FileSyncManager fileSyncManager;
 
+	private ServerConnector serverConnectorMock;
+
 	private KeyFile keyFile;
 
 	/**
@@ -61,8 +64,11 @@ public class FileSyncManagerTest {
 
 		keyFile = new KeyFile();
 
+		serverConnectorMock = Mockito.mock(ServerConnector.class);
+
 		encManagerMock = Mockito.mock(EncryptionManager.class);
 		Mockito.when(encManagerMock.requestKeyFile()).thenReturn(keyFile);
+		Mockito.when(encManagerMock.getConnector()).thenReturn(serverConnectorMock);
 
 		fileSyncManager = new FileSyncManager(fileManagerMock, encManagerMock);
 	}
@@ -79,6 +85,7 @@ public class FileSyncManagerTest {
 		fileManagerMock = null;
 		encManagerMock = null;
 		fileSyncManager = null;
+		serverConnectorMock = null;
 		keyFile = null;
 	}
 
