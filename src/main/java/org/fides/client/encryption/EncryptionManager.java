@@ -94,7 +94,7 @@ public class EncryptionManager {
 	public KeyFile requestKeyFile() {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			log.error("Server connector does not give an InputStream");
+			log.error("Server connector does not give an InputStream for a keyfile");
 			return null;
 		}
 
@@ -140,7 +140,7 @@ public class EncryptionManager {
 
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			log.error("ServerConnector does not profide an OutputStream");
+			log.error("ServerConnector does not profide an OutputStream for updating keyfile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
