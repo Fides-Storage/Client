@@ -43,8 +43,6 @@ public class FileSyncManager {
 	 *            The {@link EncryptionManager} to use
 	 */
 	public FileSyncManager(FileManager fileManager, EncryptionManager encManager) {
-		// TODO: what does the super here?
-		super();
 		this.fileManager = fileManager;
 		this.encManager = encManager;
 	}
@@ -58,12 +56,11 @@ public class FileSyncManager {
 	public synchronized boolean fileManagerCheck() {
 		KeyFile keyFile;
 
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			log.error(e);
+		keyFile = encManager.requestKeyFile();
+		if (keyFile == null) {
 			return false;
 		}
+
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
 		for (FileCompareResult result : results) {
 			handleCompareResult(result);
@@ -79,19 +76,16 @@ public class FileSyncManager {
 	 * @throws IOException
 	 */
 	public synchronized boolean checkClientFile(String fileName) {
-		KeyFile keyFile;
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			log.error(e);
+		KeyFile keyFile = encManager.requestKeyFile();
+		if (keyFile == null) {
 			return false;
 		}
 
 		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
 		if (result != null) {
-			handleCompareResult(result);
+			return handleCompareResult(result);
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -99,36 +93,39 @@ public class FileSyncManager {
 	 * 
 	 * @param result
 	 *            The {@link FileCompareResult} to handle
+	 * @return true if successfully handled, otherwise false
 	 */
-	private void handleCompareResult(FileCompareResult result) {
+	private boolean handleCompareResult(FileCompareResult result) {
+		boolean succesful = false;
 		switch (result.getResultType()) {
 		case LOCAL_ADDED:
-			handleLocalAdded(result.getName());
+			succesful = handleLocalAdded(result.getName());
 			break;
 		case LOCAL_REMOVED:
-			handleLocalRemoved(result.getName());
+			succesful = handleLocalRemoved(result.getName());
 			break;
 		case LOCAL_UPDATED:
-			handleLocalUpdated(result.getName());
+			succesful = handleLocalUpdated(result.getName());
 			break;
 		case SERVER_ADDED:
-			// TODO: where does the false stands for
-			handleServerAddedOrUpdated(result.getName(), false);
+			// False because it is a new file
+			succesful = handleServerAddedOrUpdated(result.getName(), false);
 			break;
 		case SERVER_REMOVED:
-			handleServerRemoved(result.getName());
+			succesful = handleServerRemoved(result.getName());
 			break;
 		case SERVER_UPDATED:
-			// TODO: where does the true stands for
-			handleServerAddedOrUpdated(result.getName(), true);
+			// True because it is an update
+			succesful = handleServerAddedOrUpdated(result.getName(), true);
 			break;
 		case CONFLICTED:
-			handleConflict(result.getName());
+			succesful = handleConflict(result.getName());
 			break;
 		default:
-			// TODO: default do nothing?
+			log.error("Invalid CompareResult");
 			break;
 		}
+		return succesful;
 	}
 
 	/**
@@ -136,16 +133,14 @@ public class FileSyncManager {
 	 * 
 	 * @param fileName
 	 *            The file to upload
+	 * @return true if successfully handled, otherwise false
 	 */
-	private void handleLocalAdded(final String fileName) {
+	private boolean handleLocalAdded(final String fileName) {
 		EncryptedOutputStreamData outData = encManager.uploadFile();
 		// Get the keyfile
-		KeyFile keyFile = null;
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			log.error(e);
-			return;
+		KeyFile keyFile = encManager.requestKeyFile();
+		if (keyFile == null) {
+			return false;
 		}
 
 		// Upload the file
@@ -158,15 +153,17 @@ public class FileSyncManager {
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 		} catch (IOException e) {
 			log.error(e);
-			// TODO: stop here?
+			return false;
 		}
 
 		// Update the keyfile
 		encManager.uploadKeyFile(keyFile);
+		return true;
 	}
 
-	private void handleLocalRemoved(final String fileName) {
+	private boolean handleLocalRemoved(final String fileName) {
 		// TODO handle removed local
+		return false;
 	}
 
 	/**
@@ -174,41 +171,46 @@ public class FileSyncManager {
 	 * 
 	 * @param fileName
 	 *            The file to update
+	 * @return true if successfully handled, otherwise false
 	 */
-	private void handleLocalUpdated(final String fileName) {
+	private boolean handleLocalUpdated(final String fileName) {
 		// Get the keyfile
-		KeyFile keyFile = null;
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			log.error(e);
-			return;
+		KeyFile keyFile = encManager.requestKeyFile();
+		if (keyFile == null) {
+			return false;
 		}
+
+		boolean succesful = false;
 
 		// Get a stream to write to
-		ClientFile clientFile = keyFile.getClientFileByName(fileName);
 		OutputStream outEnc = null;
+		InputStream in = null;
+		OutputStream out = null;
 		try {
+			ClientFile clientFile = keyFile.getClientFileByName(fileName);
 			outEnc = encManager.updateFile(clientFile);
-		} catch (InvalidClientFileException e) {
-			log.error(e);
-			return;
-		}
 
-		// Do the update of the file
-		MessageDigest messageDigest = FileUtil.createFileDigest();
-		try (InputStream in = fileManager.readFile(fileName);
-			OutputStream out = new DigestOutputStream(outEnc, messageDigest)) {
+			MessageDigest messageDigest = FileUtil.createFileDigest();
+			in = fileManager.readFile(fileName);
+			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
+
+			succesful = true;
+		} catch (InvalidClientFileException e) {
+			log.error(e);
+			succesful = false;
 		} catch (IOException e) {
 			log.error(e);
-			// TODO: stop here?
+			succesful = false;
 		}
 
 		// Update the keyfile
-		encManager.uploadKeyFile(keyFile);
+		if (succesful) {
+			encManager.uploadKeyFile(keyFile);
+		}
+		return succesful;
 
 	}
 
@@ -219,15 +221,13 @@ public class FileSyncManager {
 	 *            The name to add
 	 * @param update
 	 *            true if it is a file update, false when file is added
+	 * @return true if successfully handled, otherwise false
 	 */
-	private void handleServerAddedOrUpdated(final String fileName, boolean update) {
+	private boolean handleServerAddedOrUpdated(final String fileName, boolean update) {
 		// Almost the same as handleServerUpdated
-		KeyFile keyFile = null;
-		try {
-			keyFile = encManager.requestKeyFile();
-		} catch (IOException e) {
-			log.error(e);
-			return;
+		KeyFile keyFile = encManager.requestKeyFile();
+		if (keyFile == null) {
+			return false;
 		}
 
 		MessageDigest messageDigest = FileUtil.createFileDigest();
@@ -241,7 +241,7 @@ public class FileSyncManager {
 			}
 		} catch (FileNotFoundException e) {
 			log.error(e);
-			return;
+			return false;
 		}
 
 		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
@@ -255,14 +255,17 @@ public class FileSyncManager {
 		} catch (InvalidClientFileException e) {
 			log.error(e);
 		}
+		return true;
 	}
 
-	private void handleServerRemoved(final String fileName) {
+	private boolean handleServerRemoved(final String fileName) {
 		// TODO handle removed on server
+		return false;
 	}
 
-	private void handleConflict(final String fileName) {
+	private boolean handleConflict(final String fileName) {
 		// TODO handle conflict
+		return false;
 	}
 
 	public FileManager getFileManager() {

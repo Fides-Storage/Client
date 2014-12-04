@@ -14,11 +14,11 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.UserProperties;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.CompareResultType;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
@@ -78,8 +78,10 @@ public class FileManager {
 	 * The compare check for a file on the server
 	 * 
 	 * @param serverName
+	 *            The name of the file on the server
 	 * @param keyFile
-	 * @return
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	public FileCompareResult checkServerSideFile(String serverName, KeyFile keyFile) {
 		List<File> files = new ArrayList<>();
@@ -89,7 +91,17 @@ public class FileManager {
 		return checkServerSideFile(serverName, clientFileNames, keyFile);
 	}
 
-	// TODO: javadoc
+	/**
+	 * The compare check for a file on the server
+	 * 
+	 * @param serverName
+	 *            The name of the file on the server
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
 	private FileCompareResult checkServerSideFile(String serverName, Collection<String> clientFileNames, KeyFile keyFile) {
 		FileCompareResult result = null;
 		// Does the file exist on the server
@@ -114,8 +126,10 @@ public class FileManager {
 	 * The compare check for a local file
 	 * 
 	 * @param clientName
+	 *            The name of the local file
 	 * @param keyFile
-	 * @return
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	public FileCompareResult checkClientSideFile(String clientName, KeyFile keyFile) {
 		Set<String> serverFileNames = new HashSet<>();
@@ -125,7 +139,17 @@ public class FileManager {
 		return checkClientSideFile(clientName, serverFileNames, keyFile);
 	}
 
-	// TODO: javadoc
+	/**
+	 * The compare check for a local file
+	 * 
+	 * @param clientName
+	 *            The name of the local file
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
 	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
 		FileCompareResult result = null;
 		// Does the local file exist
@@ -146,7 +170,15 @@ public class FileManager {
 		return result;
 	}
 
-	// TODO: javadoc
+	/**
+	 * The compare check for when a file exists on the server and client
+	 * 
+	 * @param fileName
+	 *            The name of the file (local and on server)
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
 	private FileCompareResult checkMatchingFile(String fileName, KeyFile keyFile) {
 		// We both have the file
 		FileCompareResult result = null;
@@ -281,16 +313,10 @@ public class FileManager {
 	 */
 	private static Set<String> filesToNames(List<File> files, File directory) {
 		Set<String> fileNames = new HashSet<>();
-		// TODO: use new File for path
-		String baseFilePath = directory.getPath() + "\\";
+		// TODO: test
 		for (File file : files) {
-			String fileName = file.getPath();
-			if (fileName.startsWith(baseFilePath)) {
-				fileName = fileName.substring(baseFilePath.length());
-				fileNames.add(fileName);
-			} else {
-				log.debug("File does not match with base directoy: " + file.getPath() + " ; " + directory.getPath());
-			}
+			File relativeFile = directory.toPath().relativize(file.toPath()).toFile();
+			fileNames.add(relativeFile.getPath());
 		}
 		return fileNames;
 	}
@@ -304,15 +330,8 @@ public class FileManager {
 	 */
 	public static String fileToLocalName(File file) {
 		File baseDir = UserProperties.getInstance().getFileDirectory();
-		// TODO: use new File for path
-		String baseFilePath = baseDir.getPath() + "\\";
-		String fileName = file.getPath();
-		if (fileName.startsWith(baseFilePath)) {
-			fileName = fileName.substring(baseFilePath.length());
-			return fileName;
-		} else {
-			log.debug("File does not match with base directoy: " + file.getPath() + " ; " + baseDir.getPath());
-		}
-		return null;
+		// TODO: test
+		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
+		return relativeFile.getPath();
 	}
 }

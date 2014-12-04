@@ -10,8 +10,7 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.UserProperties;
-import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.tools.UserProperties;
 
 /**
  * Used for loading and storing local hashes
@@ -23,8 +22,7 @@ public final class LocalHashes {
 	/**
 	 * Log for this class
 	 */
-	// TODO: use correct class
-	private static Logger log = LogManager.getLogger(EncryptionManager.class);
+	private static Logger log = LogManager.getLogger(LocalHashes.class);
 
 	private static final String LOCAL_HASHSES_FILE = "hashes.xml";
 
@@ -36,8 +34,7 @@ public final class LocalHashes {
 	 * Constuctor
 	 */
 	private LocalHashes() {
-		// TODO: use combine new file
-		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
+		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
 		if (file.exists()) {
 			try (InputStream in = new FileInputStream(file)) {
 				localHashes.loadFromXML(in);
@@ -72,8 +69,7 @@ public final class LocalHashes {
 	}
 
 	private synchronized void saveHashes() {
-		// TODO: use combine new file
-		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
+		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
 		try (OutputStream out = new FileOutputStream(file)) {
 			localHashes.storeToXML(out, "Local file hashes");
 		} catch (IOException e) {

@@ -10,14 +10,16 @@ public class ErrorMessageScreen {
 
 	/**
 	 * Shows the user a message dialog with one or more error messages
-	 * @param lines The error messages to show
+	 * 
+	 * @param lines
+	 *            The error messages to show
 	 */
 	public static void showErrorMessage(String... lines) {
 		JFrame frame = new JFrame();
 		frame.setUndecorated(true);
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-		
+
 		// Create a Panel
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("<html>");
@@ -26,7 +28,7 @@ public class ErrorMessageScreen {
 			stringBuilder.append("<br>");
 		}
 		stringBuilder.append("</html>");
-		
+
 		JOptionPane.showMessageDialog(frame, stringBuilder.toString(), "Error", JOptionPane.ERROR_MESSAGE);
 		frame.dispose();
 	}

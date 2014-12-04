@@ -23,6 +23,8 @@ public final class FileUtil {
 	 */
 	private static Logger log = LogManager.getLogger(FileUtil.class);
 
+	private static final String HASH_ALGORITHM = "MD5";
+
 	private FileUtil() {
 	}
 
@@ -61,8 +63,7 @@ public final class FileUtil {
 	public static MessageDigest createFileDigest() {
 		MessageDigest messageDigest = null;
 		try {
-			// TODO: make static final variable
-			messageDigest = MessageDigest.getInstance("MD5");
+			messageDigest = MessageDigest.getInstance(HASH_ALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			// Should never happen
 			log.error(e);

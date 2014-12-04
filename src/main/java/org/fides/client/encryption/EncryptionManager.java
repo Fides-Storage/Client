@@ -32,6 +32,7 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.ui.ErrorMessageScreen;
 
 /**
  * The {@link EncryptionManager} handles the encryption and decryption of an {@link InputStream} before it is passed on
@@ -90,29 +91,33 @@ public class EncryptionManager {
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
-	// TODO: throws exception, but catch others with return null and also use closeQuietly
-	public KeyFile requestKeyFile() throws IOException {
+	public KeyFile requestKeyFile() {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			log.error("Server connector does not give an InputStream");
 			return null;
 		}
 
-		DataInputStream din = new DataInputStream(in);
-
-		byte[] saltBytes = new byte[SALT_SIZE];
-		int pbkdf2Rounds = din.readInt();
-		din.read(saltBytes, 0, SALT_SIZE);
-
-		Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
-
-		ObjectInputStream inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
-		KeyFile keyFile;
+		DataInputStream din = null;
+		ObjectInputStream inDecrypted = null;
 		try {
+			din = new DataInputStream(in);
+
+			byte[] saltBytes = new byte[SALT_SIZE];
+			int pbkdf2Rounds = din.readInt();
+			din.read(saltBytes, 0, SALT_SIZE);
+
+			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+
+			inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
+			KeyFile keyFile;
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
-		} catch (ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
+			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "THe program is unable to continue.", e.getMessage());
+			System.exit(1); // We can't continue
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
@@ -129,8 +134,6 @@ public class EncryptionManager {
 	 * @throws IOException
 	 */
 	public boolean uploadKeyFile(final KeyFile keyFile) {
-		// TODO: to complex return statement
-		boolean completed = false;
 		if (keyFile == null) {
 			throw new NullPointerException("No KeyFile");
 		}
@@ -157,7 +160,7 @@ public class EncryptionManager {
 				outEncrypted.flush();
 				dout.flush();
 				out.flush();
-				completed = true;
+				return true;
 			} catch (IOException e) {
 				log.error(e);
 			} finally {
@@ -166,7 +169,7 @@ public class EncryptionManager {
 				IOUtils.closeQuietly(out);
 			}
 		}
-		return completed;
+		return false;
 	}
 
 	/**
@@ -203,12 +206,14 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			// TODO: if failed throw error, otherwise code below will have a empty key
+			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
+			System.exit(1);
 		} catch (InvalidKeySpecException e) {
-			// Should not happen
-			// TODO: if failed throw error, otherwise code below will have a empty key
+			// Should not happen, we close if it does
+			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
+			System.exit(1);
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
@@ -248,27 +253,43 @@ public class EncryptionManager {
 		return connector;
 	}
 
-	// TODO: javadoc
+	/**
+	 * Create a n {@link InputStream} that decrypts and encrypted {@link InputStream}
+	 * 
+	 * @param in
+	 *            The stream to decrypt
+	 * @param key
+	 *            The {@link Key} to use
+	 * @return An decrypting {@link InputStream}
+	 */
 	private InputStream getDecryptionStream(InputStream in, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
 		CipherParameters params = new ParametersWithIV(keyParam, IV);
 		cipher.reset();
-		// TODO: where stands false for?
+		// false because are decrypting
 		cipher.init(false, params);
 
 		return new CipherInputStream(in, cipher);
 	}
 
-	// TODO: javadoc
+	/**
+	 * Create a n {@link OutputStream} that encrypts and encrypted {@link OutputStream}
+	 * 
+	 * @param in
+	 *            The stream to encrypt
+	 * @param key
+	 *            The {@link Key} to use
+	 * @return An encrypting {@link OutputStream}
+	 */
 	private OutputStream getEncryptionStream(OutputStream out, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
 		CipherParameters params = new ParametersWithIV(keyParam, IV);
 		cipher.reset();
-		// TODO: where stands true for?
+		// true because are encrypting
 		cipher.init(true, params);
 
 		return new CipherOutputStream(out, cipher);

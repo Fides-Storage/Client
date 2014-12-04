@@ -22,8 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.UserProperties;
-import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.tools.UserProperties;
 
 /**
  * Checks the local file system for changes
@@ -35,8 +34,7 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * Log for this class
 	 */
-	// TODO: use correct class
-	private static Logger log = LogManager.getLogger(EncryptionManager.class);
+	private static Logger log = LogManager.getLogger(LocalFileChecker.class);
 
 	private final FileSyncManager syncManager;
 
@@ -139,14 +137,15 @@ public class LocalFileChecker extends Thread {
 	 *            The location of the event
 	 */
 	private void handleEvent(WatchEvent<?> event, Path dir) {
-		// TODO: give explanation why?
-		@SuppressWarnings("unchecked")
-		WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
-		WatchEvent.Kind<?> kind = watchEvent.kind();
+		WatchEvent.Kind<?> kind = event.kind();
 		// We can ignore an Overflow
 		if (kind == OVERFLOW) {
 			return;
 		}
+
+		// It does not need to be check, in this situation this is always right
+		@SuppressWarnings("unchecked")
+		WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
 
 		// Get he right location
 		Path file = watchEvent.context();

@@ -1,8 +1,5 @@
 package org.fides.client.files.data;
 
-import org.fides.client.files.FileManager;
-
-
 /**
  * A result of the {@link FileManager#compareFiles(KeyFile)} when comparing the local files and the files on the server
  * 

@@ -11,8 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.apache.commons.io.FileUtils;
-import org.fides.client.UserProperties;
-import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.UserProperties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,9 +38,6 @@ public class LocalFileCheckTest {
 
 	private FileSyncManager syncManagerMock;
 
-	// TODO: unused?
-	private KeyFile keyFile;
-
 	private File testDir;
 
 	private Collection<String> calledFiles;
@@ -65,7 +61,6 @@ public class LocalFileCheckTest {
 				return true;
 			}
 		});
-		keyFile = new KeyFile();
 
 		testDir = new File("./testdir");
 		if (testDir.exists()) {
@@ -105,7 +100,7 @@ public class LocalFileCheckTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	// TODO: fail
+	// TODO: test
 	public void test() throws IOException, InterruptedException {
 		File fileChange = new File(testDir, "fileChange.txt");
 		fileChange.createNewFile();

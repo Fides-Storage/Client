@@ -3,6 +3,8 @@ package org.fides.client.files.data;
 import java.io.Serializable;
 import java.security.Key;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Contains the information of the user's files on the servers
  * 
@@ -34,8 +36,6 @@ public class ClientFile implements Serializable {
 	 *            The hash of the file
 	 */
 	public ClientFile(String name, String location, Key key, String hash) {
-		// TODO: is super needed?
-		super();
 		this.name = name;
 		this.location = location;
 		this.key = key;
@@ -64,7 +64,6 @@ public class ClientFile implements Serializable {
 
 	@Override
 	public int hashCode() {
-		// TODO: magic number
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
@@ -84,19 +83,10 @@ public class ClientFile implements Serializable {
 			return false;
 		}
 		ClientFile other = (ClientFile) obj;
-		if (location == null) {
-			if (other.location != null) {
-				return false;
-			}
-		} else if (!location.equals(other.location)) {
+		if (!StringUtils.equals(other.location, location)) {
 			return false;
 		}
-		// TODO: combine nested ifs
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
+		if (!StringUtils.equals(other.name, name)) {
 			return false;
 		}
 		return true;

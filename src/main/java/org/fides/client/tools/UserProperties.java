@@ -1,4 +1,4 @@
-package org.fides.client;
+package org.fides.client.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.ui.ErrorMessageScreen;
 
 /**
  * Contains the settings on where files should be saved.
@@ -17,35 +18,46 @@ import org.apache.logging.log4j.Logger;
  * @author Koen
  *
  */
-// TODO: move to org.fides.client.tools
 public final class UserProperties {
 
 	/**
 	 * The directory to store settings
 	 */
-	public static final String SETTINGS_DIRECTORY = "./Settings/";
+	public static final File SETTINGS_DIRECTORY = new File("./Settings");
 
 	/**
 	 * Log for this class
 	 */
 	private static Logger log = LogManager.getLogger(UserProperties.class);
 
-	// TODO: javadoc?
+	/**
+	 * The default directory to store files
+	 */
 	private static final String DEFAULT_FILE_DIR = "./Fides";
 
-	// TODO: javadoc?
+	/**
+	 * The file containing the user settings
+	 */
 	private static final String USER_SETTINGS_FILE = "user.properties";
 
-	// TODO: javadoc?
+	/**
+	 * The key to get the file storage directory from the properties
+	 */
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
-	// TODO: javadoc?
+	/**
+	 * Singleton instance
+	 */
 	private static UserProperties instance;
 
-	// TODO: javadoc?
+	/**
+	 * The properties used for storing the settings
+	 */
 	private Properties properties;
 
-	// TODO: javadoc?
+	/**
+	 * The {@link File} representing the directory in which files can be saves
+	 */
 	private File fileDirectory;
 
 	/**
@@ -54,20 +66,22 @@ public final class UserProperties {
 	private UserProperties() {
 		properties = new Properties();
 
-		File settingsDir = new File(SETTINGS_DIRECTORY);
-		if (!settingsDir.exists()) {
-			settingsDir.mkdirs();
+		// File settingsDir = new File(SETTINGS_DIRECTORY);
+		if (!SETTINGS_DIRECTORY.exists()) {
+			if (!SETTINGS_DIRECTORY.mkdirs()) {
+				log.error("Could not create settings directory");
+				ErrorMessageScreen.showErrorMessage("Could not create settings directory.", "Make sure you have the rights to create files.");
+				System.exit(1);
+			}
 		}
 
 		try {
-			// TODO: use new file to combine directory and file
-			File file = new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE);
+			File file = new File(SETTINGS_DIRECTORY, USER_SETTINGS_FILE);
 			if (file.exists()) {
 				properties.load(new FileInputStream(file));
 			}
 		} catch (IOException e) {
-			// TODO: use logger
-			e.printStackTrace();
+			log.error(e);
 		}
 
 		// Create the a file referencing the the location were the files should be saved
@@ -88,7 +102,8 @@ public final class UserProperties {
 		if (!fileDirectory.exists()) {
 			if (!fileDirectory.mkdirs()) {
 				log.error("File directory can not be created");
-				// TODO: do we need to shutdown here, or give the user some feedback?
+				ErrorMessageScreen.showErrorMessage("File directory can not be created.", "Make sure you have the rights to create files");
+				System.exit(1);
 			}
 		}
 	}
@@ -101,11 +116,10 @@ public final class UserProperties {
 	 * Save the properties
 	 */
 	private void saveProperties() {
-		// TODO: use new file to combine directory and file
-		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE))) {
+		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY, USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {
-			log.debug(e);
+			log.error(e);
 		}
 	}
 
