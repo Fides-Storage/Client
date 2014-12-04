@@ -45,7 +45,7 @@ public class EncryptionManagerTest {
 		// Create a mock of the ServerConnector to catch the call to uploadKeyFile.
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.uploadKeyFile()).thenReturn(mockOut);
+		when(mockConnector.updateKeyFile()).thenReturn(mockOut);
 
 		KeyFile keyfile = new KeyFile();
 		ClientFile clientFile = new ClientFile("Name", "Location", null, "Hash");
@@ -76,7 +76,7 @@ public class EncryptionManagerTest {
 		// uploadKeyFile.
 		ServerConnector mockConnector = mock(ServerConnector.class);
 		ByteArrayOutputStream mockOut = new ByteArrayOutputStream();
-		when(mockConnector.uploadKeyFile()).thenReturn(mockOut);
+		when(mockConnector.updateKeyFile()).thenReturn(mockOut);
 
 		KeyFile keyfile = new KeyFile();
 		ClientFile clientFile = new ClientFile("Name", "Location", null, "Hash");

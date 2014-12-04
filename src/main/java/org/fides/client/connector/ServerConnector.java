@@ -74,7 +74,7 @@ public class ServerConnector {
 	 * Connect to the server with the given ip and port
 	 * 
 	 * @param address
-	 * 			The {@link InetSocketAddress} with the server's address
+	 *            The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
 	 */
 	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
@@ -223,25 +223,109 @@ public class ServerConnector {
 	}
 
 	public InputStream requestKeyFile() {
+		try {
+			JsonObject keyFileRequest = new JsonObject();
+			keyFileRequest.addProperty("action", "getKeyFile");
+			out.writeUTF(new Gson().toJson(keyFileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has("successful")) {
+				if (requestResponse.get("successful").getAsBoolean()) {
+					return in;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
+
 	}
 
-	public OutputStream uploadKeyFile() {
+	public OutputStream updateKeyFile() {
+		try {
+			JsonObject fileRequest = new JsonObject();
+			fileRequest.addProperty("action", "updateKeyFile");
+			out.writeUTF(new Gson().toJson(fileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has("successful")) {
+				if (requestResponse.get("successful").getAsBoolean()) {
+					return out;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
 	/**
 	 * Returns a stream of the encrypted requested file
+	 * 
+	 * @param location The location of the requested file
+	 * @return
+	 * 		An inputstream with the content of the requested file. 
+	 * 		Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
+		try {
+			JsonObject fileRequest = new JsonObject();
+			fileRequest.addProperty("action", "getFile");
+			fileRequest.addProperty("location", location);
+			out.writeUTF(new Gson().toJson(fileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has("successful")) {
+				if (requestResponse.get("successful").getAsBoolean()) {
+					return in;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
 	public OutputStreamData uploadFile() {
+		try {
+			JsonObject uploadRequest = new JsonObject();
+			uploadRequest.addProperty("action", "uploadFile");
+			out.writeUTF(new Gson().toJson(uploadRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has("successful")) {
+				if (requestResponse.get("successful").getAsBoolean() && requestResponse.has("location")) {
+					String location = requestResponse.get("location").getAsString();
+					return new OutputStreamData(out, location);
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
 	public OutputStream updateFile(String location) {
+		try {
+			JsonObject updateRequest = new JsonObject();
+			updateRequest.addProperty("action", "updateFile");
+			updateRequest.addProperty("location", location);
+			out.writeUTF(new Gson().toJson(updateRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has("successful")) {
+				if (requestResponse.get("successful").getAsBoolean()) {
+					return out;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 

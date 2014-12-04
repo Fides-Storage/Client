@@ -119,7 +119,7 @@ public class EncryptionManager {
 			throw new NullPointerException();
 		}
 
-		OutputStream out = connector.uploadKeyFile();
+		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
 			throw new NullPointerException();
 		}
