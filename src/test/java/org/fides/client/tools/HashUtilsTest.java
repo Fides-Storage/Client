@@ -21,4 +21,11 @@ public class HashUtilsTest {
 		assertEquals("cXrFBpUNoMy2QEzdXnWR9yAYogy8onyKQj6cnlYmrGE=", hashTest);
 	}
 
+	/**
+	 * Expects a NullPointerException when null is given
+	 */
+	@Test(expected = NullPointerException.class)
+	public void testHashFunctionWithNullArgument() {
+		HashUtils.hash(null);
+	}
 }

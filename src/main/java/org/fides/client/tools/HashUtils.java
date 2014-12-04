@@ -11,7 +11,7 @@ import org.bouncycastle.util.encoders.Base64;
  * Utils for client
  * 
  * @author jesse
- *
+ * 
  */
 public class HashUtils {
 	/**
