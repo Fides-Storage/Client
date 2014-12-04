@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
  */
 public class ServerConnector {
 
+	// TODO: Moves these static finals to a seperate class which can be shared between the client and server
 	private static final String SUCCESSFUL = "successful";
 
 	private static final String ERROR = "error";
