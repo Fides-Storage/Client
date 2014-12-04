@@ -153,6 +153,11 @@ public class ServerConnector {
 						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
+					if (loggedIn) {
+						// TODO: Gets removed when we finish the custom IOStream.
+						savedUsername = username;
+						savedPasswordHash = passwordHash;
+					}
 				} else {
 					loggedIn = false;
 				}
@@ -162,7 +167,6 @@ public class ServerConnector {
 				loggedIn = false;
 			}
 		}
-
 		return loggedIn;
 	}
 
@@ -262,11 +266,11 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject keyFileRequest = new JsonObject();
-			keyFileRequest.addProperty("action", Actions.GETKEYFILE);
+			keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
 			out.writeUTF(new Gson().toJson(keyFileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has("successful")) {
-				if (requestResponse.get("successful").getAsBoolean()) {
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 					return in;
 				} else {
 					// TODO: Read error message.
@@ -285,14 +289,13 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty("action", Actions.UPDATEKEYFILE);
+			fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
 			out.writeUTF(new Gson().toJson(fileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has("successful")) {
-				if (requestResponse.get("successful").getAsBoolean()) {
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 					return out;
 				} else {
-					System.out.println("error message: " + requestResponse.get("error"));
 					// TODO: Read error message.
 				}
 			}
@@ -316,12 +319,12 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty("action", Actions.GETFILE);
-			fileRequest.addProperty("location", location);
+			fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
+			fileRequest.addProperty(Actions.Properties.LOCATION, location);
 			out.writeUTF(new Gson().toJson(fileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has("successful")) {
-				if (requestResponse.get("successful").getAsBoolean()) {
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 					return in;
 				} else {
 					// TODO: Read error message.
@@ -339,12 +342,12 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject uploadRequest = new JsonObject();
-			uploadRequest.addProperty("action", Actions.UPLOADFILE);
+			uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
 			out.writeUTF(new Gson().toJson(uploadRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has("successful")) {
-				if (requestResponse.get("successful").getAsBoolean() && requestResponse.has("location")) {
-					String location = requestResponse.get("location").getAsString();
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
+					String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
 					return new OutputStreamData(out, location);
 				} else {
 					// TODO: Read error message.
@@ -362,12 +365,12 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject updateRequest = new JsonObject();
-			updateRequest.addProperty("action", Actions.UPDATEFILE);
-			updateRequest.addProperty("location", location);
+			updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
+			updateRequest.addProperty(Actions.Properties.LOCATION, location);
 			out.writeUTF(new Gson().toJson(updateRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has("successful")) {
-				if (requestResponse.get("successful").getAsBoolean()) {
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 					return out;
 				} else {
 					// TODO: Read error message.
