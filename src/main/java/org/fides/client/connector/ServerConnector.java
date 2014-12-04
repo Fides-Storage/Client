@@ -9,6 +9,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLSession;
@@ -20,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.fides.client.tools.Actions;
+import org.fides.client.tools.Responses;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
@@ -29,10 +33,16 @@ import com.google.gson.JsonObject;
  * @author Tom
  */
 public class ServerConnector {
+
 	/**
 	 * Log for this class
 	 */
 	private static Logger log = LogManager.getLogger(ServerConnector.class);
+
+	/**
+	 * The collection to store the error messages received from the server
+	 */
+	private Map<String, String> errorMessages = new HashMap<>();
 
 	/**
 	 * The SSLSocket that will be used
@@ -74,7 +84,7 @@ public class ServerConnector {
 	 * Connect to the server with the given ip and port
 	 * 
 	 * @param address
-	 * 			The {@link InetSocketAddress} with the server's address
+	 *            The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
 	 */
 	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
@@ -122,22 +132,26 @@ public class ServerConnector {
 		if (isConnected()) {
 			try {
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "login");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(Actions.ACTION, Actions.LOGIN);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
+					}
+					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 
-				if (userAnswer.has("successful")) {
-					loggedIn = userAnswer.get("successful").getAsBoolean();
 				} else {
 					loggedIn = false;
 				}
 
 			} catch (IOException e) {
 				log.error("IOException connection failed: ", e);
+				loggedIn = false;
 			}
 		}
 
@@ -162,16 +176,18 @@ public class ServerConnector {
 			try {
 
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "createUser");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-
-				if (userAnswer.has("successful")) {
-					return userAnswer.get("successful").getAsBoolean();
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.CREATEUSER, userAnswer.get(Responses.ERROR).getAsString());
+					}
+					return userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 				} else {
 					return false;
 				}
@@ -180,8 +196,18 @@ public class ServerConnector {
 				log.error("IOException connection failed: ", e);
 			}
 		}
-
 		return false;
+	}
+
+	/**
+	 * Getter to get the error message received from the server
+	 * 
+	 * @param key
+	 *            of the map to get the corresponding value
+	 * @return the value
+	 */
+	public String getErrorMessage(String key) {
+		return errorMessages.get(key);
 	}
 
 	/**

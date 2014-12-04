@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Properties;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,10 +18,10 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.FileCompareResult;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.KeyFile;
+import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.ServerAddressScreen;
-import org.fides.client.ui.UsernamePasswordScreen;
 
 /**
  * Client application
@@ -44,64 +44,37 @@ public class App {
 	 */
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();
+
 		InetSocketAddress serverAddress = newServerConnection(serverConnector);
+
 		if (serverAddress == null) {
 			System.exit(1);
 		}
-		
-		// TODO: move this away from here, its pretty big
-		while (isRunning) {
 
-			String[] data = UsernamePasswordScreen.getUsernamePassword();
+		try {
+			serverConnector.connect(serverAddress);
+		} catch (ConnectException | UnknownHostException e) {
+			log.error(e);
+			System.exit(1);
+		}
 
-			// User ask to close application
-			if (data == null) {
-				isRunning = false;
-			}
+		Boolean isAuthenticated = AuthenticateUser.authenticateUser(serverConnector);
 
-			try {
-				serverConnector.connect(serverAddress);
-			} catch (Exception e) {
-				log.error(e);
-				isRunning = false;
-			}
+		if (isAuthenticated && serverConnector.isConnected()) {
 
-			if (isRunning && (data[0]).equals("register")) {
-
-				// checks if password and password confirmation is the same
-				if (data[2].equals(data[3])) {
-					// register on the server
-					if (serverConnector.register(data[1], data[2])) {
-						log.debug("Register successful");
-						serverConnector.disconnect();
-					} else {
-						log.debug("Register failed");
-						serverConnector.disconnect();
-					}
-				} else {
-					log.debug("Register password confirmation is not valid.");
-				}
-			} else if (isRunning && (data[0]).equals("login")) {
-				if (serverConnector.login(data[1], data[2])) {
-					log.debug("login successful");
-					break;
-				} else {
-					log.debug("login failed");
-					serverConnector.disconnect();
-				}
-			}
+			// TODO: Do normal work, we are going to loop here
+			// TODO: Do this in a function.
+			serverConnector.disconnect();
 
 		}
 
-		if (serverConnector.isConnected() && serverConnector.isLoggedIn() && isRunning) {
-			// TODO Do normal work, we are going to loop here
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 
 	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {

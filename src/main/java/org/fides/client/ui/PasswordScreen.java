@@ -1,18 +1,19 @@
 package org.fides.client.ui;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.SwingUtilities;
-import javax.swing.JOptionPane;
-
 import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingUtilities;
 
 /**
  * UI where a password can be submitted by a user
@@ -32,6 +33,7 @@ public class PasswordScreen {
 
 		// Create a Panel
 		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		// Add a label to the panel
 		JLabel label = new JLabel("Password:");
