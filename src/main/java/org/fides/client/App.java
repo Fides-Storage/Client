@@ -5,10 +5,16 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
+import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.files.FileCheckTask;
+import org.fides.client.files.FileManager;
+import org.fides.client.files.FileSyncManager;
+import org.fides.client.files.LocalFileChecker;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.ServerAddressScreen;
@@ -19,6 +25,8 @@ import org.fides.client.ui.UsernamePasswordScreen;
  * 
  */
 public class App {
+	private static final long CHECK_TIME = 5 * 60 * 1000;
+
 	/**
 	 * Log for this class
 	 */
@@ -84,12 +92,23 @@ public class App {
 
 		if (serverConnector.isConnected() && serverConnector.isLoggedIn() && isRunning) {
 			// TODO Do normal work, we are going to loop here
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			FileManager fileManager = new FileManager();
+			EncryptionManager encManager = new EncryptionManager(serverConnector, "Default");
+
+			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
+			LocalFileChecker checker = new LocalFileChecker(syncManager);
+			checker.start();
+
+			Timer timer = new Timer("CheckTimer");
+			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), CHECK_TIME, CHECK_TIME);
+
+			// try {
+			// Thread.sleep(5000);
+			// } catch (InterruptedException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 		}
 	}
 

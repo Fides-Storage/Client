@@ -153,7 +153,6 @@ public class LocalFileChecker extends Thread {
 		Path file = watchEvent.context();
 		Path child = dir.resolve(file);
 		log.debug(kind + " : " + file + " : " + child);
-		System.out.println(kind + " : " + file + " : " + child);
 
 		if (Files.isDirectory(child)) {
 			// Change is a directory
@@ -192,7 +191,6 @@ public class LocalFileChecker extends Thread {
 	 *            The directory to check
 	 */
 	private void checkSubPath(Path subPath) {
-		System.out.println("SUB: " + subPath);
 		if (Files.isRegularFile(subPath)) {
 			// Transform string to local space and upload (or remove)
 			String localName = FileManager.fileToLocalName(subPath.toFile());
@@ -207,7 +205,6 @@ public class LocalFileChecker extends Thread {
 					ENTRY_MODIFY);
 				keys.put(newKey, subPath);
 			} catch (IOException e) {
-				e.printStackTrace();
 				log.error(e);
 			}
 			for (File subFile : subPath.toFile().listFiles()) {

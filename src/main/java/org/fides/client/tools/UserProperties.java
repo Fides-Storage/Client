@@ -66,7 +66,6 @@ public final class UserProperties {
 	private UserProperties() {
 		properties = new Properties();
 
-		// File settingsDir = new File(SETTINGS_DIRECTORY);
 		if (!SETTINGS_DIRECTORY.exists()) {
 			if (!SETTINGS_DIRECTORY.mkdirs()) {
 				log.error("Could not create settings directory");

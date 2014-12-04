@@ -348,6 +348,7 @@ public class FileManager {
 	private static String fileToLocalName(File file, File basedir) {
 		File baseDir = UserProperties.getInstance().getFileDirectory();
 		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
-		return relativeFile.getPath().replace('\\', '/'); // we always want '/'
+		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use thesame
+		return relativeFile.getPath().replace('\\', '/');
 	}
 }
