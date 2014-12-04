@@ -58,6 +58,9 @@ public class FileSyncManager {
 		KeyFile keyFile;
 
 		keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -78,6 +81,9 @@ public class FileSyncManager {
 	 */
 	public synchronized boolean checkClientFile(String fileName) {
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -137,12 +143,16 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalAdded(final String fileName) {
-		EncryptedOutputStreamData outData = encManager.uploadFile();
 		// Get the keyfile
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
+
+		EncryptedOutputStreamData outData = encManager.uploadFile();
 
 		// Upload the file
 		MessageDigest messageDigest = FileUtil.createFileDigest();
@@ -156,9 +166,14 @@ public class FileSyncManager {
 			log.error(e);
 			return false;
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
 
 		// Update the keyfile
 		encManager.updateKeyFile(keyFile);
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		return true;
 	}
 
@@ -177,6 +192,9 @@ public class FileSyncManager {
 	private boolean handleLocalUpdated(final String fileName) {
 		// Get the keyfile
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -206,10 +224,15 @@ public class FileSyncManager {
 			log.error(e);
 			succesful = false;
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
 
 		// Update the keyfile
 		if (succesful) {
 			encManager.updateKeyFile(keyFile);
+			// TODO: Code is temporary, the disconnect will be removed eventually
+			encManager.getConnector().disconnect();
+
 		}
 		return succesful;
 
@@ -227,6 +250,9 @@ public class FileSyncManager {
 	private boolean handleServerAddedOrUpdated(final String fileName, boolean update) {
 		// Almost the same as handleServerUpdated
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -256,6 +282,9 @@ public class FileSyncManager {
 		} catch (InvalidClientFileException e) {
 			log.error(e);
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		return true;
 	}
 
