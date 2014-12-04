@@ -19,15 +19,15 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.fides.components.Actions;
 import org.fides.components.Responses;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 /**
  * This class makes it possible to connect to a server and communicate with it
- *
+ * 
  * @author Jesse
  * @author Niels
  * @author Tom
@@ -89,8 +89,9 @@ public class ServerConnector {
 
 	/**
 	 * Connect to the server with the given ip and port
-	 *
-	 * @param address The {@link InetSocketAddress} with the server's address
+	 * 
+	 * @param address
+	 *            The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
 	 */
 	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
@@ -120,7 +121,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is alive
-	 *
+	 * 
 	 * @return true if connected
 	 */
 	public boolean isConnected() {
@@ -129,9 +130,11 @@ public class ServerConnector {
 
 	/**
 	 * Login user with given username and passwordHash
-	 *
-	 * @param username     name of the user
-	 * @param passwordHash to login
+	 * 
+	 * @param username
+	 *            name of the user
+	 * @param passwordHash
+	 *            to login
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
@@ -169,9 +172,11 @@ public class ServerConnector {
 
 	/**
 	 * Register the user with given username and passwordHash
-	 *
-	 * @param username     the given username
-	 * @param passwordHash of the account
+	 * 
+	 * @param username
+	 *            the given username
+	 * @param passwordHash
+	 *            of the account
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {
@@ -204,8 +209,9 @@ public class ServerConnector {
 
 	/**
 	 * Getter to get the error message received from the server
-	 *
-	 * @param key of the map to get the corresponding value
+	 * 
+	 * @param key
+	 *            of the map to get the corresponding value
 	 * @return the value
 	 */
 	public String getErrorMessage(String key) {
@@ -214,7 +220,7 @@ public class ServerConnector {
 
 	/**
 	 * Disconnect the current connection
-	 *
+	 * 
 	 * @return true if disconnect was successful
 	 */
 	public boolean disconnect() {
@@ -234,7 +240,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is inactive
-	 *
+	 * 
 	 * @return true if disconnected
 	 */
 	public boolean isDisconnected() {
@@ -243,7 +249,7 @@ public class ServerConnector {
 
 	/**
 	 * Get the server certificates
-	 *
+	 * 
 	 * @return the server certificates
 	 */
 	public Certificate[] getServerCertificates() {
@@ -256,7 +262,7 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject keyFileRequest = new JsonObject();
-			keyFileRequest.addProperty("action", "getKeyFile");
+			keyFileRequest.addProperty("action", Actions.GETKEYFILE);
 			out.writeUTF(new Gson().toJson(keyFileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has("successful")) {
@@ -279,7 +285,7 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty("action", "updateKeyFile");
+			fileRequest.addProperty("action", Actions.UPDATEKEYFILE);
 			out.writeUTF(new Gson().toJson(fileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has("successful")) {
@@ -299,8 +305,9 @@ public class ServerConnector {
 
 	/**
 	 * Returns a stream of the encrypted requested file
-	 *
-	 * @param location The location of the requested file
+	 * 
+	 * @param location
+	 *            The location of the requested file
 	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
@@ -309,7 +316,7 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty("action", "getFile");
+			fileRequest.addProperty("action", Actions.GETFILE);
 			fileRequest.addProperty("location", location);
 			out.writeUTF(new Gson().toJson(fileRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
@@ -332,7 +339,7 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject uploadRequest = new JsonObject();
-			uploadRequest.addProperty("action", "uploadFile");
+			uploadRequest.addProperty("action", Actions.UPLOADFILE);
 			out.writeUTF(new Gson().toJson(uploadRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has("successful")) {
@@ -355,7 +362,7 @@ public class ServerConnector {
 			connect(savedAddress);
 			login(savedUsername, savedPasswordHash);
 			JsonObject updateRequest = new JsonObject();
-			updateRequest.addProperty("action", "updateFile");
+			updateRequest.addProperty("action", Actions.UPDATEFILE);
 			updateRequest.addProperty("location", location);
 			out.writeUTF(new Gson().toJson(updateRequest));
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
