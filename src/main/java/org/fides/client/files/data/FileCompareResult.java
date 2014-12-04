@@ -1,5 +1,4 @@
-package org.fides.client.files;
-
+package org.fides.client.files.data;
 
 /**
  * A result of the {@link FileManager#compareFiles(KeyFile)} when comparing the local files and the files on the server

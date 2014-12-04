@@ -1,17 +1,25 @@
 package org.fides.client.files;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.UserSettings;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.CompareResultType;
+import org.fides.client.files.data.FileCompareResult;
+import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.LocalHashes;
+import org.fides.client.tools.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
@@ -25,18 +33,6 @@ public class FileManager {
 	 */
 	private static Logger log = LogManager.getLogger(FileManager.class);
 
-	private Properties localHashes;
-
-	private UserSettings settings;
-
-	/**
-	 * Constructor
-	 */
-	public FileManager(Properties localHashes) {
-		settings = UserSettings.getInstance();
-		this.localHashes = localHashes;
-	}
-
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
 	 * 
@@ -45,12 +41,13 @@ public class FileManager {
 	 * @return The collection of {@link FileCompareResult} with the differences between a server({@link KeyFile})
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
+		UserProperties settings = UserProperties.getInstance();
 		List<FileCompareResult> results = new ArrayList<>();
 		// Get all the names of the local stored files
 		List<File> files = new ArrayList<>();
 		File directory = settings.getFileDirectory();
 		filesInDirectory(directory, files);
-		Set<String> clientFileNames = filesToNames(files, directory);
+		Set<String> clientFileNames = filesToLocalNames(files, directory);
 
 		// We don't the files need it anymore, only the names
 		files.clear();
@@ -58,53 +55,20 @@ public class FileManager {
 
 		// Get all the name of the server stored files
 		Set<String> serverFileNames = new HashSet<>();
-		for (ClientFile clientFile : keyFile.getAllClientFiles()) {
+		for (ClientFile clientFile : keyFile.getAllClientFiles().values()) {
 			serverFileNames.add(clientFile.getName());
 		}
 
-		// Lets start comparing
 		for (String serverName : serverFileNames) {
-			// Server has the file
-			if (clientFileNames.contains(serverName)) {
-				// We both have the file
-				String fileHash = FileUtil.generateFileHash(new File(directory, serverName));
-				String savedHash = localHashes.getProperty(serverName);
-				boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(serverName).getHash());
-				boolean localChanged = !savedHash.equals(fileHash);
-
-				if (localChanged && serverChanged) {
-					// Both server and client are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.CONFLICTED));
-				} else if (localChanged) {
-					// Client are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_UPDATED));
-				} else if (serverChanged) {
-					// Server are changed
-					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_UPDATED));
-				}
-				// Else nothing changed
-			} else {
-				// I have not the file
-				if (localHashes.containsKey(serverName)) {
-					// Did exist local (its removed local)
-					results.add(new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED));
-				} else {
-					// Did not exist here (its added on the server)
-					results.add(new FileCompareResult(serverName, CompareResultType.SERVER_ADDED));
-				}
+			FileCompareResult result = checkServerSideFile(serverName, clientFileNames, keyFile);
+			if (result != null) {
+				results.add(result);
 			}
 		}
 		for (String clientName : clientFileNames) {
-			// I have the file
-			if (!serverFileNames.contains(clientName)) {
-				// Server has not the file
-				if (localHashes.containsKey(clientName)) {
-					// Did exist local (its remove on the server)
-					results.add(new FileCompareResult(clientName, CompareResultType.SERVER_REMOVED));
-				} else {
-					// Did not exist here (its added local)
-					results.add(new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED));
-				}
+			FileCompareResult result = checkClientSideFile(clientName, serverFileNames, keyFile);
+			if (result != null) {
+				results.add(result);
 			}
 		}
 
@@ -112,49 +76,209 @@ public class FileManager {
 	}
 
 	/**
-	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
+	 * The compare check for a file on the server
 	 * 
-	 * @param instream
-	 *            The inputstream to read from
-	 * @param name
-	 *            The name of the file
-	 * @return
+	 * @param serverName
+	 *            The name of the file on the server
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
-	public String addFile(InputStream instream, String name) {
-		return null;
+	public FileCompareResult checkServerSideFile(String serverName, KeyFile keyFile) {
+		List<File> files = new ArrayList<>();
+		File directory = UserProperties.getInstance().getFileDirectory();
+		filesInDirectory(directory, files);
+		Set<String> clientFileNames = filesToLocalNames(files, directory);
+		return checkServerSideFile(serverName, clientFileNames, keyFile);
+	}
+
+	/**
+	 * The compare check for a file on the server
+	 * 
+	 * @param serverName
+	 *            The name of the file on the server
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
+	private FileCompareResult checkServerSideFile(String serverName, Collection<String> clientFileNames, KeyFile keyFile) {
+		FileCompareResult result = null;
+		// Does the file exist on the server
+		if (keyFile.getClientFileByName(serverName) != null) {
+			// Server has the file
+			if (clientFileNames.contains(serverName)) {
+				// We both have the file
+				result = checkMatchingFile(serverName, keyFile);
+			} else if (LocalHashes.getInstance().containsHash(serverName)) {
+				// Did exist local (its removed local)
+				result = new FileCompareResult(serverName, CompareResultType.LOCAL_REMOVED);
+			} else {
+				// Did not exist here (its added on the server)
+				result = new FileCompareResult(serverName, CompareResultType.SERVER_ADDED);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * The compare check for a local file
+	 * 
+	 * @param clientName
+	 *            The name of the local file
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
+	public FileCompareResult checkClientSideFile(String clientName, KeyFile keyFile) {
+		Set<String> serverFileNames = new HashSet<>();
+		for (ClientFile clientFile : keyFile.getAllClientFiles().values()) {
+			serverFileNames.add(clientFile.getName());
+		}
+		return checkClientSideFile(clientName, serverFileNames, keyFile);
+	}
+
+	/**
+	 * The compare check for a local file
+	 * 
+	 * @param clientName
+	 *            The name of the local file
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
+	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
+		FileCompareResult result = null;
+		// Does the local file exist
+		File file = new File(UserProperties.getInstance().getFileDirectory(), clientName);
+		if (file.exists()) {
+			// I have the file
+			if (serverFileNames.contains(clientName)) {
+				// We both have the file
+				result = checkMatchingFile(clientName, keyFile);
+			} else if (LocalHashes.getInstance().containsHash(clientName)) {
+				// Did exist local (its remove on the server)
+				result = new FileCompareResult(clientName, CompareResultType.SERVER_REMOVED);
+			} else {
+				// Did not exist here (its added local)
+				result = new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * The compare check for when a file exists on the server and client
+	 * 
+	 * @param fileName
+	 *            The name of the file (local and on server)
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
+	 * @return The {@link FileCompareResult} from the check, can be null if no result
+	 */
+	private FileCompareResult checkMatchingFile(String fileName, KeyFile keyFile) {
+		// We both have the file
+		FileCompareResult result = null;
+		String fileHash = FileUtil.generateFileHash(new File(UserProperties.getInstance().getFileDirectory(), fileName));
+		String savedHash = LocalHashes.getInstance().getHash(fileName);
+		boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
+		boolean localChanged = !savedHash.equals(fileHash);
+
+		if (localChanged && serverChanged) {
+			// Both server and client are changed
+			result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+		} else if (localChanged) {
+			// Client are changed
+			result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
+		} else if (serverChanged) {
+			// Server are changed
+			result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+		}
+		// Else nothing changed
+		return result;
 	}
 
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 * 
-	 * @param instream
-	 * @param name
-	 * @return
+	 * @param fileName
+	 *            The name of the file
+	 * @return The {@link OutputStream} to write to the file
+	 * @throws FileNotFoundException
 	 */
-	public String updateFile(InputStream instream, String name) {
-		return null;
+	public OutputStream addFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		if (file.exists()) {
+			log.error("File does already exist: " + file);
+			return null;
+		}
+		if (!file.canWrite()) {
+			log.error("File can not be written: " + file);
+			return null;
+		}
+		return new FileOutputStream(file);
 	}
 
 	/**
-	 * Remove a file
+	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 * 
-	 * @param name
-	 *            The name of the file
+	 * @param fileName
+	 *            The name of the file to create, in local space
+	 * @return The {@link OutputStream} to write to the file
+	 * @throws FileNotFoundException
+	 */
+	public OutputStream updateFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.exists()) {
+			log.error("File does not exist: " + file);
+			return null;
+		}
+		if (!file.canWrite()) {
+			log.error("File can not be written: " + file);
+			return null;
+		}
+		return new FileOutputStream(file);
+	}
+
+	/**
+	 * Removes a file
+	 * 
+	 * @param fileName
+	 *            The name of the file to update, in local space
 	 * @return true if removed
 	 */
-	public boolean removeFile(String name) {
-		return false;
+	public boolean removeFile(String fileName) {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.canWrite()) {
+			log.error("File can not be written: " + file);
+			return false;
+		}
+		return file.delete();
 	}
 
 	/**
-	 * Read a file
+	 * Reads a file
 	 * 
-	 * @param name
-	 *            The name of the file to read
-	 * @return An {@link InputStream} reading form the file
+	 * @param fileName
+	 *            The name of the file to read, in local space
+	 * @return An {@link InputStream} reading from the file
+	 * @throws FileNotFoundException
 	 */
-	public InputStream readFile(String name) {
-		return null;
+	public InputStream readFile(String fileName) throws FileNotFoundException {
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		if (!file.canRead()) {
+			log.error("File can not be read: " + file);
+			return null;
+		}
+		return new FileInputStream(file);
 	}
 
 	/**
@@ -167,38 +291,64 @@ public class FileManager {
 	 */
 	private static void filesInDirectory(File directory, List<File> files) {
 		File[] dirFiles = directory.listFiles();
-		for (File file : dirFiles) {
-			if (file.isDirectory()) {
-				filesInDirectory(file, files);
-			} else {
-				files.add(file);
+		if (dirFiles != null) {
+			for (File file : dirFiles) {
+				if (file.isDirectory()) {
+					filesInDirectory(file, files);
+				} else {
+					files.add(file);
+				}
 			}
 		}
 	}
 
 	/**
-	 * Transforms a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
+	 * Relativizes a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files are save on a PC can be
-	 * different.
+	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
+	 * different PCs
 	 * 
 	 * @param files
+	 *            The file to turn to local space
 	 * @param directory
+	 *            The directory to relativize to
 	 * @return
 	 */
-	private static Set<String> filesToNames(List<File> files, File directory) {
+	private static Set<String> filesToLocalNames(List<File> files, File basedir) {
 		Set<String> fileNames = new HashSet<>();
-		String baseFilePath = directory.getPath() + "\\";
 		for (File file : files) {
-			String fileName = file.getPath();
-			if (fileName.startsWith(baseFilePath)) {
-				fileName = fileName.substring(baseFilePath.length());
-				fileNames.add(fileName);
-			} else {
-				log.debug(file.getPath() + " : " + directory.getPath());
-			}
+			// File relativeFile = directory.toPath().relativize(file.toPath()).toFile();
+			// fileNames.add(relativeFile.getPath().replace('\\', '/')); // we always want '/'
+			fileNames.add(fileToLocalName(file, basedir));
 		}
 		return fileNames;
 	}
 
+	/**
+	 * Relativizes a file to a local file name
+	 * 
+	 * @param file
+	 *            The file to turn to local space
+	 * @return The local file name
+	 */
+	public static String fileToLocalName(File file) {
+		File baseDir = UserProperties.getInstance().getFileDirectory();
+		return fileToLocalName(file, baseDir);
+	}
+
+	/**
+	 * Relativizes a file to a local file name
+	 * 
+	 * @param file
+	 *            The file to turn to local space
+	 * @param basedir
+	 *            The directory to relativize to
+	 * @return The local file name
+	 */
+	private static String fileToLocalName(File file, File basedir) {
+		File baseDir = UserProperties.getInstance().getFileDirectory();
+		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
+		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use thesame
+		return relativeFile.getPath().replace('\\', '/');
+	}
 }

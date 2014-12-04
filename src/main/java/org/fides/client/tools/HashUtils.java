@@ -11,7 +11,7 @@ import org.bouncycastle.util.encoders.Base64;
  * Utils for client
  * 
  * @author jesse
- *
+ * 
  */
 public class HashUtils {
 	/**
@@ -22,7 +22,7 @@ public class HashUtils {
 	/**
 	 * hash function to hash password
 	 */
-	private static final String HASH = "SHA-256";
+	private static final String HASH_ALGORITHM = "SHA-256";
 
 	/**
 	 * Hash data
@@ -33,7 +33,7 @@ public class HashUtils {
 	 */
 	public static String hash(String data) {
 		try {
-			MessageDigest messageDigest = MessageDigest.getInstance(HASH);
+			MessageDigest messageDigest = MessageDigest.getInstance(HASH_ALGORITHM);
 			messageDigest.update(data.getBytes());
 			return Base64.toBase64String(messageDigest.digest());
 		} catch (NoSuchAlgorithmException e) {

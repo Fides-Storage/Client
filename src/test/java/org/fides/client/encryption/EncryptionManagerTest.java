@@ -21,8 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
-import org.fides.client.files.ClientFile;
-import org.fides.client.files.KeyFile;
+import org.fides.client.files.data.ClientFile;
+import org.fides.client.files.data.KeyFile;
 import org.junit.Test;
 
 /**
@@ -54,7 +54,7 @@ public class EncryptionManagerTest {
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector
 			EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
-			manager.uploadKeyFile(keyfile);
+			manager.updateKeyFile(keyfile);
 
 			ByteArrayInputStream mockIn = new ByteArrayInputStream(mockOut.toByteArray());
 			DataInputStream mockDin = new DataInputStream(mockIn);
@@ -85,7 +85,7 @@ public class EncryptionManagerTest {
 		try {
 			// Creates an EncryptionManager with the mock ServerConnector
 			EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
-			manager.uploadKeyFile(keyfile);
+			manager.updateKeyFile(keyfile);
 
 			// Use the mock ServerConnector to replace the call to requestKeyFile to return the encrypted key file.
 			ByteArrayInputStream mockIn = new ByteArrayInputStream(mockOut.toByteArray());

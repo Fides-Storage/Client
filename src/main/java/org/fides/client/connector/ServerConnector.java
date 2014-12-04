@@ -9,6 +9,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLSession;
@@ -20,19 +22,27 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.fides.components.Actions;
+import org.fides.components.Responses;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
- * 
+ *
  * @author Jesse
  * @author Niels
  * @author Tom
  */
 public class ServerConnector {
+
 	/**
 	 * Log for this class
 	 */
 	private static Logger log = LogManager.getLogger(ServerConnector.class);
+
+	/**
+	 * The collection to store the error messages received from the server
+	 */
+	private Map<String, String> errorMessages = new HashMap<>();
 
 	/**
 	 * The SSLSocket that will be used
@@ -79,9 +89,8 @@ public class ServerConnector {
 
 	/**
 	 * Connect to the server with the given ip and port
-	 * 
-	 * @param address
-	 *            The {@link InetSocketAddress} with the server's address
+	 *
+	 * @param address The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
 	 */
 	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
@@ -111,7 +120,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is alive
-	 * 
+	 *
 	 * @return true if connected
 	 */
 	public boolean isConnected() {
@@ -120,35 +129,34 @@ public class ServerConnector {
 
 	/**
 	 * Login user with given username and passwordHash
-	 * 
-	 * @param username
-	 *            name of the user
-	 * @param passwordHash
-	 *            to login
+	 *
+	 * @param username     name of the user
+	 * @param passwordHash to login
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
 		if (isConnected() && !loggedIn) {
 			try {
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "login");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(Actions.ACTION, Actions.LOGIN);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-
-				if (userAnswer.has("successful")) {
-					savedUsername = username;
-					savedPasswordHash = passwordHash;
-					loggedIn = userAnswer.get("successful").getAsBoolean();
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
+					}
+					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 				} else {
 					loggedIn = false;
 				}
 
 			} catch (IOException e) {
 				log.error("IOException connection failed: ", e);
+				loggedIn = false;
 			}
 		}
 
@@ -161,11 +169,9 @@ public class ServerConnector {
 
 	/**
 	 * Register the user with given username and passwordHash
-	 * 
-	 * @param username
-	 *            the given username
-	 * @param passwordHash
-	 *            of the account
+	 *
+	 * @param username     the given username
+	 * @param passwordHash of the account
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {
@@ -173,16 +179,18 @@ public class ServerConnector {
 			try {
 
 				JsonObject user = new JsonObject();
-				user.addProperty("action", "createUser");
-				user.addProperty("username", username);
-				user.addProperty("passwordHash", passwordHash);
+				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-
-				if (userAnswer.has("successful")) {
-					return userAnswer.get("successful").getAsBoolean();
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.CREATEUSER, userAnswer.get(Responses.ERROR).getAsString());
+					}
+					return userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 				} else {
 					return false;
 				}
@@ -191,13 +199,22 @@ public class ServerConnector {
 				log.error("IOException connection failed: ", e);
 			}
 		}
-
 		return false;
 	}
 
 	/**
+	 * Getter to get the error message received from the server
+	 *
+	 * @param key of the map to get the corresponding value
+	 * @return the value
+	 */
+	public String getErrorMessage(String key) {
+		return errorMessages.get(key);
+	}
+
+	/**
 	 * Disconnect the current connection
-	 * 
+	 *
 	 * @return true if disconnect was successful
 	 */
 	public boolean disconnect() {
@@ -217,7 +234,7 @@ public class ServerConnector {
 
 	/**
 	 * Returns if the connection is inactive
-	 * 
+	 *
 	 * @return true if disconnected
 	 */
 	public boolean isDisconnected() {
@@ -226,7 +243,7 @@ public class ServerConnector {
 
 	/**
 	 * Get the server certificates
-	 * 
+	 *
 	 * @return the server certificates
 	 */
 	public Certificate[] getServerCertificates() {
@@ -282,9 +299,8 @@ public class ServerConnector {
 
 	/**
 	 * Returns a stream of the encrypted requested file
-	 * 
-	 * @param location
-	 *            The location of the requested file
+	 *
+	 * @param location The location of the requested file
 	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
