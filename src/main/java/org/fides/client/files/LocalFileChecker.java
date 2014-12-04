@@ -35,6 +35,7 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * Log for this class
 	 */
+	// TODO: use correct class
 	private static Logger log = LogManager.getLogger(EncryptionManager.class);
 
 	private final FileSyncManager syncManager;
@@ -138,6 +139,7 @@ public class LocalFileChecker extends Thread {
 	 *            The location of the event
 	 */
 	private void handleEvent(WatchEvent<?> event, Path dir) {
+		// TODO: give explanation why?
 		@SuppressWarnings("unchecked")
 		WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
 		WatchEvent.Kind<?> kind = watchEvent.kind();

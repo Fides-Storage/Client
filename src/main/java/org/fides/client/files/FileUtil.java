@@ -61,6 +61,7 @@ public final class FileUtil {
 	public static MessageDigest createFileDigest() {
 		MessageDigest messageDigest = null;
 		try {
+			// TODO: make static final variable
 			messageDigest = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
 			// Should never happen

@@ -23,6 +23,7 @@ public final class LocalHashes {
 	/**
 	 * Log for this class
 	 */
+	// TODO: use correct class
 	private static Logger log = LogManager.getLogger(EncryptionManager.class);
 
 	private static final String LOCAL_HASHSES_FILE = "hashes.xml";
@@ -35,6 +36,7 @@ public final class LocalHashes {
 	 * Constuctor
 	 */
 	private LocalHashes() {
+		// TODO: use combine new file
 		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
 		if (file.exists()) {
 			try (InputStream in = new FileInputStream(file)) {
@@ -70,6 +72,7 @@ public final class LocalHashes {
 	}
 
 	private synchronized void saveHashes() {
+		// TODO: use combine new file
 		File file = new File(UserProperties.SETTINGS_DIRECTORY + LOCAL_HASHSES_FILE);
 		try (OutputStream out = new FileOutputStream(file)) {
 			localHashes.storeToXML(out, "Local file hashes");

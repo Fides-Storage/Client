@@ -43,6 +43,7 @@ public class FileSyncManager {
 	 *            The {@link EncryptionManager} to use
 	 */
 	public FileSyncManager(FileManager fileManager, EncryptionManager encManager) {
+		// TODO: what does the super here?
 		super();
 		this.fileManager = fileManager;
 		this.encManager = encManager;
@@ -111,18 +112,21 @@ public class FileSyncManager {
 			handleLocalUpdated(result.getName());
 			break;
 		case SERVER_ADDED:
+			// TODO: where does the false stands for
 			handleServerAddedOrUpdated(result.getName(), false);
 			break;
 		case SERVER_REMOVED:
 			handleServerRemoved(result.getName());
 			break;
 		case SERVER_UPDATED:
+			// TODO: where does the true stands for
 			handleServerAddedOrUpdated(result.getName(), true);
 			break;
 		case CONFLICTED:
 			handleConflict(result.getName());
 			break;
 		default:
+			// TODO: default do nothing?
 			break;
 		}
 	}
@@ -154,6 +158,7 @@ public class FileSyncManager {
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 		} catch (IOException e) {
 			log.error(e);
+			// TODO: stop here?
 		}
 
 		// Update the keyfile
@@ -199,6 +204,7 @@ public class FileSyncManager {
 			clientFile.setHash(hash);
 		} catch (IOException e) {
 			log.error(e);
+			// TODO: stop here?
 		}
 
 		// Update the keyfile

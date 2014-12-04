@@ -89,6 +89,7 @@ public class FileManager {
 		return checkServerSideFile(serverName, clientFileNames, keyFile);
 	}
 
+	// TODO: javadoc
 	private FileCompareResult checkServerSideFile(String serverName, Collection<String> clientFileNames, KeyFile keyFile) {
 		FileCompareResult result = null;
 		// Does the file exist on the server
@@ -124,6 +125,7 @@ public class FileManager {
 		return checkClientSideFile(clientName, serverFileNames, keyFile);
 	}
 
+	// TODO: javadoc
 	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
 		FileCompareResult result = null;
 		// Does the local file exist
@@ -144,6 +146,7 @@ public class FileManager {
 		return result;
 	}
 
+	// TODO: javadoc
 	private FileCompareResult checkMatchingFile(String fileName, KeyFile keyFile) {
 		// We both have the file
 		FileCompareResult result = null;
@@ -278,6 +281,7 @@ public class FileManager {
 	 */
 	private static Set<String> filesToNames(List<File> files, File directory) {
 		Set<String> fileNames = new HashSet<>();
+		// TODO: use new File for path
 		String baseFilePath = directory.getPath() + "\\";
 		for (File file : files) {
 			String fileName = file.getPath();
@@ -300,6 +304,7 @@ public class FileManager {
 	 */
 	public static String fileToLocalName(File file) {
 		File baseDir = UserProperties.getInstance().getFileDirectory();
+		// TODO: use new File for path
 		String baseFilePath = baseDir.getPath() + "\\";
 		String fileName = file.getPath();
 		if (fileName.startsWith(baseFilePath)) {

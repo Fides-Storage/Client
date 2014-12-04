@@ -139,6 +139,7 @@ public class FileManagerCompareTest {
 	 * @throws IOException
 	 */
 	@Test
+	// TODO: Fail
 	public void testCompareClientAdded() throws IOException {
 		// Setup
 		new File(testDir, "File2.txt").createNewFile();
@@ -159,6 +160,7 @@ public class FileManagerCompareTest {
 	 * @throws IOException
 	 */
 	@Test
+	// TODO: Fail
 	public void testCompareServerRemoved() throws IOException {
 		// Setup
 		localHashes.setProperty("File3.txt", "File3.txt");
@@ -199,6 +201,7 @@ public class FileManagerCompareTest {
 	 * @throws IOException
 	 */
 	@Test
+	// TODO: Fail
 	public void testCompareServerUpdated() throws IOException {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File5.txt", "", null, "File5C.txt"));
@@ -224,6 +227,7 @@ public class FileManagerCompareTest {
 	 * @throws IOException
 	 */
 	@Test
+	// TODO: Fail
 	public void testCompareClientUpdated() throws IOException {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File6.txt", "", null, "File6D.txt"));
@@ -249,6 +253,7 @@ public class FileManagerCompareTest {
 	 * @throws IOException
 	 */
 	@Test
+	// TODO: Fail
 	public void testCompareConflict() throws IOException {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File7.txt", "", null, "File7C.txt"));

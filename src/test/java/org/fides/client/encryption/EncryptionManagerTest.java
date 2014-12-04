@@ -96,7 +96,6 @@ public class EncryptionManagerTest {
 			assertNotNull(requestedKeyFile);
 			assertEquals(clientFile, requestedKeyFile.getClientFileByName(clientFile.getName()));
 		} catch (Exception e) {
-			e.printStackTrace();
 			fail("An unexpected exception has occured: " + e.getMessage());
 		}
 	}

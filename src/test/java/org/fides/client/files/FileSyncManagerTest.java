@@ -1,8 +1,6 @@
 package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -55,15 +53,15 @@ public class FileSyncManagerTest {
 	public void setUp() throws Exception {
 		compareResults = new HashSet<>();
 		PowerMockito.mockStatic(LocalHashes.class);
-		Mockito.when(LocalHashes.getInstance()).thenReturn(mock(LocalHashes.class));
+		Mockito.when(LocalHashes.getInstance()).thenReturn(Mockito.mock(LocalHashes.class));
 
-		fileManagerMock = mock(FileManager.class);
-		when(fileManagerMock.compareFiles((KeyFile) any())).thenReturn(compareResults);
+		fileManagerMock = Mockito.mock(FileManager.class);
+		Mockito.when(fileManagerMock.compareFiles((KeyFile) Mockito.any())).thenReturn(compareResults);
 
 		keyFile = new KeyFile();
 
-		encManagerMock = mock(EncryptionManager.class);
-		when(encManagerMock.requestKeyFile()).thenReturn(keyFile);
+		encManagerMock = Mockito.mock(EncryptionManager.class);
+		Mockito.when(encManagerMock.requestKeyFile()).thenReturn(keyFile);
 
 		fileSyncManager = new FileSyncManager(fileManagerMock, encManagerMock);
 	}

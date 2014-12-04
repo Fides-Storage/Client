@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
  * @author Koen
  *
  */
+// TODO: move to org.fides.client.tools
 public final class UserProperties {
 
 	/**
@@ -29,16 +30,22 @@ public final class UserProperties {
 	 */
 	private static Logger log = LogManager.getLogger(UserProperties.class);
 
+	// TODO: javadoc?
 	private static final String DEFAULT_FILE_DIR = "./Fides";
 
+	// TODO: javadoc?
 	private static final String USER_SETTINGS_FILE = "user.properties";
 
+	// TODO: javadoc?
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
+	// TODO: javadoc?
 	private static UserProperties instance;
 
+	// TODO: javadoc?
 	private Properties properties;
 
+	// TODO: javadoc?
 	private File fileDirectory;
 
 	/**
@@ -53,11 +60,13 @@ public final class UserProperties {
 		}
 
 		try {
+			// TODO: use new file to combine directory and file
 			File file = new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE);
 			if (file.exists()) {
 				properties.load(new FileInputStream(file));
 			}
 		} catch (IOException e) {
+			// TODO: use logger
 			e.printStackTrace();
 		}
 
@@ -72,12 +81,14 @@ public final class UserProperties {
 				log.debug(e);
 			}
 
+			// TODO: saving if above try fails?
 			saveProperties();
 		}
 		fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
 			if (!fileDirectory.mkdirs()) {
 				log.error("File directory can not be created");
+				// TODO: do we need to shutdown here, or give the user some feedback?
 			}
 		}
 	}
@@ -90,6 +101,7 @@ public final class UserProperties {
 	 * Save the properties
 	 */
 	private void saveProperties() {
+		// TODO: use new file to combine directory and file
 		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY + USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {

@@ -90,6 +90,7 @@ public class EncryptionManager {
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
+	// TODO: throws exception, but catch others with return null and also use closeQuietly
 	public KeyFile requestKeyFile() throws IOException {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
@@ -128,6 +129,7 @@ public class EncryptionManager {
 	 * @throws IOException
 	 */
 	public boolean uploadKeyFile(final KeyFile keyFile) {
+		// TODO: to complex return statement
 		boolean completed = false;
 		if (keyFile == null) {
 			throw new NullPointerException("No KeyFile");
@@ -201,9 +203,11 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
+			// TODO: if failed throw error, otherwise code below will have a empty key
 			log.error(e);
 		} catch (InvalidKeySpecException e) {
 			// Should not happen
+			// TODO: if failed throw error, otherwise code below will have a empty key
 			log.error(e);
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
@@ -244,23 +248,27 @@ public class EncryptionManager {
 		return connector;
 	}
 
+	// TODO: javadoc
 	private InputStream getDecryptionStream(InputStream in, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
 		CipherParameters params = new ParametersWithIV(keyParam, IV);
 		cipher.reset();
+		// TODO: where stands false for?
 		cipher.init(false, params);
 
 		return new CipherInputStream(in, cipher);
 	}
 
+	// TODO: javadoc
 	private OutputStream getEncryptionStream(OutputStream out, Key key) {
 		BufferedBlockCipher cipher = createCipher();
 
 		KeyParameter keyParam = new KeyParameter(key.getEncoded());
 		CipherParameters params = new ParametersWithIV(keyParam, IV);
 		cipher.reset();
+		// TODO: where stands true for?
 		cipher.init(true, params);
 
 		return new CipherOutputStream(out, cipher);

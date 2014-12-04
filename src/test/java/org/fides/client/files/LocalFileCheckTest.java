@@ -2,8 +2,6 @@ package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -40,6 +39,7 @@ public class LocalFileCheckTest {
 
 	private FileSyncManager syncManagerMock;
 
+	// TODO: unused?
 	private KeyFile keyFile;
 
 	private File testDir;
@@ -57,8 +57,8 @@ public class LocalFileCheckTest {
 	public void setUp() throws Exception {
 		calledFiles = new HashSet<>();
 
-		syncManagerMock = mock(FileSyncManager.class);
-		when(syncManagerMock.checkClientFile(Matchers.anyString())).then(new Answer<Boolean>() {
+		syncManagerMock = Mockito.mock(FileSyncManager.class);
+		Mockito.when(syncManagerMock.checkClientFile(Matchers.anyString())).then(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock invocation) throws Throwable {
 				calledFiles.add(invocation.getArgumentAt(0, String.class));
@@ -73,10 +73,10 @@ public class LocalFileCheckTest {
 		}
 		testDir.mkdirs();
 
-		UserProperties userPropMock = mock(UserProperties.class);
-		when(userPropMock.getFileDirectory()).thenReturn(testDir);
+		UserProperties userPropMock = Mockito.mock(UserProperties.class);
+		Mockito.when(userPropMock.getFileDirectory()).thenReturn(testDir);
 		PowerMockito.mockStatic(UserProperties.class);
-		when(UserProperties.getInstance()).thenReturn(userPropMock);
+		Mockito.when(UserProperties.getInstance()).thenReturn(userPropMock);
 	}
 
 	/**
@@ -105,6 +105,7 @@ public class LocalFileCheckTest {
 	 * @throws InterruptedException
 	 */
 	@Test
+	// TODO: fail
 	public void test() throws IOException, InterruptedException {
 		File fileChange = new File(testDir, "fileChange.txt");
 		fileChange.createNewFile();
