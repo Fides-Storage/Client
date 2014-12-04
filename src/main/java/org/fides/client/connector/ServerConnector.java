@@ -59,6 +59,13 @@ public class ServerConnector {
 	 */
 	private boolean loggedIn = false;
 
+	// TODO: Move this to properties
+	private String savedUsername;
+
+	private String savedPasswordHash;
+
+	private InetSocketAddress savedAddress;
+
 	/**
 	 * The constructor for the ServerConnector
 	 */
@@ -90,6 +97,8 @@ public class ServerConnector {
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
 
+			savedAddress = address;
+
 			return true;
 		} catch (ConnectException e) {
 			throw e;
@@ -119,7 +128,7 @@ public class ServerConnector {
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
-		if (isConnected()) {
+		if (isConnected() && !loggedIn) {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty("action", "login");
@@ -131,6 +140,8 @@ public class ServerConnector {
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 
 				if (userAnswer.has("successful")) {
+					savedUsername = username;
+					savedPasswordHash = passwordHash;
 					loggedIn = userAnswer.get("successful").getAsBoolean();
 				} else {
 					loggedIn = false;
@@ -224,6 +235,9 @@ public class ServerConnector {
 
 	public InputStream requestKeyFile() {
 		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
 			JsonObject keyFileRequest = new JsonObject();
 			keyFileRequest.addProperty("action", "getKeyFile");
 			out.writeUTF(new Gson().toJson(keyFileRequest));
@@ -244,6 +258,9 @@ public class ServerConnector {
 
 	public OutputStream updateKeyFile() {
 		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty("action", "updateKeyFile");
 			out.writeUTF(new Gson().toJson(fileRequest));
@@ -252,11 +269,13 @@ public class ServerConnector {
 				if (requestResponse.get("successful").getAsBoolean()) {
 					return out;
 				} else {
+					System.out.println("error message: " + requestResponse.get("error"));
 					// TODO: Read error message.
 				}
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
+			System.out.println("IO Exception");
 		}
 		return null;
 	}
@@ -264,13 +283,15 @@ public class ServerConnector {
 	/**
 	 * Returns a stream of the encrypted requested file
 	 * 
-	 * @param location The location of the requested file
-	 * @return
-	 * 		An inputstream with the content of the requested file. 
-	 * 		Returns <code>null</code> if the request failed.
+	 * @param location
+	 *            The location of the requested file
+	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
 		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty("action", "getFile");
 			fileRequest.addProperty("location", location);
@@ -291,6 +312,9 @@ public class ServerConnector {
 
 	public OutputStreamData uploadFile() {
 		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
 			JsonObject uploadRequest = new JsonObject();
 			uploadRequest.addProperty("action", "uploadFile");
 			out.writeUTF(new Gson().toJson(uploadRequest));
@@ -311,6 +335,9 @@ public class ServerConnector {
 
 	public OutputStream updateFile(String location) {
 		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
 			JsonObject updateRequest = new JsonObject();
 			updateRequest.addProperty("action", "updateFile");
 			updateRequest.addProperty("location", location);
