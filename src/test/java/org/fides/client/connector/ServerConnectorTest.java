@@ -12,8 +12,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.fides.client.tools.Actions;
-import org.fides.client.tools.Responses;
+import org.fides.components.Actions;
+import org.fides.components.Responses;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
