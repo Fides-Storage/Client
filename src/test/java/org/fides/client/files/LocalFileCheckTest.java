@@ -36,6 +36,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(UserProperties.class)
 public class LocalFileCheckTest {
 
+	private static final int SLEEP_TIME = 20;
+
 	private FileSyncManager syncManagerMock;
 
 	private File testDir;
@@ -109,36 +111,36 @@ public class LocalFileCheckTest {
 		thread = new LocalFileChecker(syncManagerMock);
 		thread.start();
 
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File file1 = new File(testDir, "File1.txt");
 		file1.createNewFile();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File subDir = new File(testDir, "subDir");
 		subDir.mkdir();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File file2 = new File(subDir, "File2.txt");
 		file2.createNewFile();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File subDir2 = new File(subDir, "subDir2");
 		subDir2.mkdirs();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File file3 = new File(subDir2, "File3.txt");
 		file3.createNewFile();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		File file4 = new File(preSubDir, "File4.txt");
 		file4.createNewFile();
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		try (OutputStream out = new FileOutputStream(fileChange)) {
 			out.write("SomeThing".getBytes());
 		}
-		Thread.sleep(20);
+		Thread.sleep(SLEEP_TIME);
 
 		assertEquals(5, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));
