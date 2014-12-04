@@ -18,6 +18,7 @@ import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.CompareResultType;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
 
 /**

@@ -36,8 +36,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(UserProperties.class)
 public class LocalFileCheckTest {
 
-	private static final int SLEEP_TIME = 20;
-
 	private FileSyncManager syncManagerMock;
 
 	private File testDir;
@@ -111,39 +109,49 @@ public class LocalFileCheckTest {
 		thread = new LocalFileChecker(syncManagerMock);
 		thread.start();
 
-		Thread.sleep(SLEEP_TIME);
+		// Give it some time to start
+		Thread.sleep(100);
 
+		// Create some files
 		File file1 = new File(testDir, "File1.txt");
 		file1.createNewFile();
-		Thread.sleep(SLEEP_TIME);
+		File file1b = new File(testDir, "File1b.txt");
+		file1b.createNewFile();
+		File file1c = new File(testDir, "File1c.txt");
+		file1c.createNewFile();
 
+		// Create a sub directory
 		File subDir = new File(testDir, "subDir");
 		subDir.mkdir();
-		Thread.sleep(SLEEP_TIME);
 
+		// Create a sub directory file
 		File file2 = new File(subDir, "File2.txt");
 		file2.createNewFile();
-		Thread.sleep(SLEEP_TIME);
 
+		// Create a sub sub directory
 		File subDir2 = new File(subDir, "subDir2");
 		subDir2.mkdirs();
-		Thread.sleep(SLEEP_TIME);
 
+		// Create a sub sub directory file
 		File file3 = new File(subDir2, "File3.txt");
 		file3.createNewFile();
-		Thread.sleep(SLEEP_TIME);
 
+		// Create a existing sub directory file
 		File file4 = new File(preSubDir, "File4.txt");
 		file4.createNewFile();
-		Thread.sleep(SLEEP_TIME);
 
+		// Change existing file
 		try (OutputStream out = new FileOutputStream(fileChange)) {
 			out.write("SomeThing".getBytes());
 		}
-		Thread.sleep(SLEEP_TIME);
 
-		assertEquals(5, calledFiles.size());
+		// Give it some time to proccess
+		Thread.sleep(100);
+
+		assertEquals(7, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));
+		assertTrue(calledFiles.contains("File1b.txt"));
+		assertTrue(calledFiles.contains("File1c.txt"));
 		assertTrue(calledFiles.contains("fileChange.txt"));
 		assertTrue(calledFiles.contains("subDir/File2.txt"));
 		assertTrue(calledFiles.contains("subDir/subDir2/File3.txt"));

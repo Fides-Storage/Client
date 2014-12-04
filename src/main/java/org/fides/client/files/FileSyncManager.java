@@ -17,6 +17,7 @@ import org.fides.client.encryption.KeyGenerator;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.LocalHashes;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a

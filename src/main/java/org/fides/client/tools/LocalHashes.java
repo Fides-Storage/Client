@@ -1,4 +1,4 @@
-package org.fides.client.files;
+package org.fides.client.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.tools.UserProperties;
 
 /**
  * Used for loading and storing local hashes

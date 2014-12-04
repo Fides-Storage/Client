@@ -5,6 +5,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.tools.UserProperties;
@@ -151,25 +153,65 @@ public class LocalFileChecker extends Thread {
 		Path file = watchEvent.context();
 		Path child = dir.resolve(file);
 		log.debug(kind + " : " + file + " : " + child);
+		System.out.println(kind + " : " + file + " : " + child);
 
 		if (Files.isDirectory(child)) {
 			// Change is a directory
-			// We want to watch it from now on
-			try {
-				WatchKey newKey = child.register(watcher,
-					ENTRY_CREATE,
-					ENTRY_DELETE,
-					ENTRY_MODIFY);
-				keys.put(newKey, child);
-			} catch (IOException e) {
-				e.printStackTrace();
-				log.error(e);
+
+			if (kind == ENTRY_CREATE) {
+				// We want to watch it from now on
+				try {
+					WatchKey newKey = child.register(watcher,
+						ENTRY_CREATE,
+						ENTRY_DELETE,
+						ENTRY_MODIFY);
+					keys.put(newKey, child);
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error(e);
+				}
+				// It is still possible that is some way files are added before it being added, this will check the
+				// change directory
+				for (File subFile : child.toFile().listFiles()) {
+					checkSubPath(subFile.toPath());
+				}
 			}
 		} else if (Files.isRegularFile(child)) {
 			// Transform string to local space and upload (or remove)
 			String localName = FileManager.fileToLocalName(child.toFile());
-			if (localName != null) {
+			if (!StringUtils.isBlank(localName)) {
 				syncManager.checkClientFile(localName);
+			}
+		}
+	}
+
+	/**
+	 * When Recursively checks a directory
+	 * 
+	 * @param subPath
+	 *            The directory to check
+	 */
+	private void checkSubPath(Path subPath) {
+		System.out.println("SUB: " + subPath);
+		if (Files.isRegularFile(subPath)) {
+			// Transform string to local space and upload (or remove)
+			String localName = FileManager.fileToLocalName(subPath.toFile());
+			if (!StringUtils.isBlank(localName)) {
+				syncManager.checkClientFile(localName);
+			}
+		} else if (Files.isDirectory(subPath)) {
+			try {
+				WatchKey newKey = subPath.register(watcher,
+					ENTRY_CREATE,
+					ENTRY_DELETE,
+					ENTRY_MODIFY);
+				keys.put(newKey, subPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.error(e);
+			}
+			for (File subFile : subPath.toFile().listFiles()) {
+				checkSubPath(subFile.toPath());
 			}
 		}
 	}
