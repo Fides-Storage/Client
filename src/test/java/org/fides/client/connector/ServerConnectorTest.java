@@ -12,6 +12,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.fides.client.tools.Actions;
+import org.fides.client.tools.Responses;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -56,7 +58,7 @@ public class ServerConnectorTest {
 		Mockito.when(connector.register(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
 		try {
-			writeJson.writeUTF("{successful:true}");
+			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
 			byteArrayOutput.close();
 			writeJson.close();
 		} catch (IOException e) {
@@ -73,7 +75,8 @@ public class ServerConnectorTest {
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
 		try {
-			assertEquals("{\"action\":\"createUser\",\"username\":\"usernameTest\",\"passwordHash\":\"passwordTest\"}", readByteArrayAsData.readUTF());
+			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATEUSER + "\",\"" + Actions.Properties.USERNAME + "" +
+				"\":\"usernameTest\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\"}", readByteArrayAsData.readUTF());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -90,7 +93,7 @@ public class ServerConnectorTest {
 		Mockito.when(connector.login(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
 		try {
-			writeJson.writeUTF("{successful:true}");
+			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
 			byteArrayOutput.close();
 			writeJson.close();
 		} catch (IOException e) {
@@ -106,7 +109,8 @@ public class ServerConnectorTest {
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
 		try {
-			assertEquals("{\"action\":\"login\",\"username\":\"usernameTest\",\"passwordHash\":\"passwordTest\"}",
+			assertEquals(
+				"{\"" + Actions.ACTION + "\":\"" + Actions.LOGIN + "\",\"" + Actions.Properties.USERNAME + "\":\"usernameTest\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\"}",
 				readByteArrayAsData.readUTF());
 		} catch (IOException e) {
 			fail(e.getMessage());
@@ -123,7 +127,7 @@ public class ServerConnectorTest {
 		Mockito.when(connector.register(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
 		try {
-			writeJson.writeUTF("{successful:false}");
+			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":false}");
 			byteArrayOutput.close();
 			writeJson.close();
 		} catch (IOException e) {
@@ -146,7 +150,7 @@ public class ServerConnectorTest {
 		Mockito.when(connector.login(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
 		try {
-			writeJson.writeUTF("{successful:false}");
+			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":false}");
 			byteArrayOutput.close();
 			writeJson.close();
 

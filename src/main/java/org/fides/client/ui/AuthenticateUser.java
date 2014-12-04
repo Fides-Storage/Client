@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
+import org.fides.client.tools.Actions;
 import org.fides.client.tools.HashUtils;
 
 /**
@@ -178,8 +179,8 @@ public class AuthenticateUser {
 					log.debug("login successful");
 					return true;
 				} else {
-					log.debug(serverConnector.getErrorMessage("login"));
-					errorMessages.add("Login failed: " + serverConnector.getErrorMessage("login"));
+					log.debug(serverConnector.getErrorMessage(Actions.LOGIN));
+					errorMessages.add("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN));
 				}
 			}
 			if (register) {
@@ -188,8 +189,8 @@ public class AuthenticateUser {
 					errorMessages.add("Register successful");
 					return true;
 				} else {
-					log.debug(serverConnector.getErrorMessage("register"));
-					errorMessages.add("Register failed: " + serverConnector.getErrorMessage("register"));
+					log.debug(serverConnector.getErrorMessage(Actions.CREATEUSER));
+					errorMessages.add("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER));
 				}
 			}
 		}

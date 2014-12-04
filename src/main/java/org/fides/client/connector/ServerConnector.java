@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.fides.client.tools.Actions;
+import org.fides.client.tools.Responses;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
@@ -31,17 +33,6 @@ import com.google.gson.JsonObject;
  * @author Tom
  */
 public class ServerConnector {
-
-	// TODO: Moves these static finals to a seperate class which can be shared between the client and server
-	private static final String SUCCESSFUL = "successful";
-
-	private static final String ERROR = "error";
-
-	private static final String ACTION = "action";
-
-	private static final String USERNAME = "username";
-
-	private static final String PASSWORD_HASH = "passwordHash";
 
 	/**
 	 * Log for this class
@@ -141,18 +132,18 @@ public class ServerConnector {
 		if (isConnected()) {
 			try {
 				JsonObject user = new JsonObject();
-				user.addProperty(ACTION, "login");
-				user.addProperty(USERNAME, username);
-				user.addProperty(PASSWORD_HASH, passwordHash);
+				user.addProperty(Actions.ACTION, Actions.LOGIN);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-				if (userAnswer.has(SUCCESSFUL)) {
-					if (userAnswer.has(ERROR)) {
-						errorMessages.put("login", userAnswer.get(ERROR).getAsString());
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
 					}
-					loggedIn = userAnswer.get(SUCCESSFUL).getAsBoolean();
+					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 
 				} else {
 					loggedIn = false;
@@ -185,18 +176,18 @@ public class ServerConnector {
 			try {
 
 				JsonObject user = new JsonObject();
-				user.addProperty(ACTION, "createUser");
-				user.addProperty(USERNAME, username);
-				user.addProperty(PASSWORD_HASH, passwordHash);
+				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
+				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
-				if (userAnswer.has(SUCCESSFUL)) {
-					if (userAnswer.has(ERROR)) {
-						errorMessages.put("register", userAnswer.get(ERROR).getAsString());
+				if (userAnswer.has(Responses.SUCCESSFUL)) {
+					if (userAnswer.has(Responses.ERROR)) {
+						errorMessages.put(Actions.CREATEUSER, userAnswer.get(Responses.ERROR).getAsString());
 					}
-					return userAnswer.get(SUCCESSFUL).getAsBoolean();
+					return userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 				} else {
 					return false;
 				}
