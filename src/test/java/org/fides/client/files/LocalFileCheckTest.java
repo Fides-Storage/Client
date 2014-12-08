@@ -145,7 +145,7 @@ public class LocalFileCheckTest {
 			out.write("SomeThing".getBytes());
 		}
 
-		// Give it some time to proccess
+		// Give it some time to process
 		Thread.sleep(100);
 
 		assertEquals(7, calledFiles.size());
