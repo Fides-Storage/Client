@@ -83,12 +83,12 @@ public class App {
 			if (keyFileStream != null) {
 				try {
 					if (keyFileStream.read() == -1) {
-						System.out.println("No keyfile available, new key generated");
+						log.debug("No keyfile available, new key generated");
 						serverConnector.disconnect();
 						encManager.updateKeyFile(new KeyFile());
 						encManager.getConnector().disconnect();
 					} else {
-						System.out.println("Keyfile already available on the server");
+						log.debug("A keyfile is available on the server");
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block, what to do when this fails?

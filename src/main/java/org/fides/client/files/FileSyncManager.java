@@ -23,7 +23,7 @@ import org.fides.client.tools.LocalHashes;
  * functional {@link FileManager}.
  * 
  * @author Koen
- *
+ * 
  */
 public class FileSyncManager {
 	/**
@@ -284,6 +284,8 @@ public class FileSyncManager {
 			log.error(e);
 		} catch (InvalidClientFileException e) {
 			log.error(e);
+		} finally {
+			IOUtils.closeQuietly(outFile);
 		}
 		// TODO: Code is temporary, the disconnect will be removed eventually
 		encManager.getConnector().disconnect();
