@@ -94,7 +94,7 @@ public class EncryptionManager {
 	public KeyFile requestKeyFile() {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			log.error("Server connector does not give an InputStream");
+			log.error("Server connector does not give an InputStream for a keyfile");
 			return null;
 		}
 
@@ -116,7 +116,7 @@ public class EncryptionManager {
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
-			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "THe program is unable to continue.", e.getMessage());
+			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "The program is unable to continue.", e.getMessage());
 			System.exit(1); // We can't continue
 			return null;
 		} finally {
@@ -133,14 +133,14 @@ public class EncryptionManager {
 	 *            The {@link KeyFile} to encrypt and send
 	 * @throws IOException
 	 */
-	public boolean uploadKeyFile(final KeyFile keyFile) {
+	public boolean updateKeyFile(final KeyFile keyFile) {
 		if (keyFile == null) {
 			throw new NullPointerException("No KeyFile");
 		}
 
-		OutputStream out = connector.uploadKeyFile();
+		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			log.error("ServerConnector does not profide an OutputStream");
+			log.error("ServerConnector does not profide an OutputStream for updating keyfile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
@@ -277,7 +277,7 @@ public class EncryptionManager {
 	/**
 	 * Create a n {@link OutputStream} that encrypts and encrypted {@link OutputStream}
 	 * 
-	 * @param in
+	 * @param out
 	 *            The stream to encrypt
 	 * @param key
 	 *            The {@link Key} to use

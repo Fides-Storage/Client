@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -208,18 +209,19 @@ public class FileManager {
 	 * @param fileName
 	 *            The name of the file
 	 * @return The {@link OutputStream} to write to the file
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
-	public OutputStream addFile(String fileName) throws FileNotFoundException {
+	public OutputStream addFile(String fileName) throws IOException {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.exists()) {
 			log.error("File does already exist: " + file);
-			return null;
+			throw new IOException("File does already exist: " + file);
 		}
+		file.createNewFile();
 		if (!file.canWrite()) {
 			log.error("File can not be written: " + file);
-			return null;
+			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
 	}
@@ -232,16 +234,16 @@ public class FileManager {
 	 * @return The {@link OutputStream} to write to the file
 	 * @throws FileNotFoundException
 	 */
-	public OutputStream updateFile(String fileName) throws FileNotFoundException {
+	public OutputStream updateFile(String fileName) throws IOException {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.exists()) {
 			log.error("File does not exist: " + file);
-			return null;
+			throw new IOException("File does not exist: " + file);
 		}
 		if (!file.canWrite()) {
 			log.error("File can not be written: " + file);
-			return null;
+			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
 	}
