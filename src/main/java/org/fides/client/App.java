@@ -35,7 +35,7 @@ public class App {
 	/**
 	 * The time used to check changes with the server TODO: Shouldn't this be in the settings?
 	 */
-	private static final long CHECK_TIME = 5000;//TimeUnit.MINUTES.toMillis(5);
+	private static final long CHECK_TIME = TimeUnit.MINUTES.toMillis(5);
 
 	/**
 	 * Log for this class
