@@ -1,6 +1,5 @@
 package org.fides.client.files;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,7 +23,7 @@ import org.fides.client.tools.LocalHashes;
  * functional {@link FileManager}.
  * 
  * @author Koen
- *
+ * 
  */
 public class FileSyncManager {
 	/**
@@ -58,6 +57,9 @@ public class FileSyncManager {
 		KeyFile keyFile;
 
 		keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -78,6 +80,9 @@ public class FileSyncManager {
 	 */
 	public synchronized boolean checkClientFile(String fileName) {
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -137,18 +142,23 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalAdded(final String fileName) {
-		EncryptedOutputStreamData outData = encManager.uploadFile();
 		// Get the keyfile
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
+
+		EncryptedOutputStreamData outData = encManager.uploadFile();
 
 		// Upload the file
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 		try (InputStream in = fileManager.readFile(fileName);
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
+			out.flush();
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
@@ -156,9 +166,14 @@ public class FileSyncManager {
 			log.error(e);
 			return false;
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
 
 		// Update the keyfile
-		encManager.uploadKeyFile(keyFile);
+		encManager.updateKeyFile(keyFile);
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		return true;
 	}
 
@@ -177,6 +192,9 @@ public class FileSyncManager {
 	private boolean handleLocalUpdated(final String fileName) {
 		// Get the keyfile
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -195,6 +213,7 @@ public class FileSyncManager {
 			in = fileManager.readFile(fileName);
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
+			out.flush();
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
 
@@ -205,11 +224,18 @@ public class FileSyncManager {
 		} catch (IOException e) {
 			log.error(e);
 			succesful = false;
+		} finally {
+			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
 
 		// Update the keyfile
 		if (succesful) {
-			encManager.uploadKeyFile(keyFile);
+			encManager.updateKeyFile(keyFile);
+			// TODO: Code is temporary, the disconnect will be removed eventually
+			encManager.getConnector().disconnect();
 		}
 		return succesful;
 
@@ -227,6 +253,9 @@ public class FileSyncManager {
 	private boolean handleServerAddedOrUpdated(final String fileName, boolean update) {
 		// Almost the same as handleServerUpdated
 		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		if (keyFile == null) {
 			return false;
 		}
@@ -240,7 +269,7 @@ public class FileSyncManager {
 			} else {
 				outFile = fileManager.addFile(fileName);
 			}
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			log.error(e);
 			return false;
 		}
@@ -255,7 +284,12 @@ public class FileSyncManager {
 			log.error(e);
 		} catch (InvalidClientFileException e) {
 			log.error(e);
+		} finally {
+			IOUtils.closeQuietly(outFile);
 		}
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
 		return true;
 	}
 

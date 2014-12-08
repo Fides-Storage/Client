@@ -19,11 +19,11 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.components.Actions;
+import org.fides.components.Responses;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.fides.components.Actions;
-import org.fides.components.Responses;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
@@ -69,6 +69,13 @@ public class ServerConnector {
 	 */
 	private boolean loggedIn = false;
 
+	// TODO: Move this to properties
+	private String savedUsername;
+
+	private String savedPasswordHash;
+
+	private InetSocketAddress savedAddress;
+
 	/**
 	 * The constructor for the ServerConnector
 	 */
@@ -100,6 +107,8 @@ public class ServerConnector {
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
 
+			savedAddress = address;
+
 			return true;
 		} catch (ConnectException e) {
 			throw e;
@@ -129,7 +138,7 @@ public class ServerConnector {
 	 * @return true if succeeded
 	 */
 	public boolean login(String username, String passwordHash) {
-		if (isConnected()) {
+		if (isConnected() && !loggedIn) {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.LOGIN);
@@ -144,7 +153,11 @@ public class ServerConnector {
 						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
-
+					if (loggedIn) {
+						// TODO: Gets removed when we finish the custom IOStream.
+						savedUsername = username;
+						savedPasswordHash = passwordHash;
+					}
 				} else {
 					loggedIn = false;
 				}
@@ -154,7 +167,6 @@ public class ServerConnector {
 				loggedIn = false;
 			}
 		}
-
 		return loggedIn;
 	}
 
@@ -248,26 +260,147 @@ public class ServerConnector {
 		return serverCertificates;
 	}
 
+	/**
+	 * Requests a keyfile from the server
+	 * 
+	 * @return An inputstream with the keyfile. If something went wrong, this will be <code>null</code>
+	 */
 	public InputStream requestKeyFile() {
+		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
+			JsonObject keyFileRequest = new JsonObject();
+			keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
+			out.writeUTF(new Gson().toJson(keyFileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return in;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
+
 	}
 
-	public OutputStream uploadKeyFile() {
+	/**
+	 * Requests a stream from the server for updating the keyfile
+	 * 
+	 * @return An outputstream to write the keyfile to. If something went wrong, this will be <code>null</code>
+	 */
+	public OutputStream updateKeyFile() {
+		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
+			JsonObject fileRequest = new JsonObject();
+			fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
+			out.writeUTF(new Gson().toJson(fileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return out;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
 	/**
 	 * Returns a stream of the encrypted requested file
+	 * 
+	 * @param location
+	 *            The location of the requested file
+	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
+		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
+			JsonObject fileRequest = new JsonObject();
+			fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
+			fileRequest.addProperty(Actions.Properties.LOCATION, location);
+			out.writeUTF(new Gson().toJson(fileRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return in;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for uploading a file
+	 * 
+	 * @return An outputdatastream containing a stream to write the file to and the location of the new file on the
+	 *         server. If something went wrong, this will be <code>null</code>
+	 */
 	public OutputStreamData uploadFile() {
+		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
+			JsonObject uploadRequest = new JsonObject();
+			uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
+			out.writeUTF(new Gson().toJson(uploadRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
+					String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
+					return new OutputStreamData(out, location);
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for updating a file
+	 * 
+	 * @param location
+	 *            The location of the file you want to update
+	 * @return An outputstream to write the file to. If something went wrong, this will be <code>null</code>
+	 */
 	public OutputStream updateFile(String location) {
+		try {
+			// TODO: Should be removed after implementing a custom IOStream
+			connect(savedAddress);
+			login(savedUsername, savedPasswordHash);
+			JsonObject updateRequest = new JsonObject();
+			updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
+			updateRequest.addProperty(Actions.Properties.LOCATION, location);
+			out.writeUTF(new Gson().toJson(updateRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return out;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return null;
 	}
 

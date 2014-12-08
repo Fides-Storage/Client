@@ -29,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * A {@link Runnable} which checks the local filesystem for changes
  * 
  * @author Koen
- *
+ * 
  */
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
@@ -62,7 +62,7 @@ public class LocalFileCheckTest {
 			}
 		});
 
-		testDir = new File("./testdir");
+		testDir = new File(UserProperties.getInstance().getFileDirectory(), "Test");
 		if (testDir.exists()) {
 			FileUtils.deleteDirectory(testDir);
 		}
