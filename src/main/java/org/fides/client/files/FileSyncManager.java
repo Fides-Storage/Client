@@ -179,6 +179,14 @@ public class FileSyncManager {
 		return true;
 	}
 
+	/**
+	 * Handles a remove of a local file
+	 * @param fileName
+	 * 		name of the removed file
+	 * @return
+	 * 		whether the remove was successful or not
+	 *
+	 */
 	private boolean handleLocalRemoved(final String fileName) {
 		// Get the keyfile
 		KeyFile keyFile = encManager.requestKeyFile();
@@ -191,18 +199,19 @@ public class FileSyncManager {
 
 		//Get ClientFile from keyfile
 		ClientFile file = keyFile.getClientFileByName(fileName);
-
-		// Remove file from keyfile
-		keyFile.removeClientFileByName(fileName);
-
-		// Remove the local hash
-		LocalHashes.getInstance().removeHash(fileName);
-
 		try {
 			// Remove the file on the server
-			encManager.removeFile(file);
+			boolean result = encManager.removeFile(file);
 			// TODO: Code is temporary, the disconnect will be removed eventually
 			encManager.getConnector().disconnect();
+
+			if(result) {
+				// Remove file from keyfile
+				keyFile.removeClientFileByName(fileName);
+
+				// Remove the local hash
+				LocalHashes.getInstance().removeHash(fileName);
+			}
 		} catch (InvalidClientFileException e) {
 			log.debug(e);
 			return false;
@@ -338,11 +347,13 @@ public class FileSyncManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.canWrite()) {
-			//Remove the local hash
-			LocalHashes.getInstance().removeHash(fileName);
-
+			boolean result = fileManager.removeFile(fileName);
+			if(result) {
+				//Remove the local hash
+				LocalHashes.getInstance().removeHash(fileName);
+			}
 			//Remove the File
-			return fileManager.removeFile(fileName);
+			return result;
 		}
 		return false;
 	}
