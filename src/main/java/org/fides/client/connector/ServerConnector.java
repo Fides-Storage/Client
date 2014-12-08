@@ -404,6 +404,13 @@ public class ServerConnector {
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for removing a file
+	 * 
+	 * @param location
+	 *            the location of the file to remove
+	 * @return true if the file is successfully removed, false otherwise
+	 */
 	public boolean removeFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
