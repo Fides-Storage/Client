@@ -1,5 +1,6 @@
 package org.fides.client.files;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,6 +18,7 @@ import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.LocalHashes;
+import org.fides.client.tools.UserProperties;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -178,8 +180,40 @@ public class FileSyncManager {
 	}
 
 	private boolean handleLocalRemoved(final String fileName) {
-		// TODO handle removed local
-		return false;
+		// Get the keyfile
+		KeyFile keyFile = encManager.requestKeyFile();
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
+		if (keyFile == null) {
+			return false;
+		}
+
+		//Get ClientFile from keyfile
+		ClientFile file = keyFile.getClientFileByName(fileName);
+
+		// Remove file from keyfile
+		keyFile.removeClientFileByName(fileName);
+
+		// Remove the local hash
+		LocalHashes.getInstance().removeHash(fileName);
+
+		try {
+			// Remove the file on the server
+			encManager.removeFile(file);
+			// TODO: Code is temporary, the disconnect will be removed eventually
+			encManager.getConnector().disconnect();
+		} catch (InvalidClientFileException e) {
+			log.debug(e);
+			return false;
+		}
+
+		// Update the keyfile
+		encManager.updateKeyFile(keyFile);
+		// TODO: Code is temporary, the disconnect will be removed eventually
+		encManager.getConnector().disconnect();
+
+		return true;
 	}
 
 	/**
@@ -293,8 +327,23 @@ public class FileSyncManager {
 		return true;
 	}
 
+	/**
+	 * Handle a removed file on the server, this will remove the file locally
+	 * @param fileName
+	 * 			The filename of the removed file
+	 * @return
+	 * 			Whether the file hash been removed or not
+	 */
 	private boolean handleServerRemoved(final String fileName) {
-		// TODO handle removed on server
+		UserProperties settings = UserProperties.getInstance();
+		File file = new File(settings.getFileDirectory(), fileName);
+		if (file.canWrite()) {
+			//Remove the local hash
+			LocalHashes.getInstance().removeHash(fileName);
+
+			//Remove the File
+			return fileManager.removeFile(fileName);
+		}
 		return false;
 	}
 
