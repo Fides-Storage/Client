@@ -88,6 +88,7 @@ public class FileSyncManager {
 		}
 
 		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
+		log.debug(result);
 		if (result != null) {
 			return handleCompareResult(result);
 		}

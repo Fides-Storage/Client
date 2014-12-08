@@ -42,7 +42,8 @@ public final class FileUtil {
 			MessageDigest messageDigest = createFileDigest();
 			// In order to make the hash or checksum we have to read the entire file
 			try (DigestInputStream dis = new DigestInputStream(new FileInputStream(file), messageDigest)) {
-				while (dis.read() != -1) {
+				byte[] bytes = new byte[1000];
+				while (dis.read(bytes) != -1) {
 					// Do nothing
 				}
 			} catch (IOException e) {

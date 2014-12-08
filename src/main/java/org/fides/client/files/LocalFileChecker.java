@@ -63,7 +63,7 @@ public class LocalFileChecker extends Thread {
 				for (;;) {
 					try {
 						EventPair pair = eventsQueue.take();
-						handleEvent(pair.event, pair.dir);
+						handleEvent(pair.kind, pair.child);
 					} catch (InterruptedException e) {
 						log.error(e);
 					}
@@ -92,7 +92,6 @@ public class LocalFileChecker extends Thread {
 				return;
 			}
 
-			// eventsQueue.add(key);
 			handleKey(key);
 
 			// Reset the key -- this step is critical if you want to
@@ -125,8 +124,14 @@ public class LocalFileChecker extends Thread {
 		}
 
 		for (WatchEvent<?> event : key.pollEvents()) {
-			// handleEvent(event, dir);
-			eventsQueue.add(new EventPair(event, dir));
+			// Get the right location
+			Path file = (Path) event.context();
+			Path child = dir.resolve(file);
+			EventPair pair = new EventPair(event.kind(), child);
+
+			if (!eventsQueue.contains(pair)) {
+				eventsQueue.add(pair);
+			}
 		}
 	}
 
@@ -138,21 +143,13 @@ public class LocalFileChecker extends Thread {
 	 * @param dir
 	 *            The location of the event
 	 */
-	private void handleEvent(WatchEvent<?> event, Path dir) {
-		WatchEvent.Kind<?> kind = event.kind();
+	private void handleEvent(WatchEvent.Kind<?> kind, Path child) {
 		// We can ignore an Overflow
 		if (kind == OVERFLOW) {
 			return;
 		}
 
-		// It does not need to be check, in this situation this is always right
-		@SuppressWarnings("unchecked")
-		WatchEvent<Path> watchEvent = (WatchEvent<Path>) event;
-
-		// Get he right location
-		Path file = watchEvent.context();
-		Path child = dir.resolve(file);
-		log.debug(kind + " : " + file + " : " + child);
+		log.debug(kind + " : " + child);
 
 		if (Files.isDirectory(child)) {
 			// Change is a directory
@@ -248,15 +245,48 @@ public class LocalFileChecker extends Thread {
 	 * @author Koen
 	 *
 	 */
-	private class EventPair {
-		private WatchEvent<?> event;
+	private static final class EventPair {
+		private WatchEvent.Kind<?> kind;
 
-		private Path dir;
+		private Path child;
 
-		public EventPair(WatchEvent<?> event, Path dir) {
-			this.event = event;
-			this.dir = dir;
+		public EventPair(WatchEvent.Kind<?> kind, Path child) {
+			this.kind = kind;
+			this.child = child;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + child.hashCode();
+			result = prime * result + kind.name().hashCode();
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			EventPair other = (EventPair) obj;
+
+			if (!child.equals(other.child)) {
+				return false;
+			}
+			if (!kind.name().equals(other.kind.name())) {
+				return false;
+			}
+
+			return true;
+		}
+
 	}
 
 }
