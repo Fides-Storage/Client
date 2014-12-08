@@ -30,7 +30,7 @@ public final class LocalHashes {
 	private Properties localHashes = new Properties();
 
 	/**
-	 * Constuctor
+	 * Constructor
 	 */
 	private LocalHashes() {
 		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
