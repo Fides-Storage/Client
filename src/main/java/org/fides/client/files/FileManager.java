@@ -36,7 +36,8 @@ public class FileManager {
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
 	 *
-	 * @param keyFile The {@link KeyFile} originating from the server
+	 * @param keyFile
+	 *            The {@link KeyFile} originating from the server
 	 * @return The collection of {@link FileCompareResult} with the differences between a server({@link KeyFile})
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
@@ -77,8 +78,10 @@ public class FileManager {
 	/**
 	 * The compare check for a file on the server
 	 *
-	 * @param serverName The name of the file on the server
-	 * @param keyFile    The {@link KeyFile} with the server files
+	 * @param serverName
+	 *            The name of the file on the server
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
 	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	public FileCompareResult checkServerSideFile(String serverName, KeyFile keyFile) {
@@ -92,9 +95,12 @@ public class FileManager {
 	/**
 	 * The compare check for a file on the server
 	 *
-	 * @param serverName      The name of the file on the server
-	 * @param clientFileNames The list with files on the client
-	 * @param keyFile         The {@link KeyFile} with the server files
+	 * @param serverName
+	 *            The name of the file on the server
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
 	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	private FileCompareResult checkServerSideFile(String serverName, Collection<String> clientFileNames, KeyFile keyFile) {
@@ -120,8 +126,10 @@ public class FileManager {
 	/**
 	 * The compare check for a local file
 	 *
-	 * @param clientName The name of the local file
-	 * @param keyFile    The {@link KeyFile} with the server files
+	 * @param clientName
+	 *            The name of the local file
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
 	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	public FileCompareResult checkClientSideFile(String clientName, KeyFile keyFile) {
@@ -135,9 +143,12 @@ public class FileManager {
 	/**
 	 * The compare check for a local file
 	 *
-	 * @param clientName      The name of the local file
-	 * @param clientFileNames The list with files on the client
-	 * @param keyFile         The {@link KeyFile} with the server files
+	 * @param clientName
+	 *            The name of the local file
+	 * @param clientFileNames
+	 *            The list with files on the client
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
 	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	private FileCompareResult checkClientSideFile(String clientName, Collection<String> serverFileNames, KeyFile keyFile) {
@@ -166,8 +177,10 @@ public class FileManager {
 	/**
 	 * The compare check for when a file exists on the server and client
 	 *
-	 * @param fileName The name of the file (local and on server)
-	 * @param keyFile  The {@link KeyFile} with the server files
+	 * @param fileName
+	 *            The name of the file (local and on server)
+	 * @param keyFile
+	 *            The {@link KeyFile} with the server files
 	 * @return The {@link FileCompareResult} from the check, can be null if no result
 	 */
 	private FileCompareResult checkMatchingFile(String fileName, KeyFile keyFile) {
@@ -195,7 +208,8 @@ public class FileManager {
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 *
-	 * @param fileName The name of the file
+	 * @param fileName
+	 *            The name of the file
 	 * @return The {@link OutputStream} to write to the file
 	 * @throws IOException
 	 */
@@ -217,7 +231,8 @@ public class FileManager {
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
 	 *
-	 * @param fileName The name of the file to create, in local space
+	 * @param fileName
+	 *            The name of the file to create, in local space
 	 * @return The {@link OutputStream} to write to the file
 	 * @throws FileNotFoundException
 	 */
@@ -238,7 +253,8 @@ public class FileManager {
 	/**
 	 * Removes a file
 	 *
-	 * @param fileName The name of the file to update, in local space
+	 * @param fileName
+	 *            The name of the file to update, in local space
 	 * @return true if removed
 	 */
 	public boolean removeFile(String fileName) {
@@ -254,7 +270,8 @@ public class FileManager {
 	/**
 	 * Reads a file
 	 *
-	 * @param fileName The name of the file to read, in local space
+	 * @param fileName
+	 *            The name of the file to read, in local space
 	 * @return An {@link InputStream} reading from the file
 	 * @throws FileNotFoundException
 	 */
@@ -271,8 +288,10 @@ public class FileManager {
 	/**
 	 * Add all files and {@link File} in subdirectories to a list;
 	 *
-	 * @param directory The directory to look in
-	 * @param files     The {@link List} to add the {@link File} to
+	 * @param directory
+	 *            The directory to look in
+	 * @param files
+	 *            The {@link List} to add the {@link File} to
 	 */
 	private static void filesInDirectory(File directory, List<File> files) {
 		File[] dirFiles = directory.listFiles();
@@ -293,8 +312,10 @@ public class FileManager {
 	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
 	 * different PCs
 	 *
-	 * @param files     The file to turn to local space
-	 * @param directory The directory to relativize to
+	 * @param files
+	 *            The file to turn to local space
+	 * @param directory
+	 *            The directory to relativize to
 	 * @return
 	 */
 	private static Set<String> filesToLocalNames(List<File> files, File basedir) {
@@ -310,7 +331,8 @@ public class FileManager {
 	/**
 	 * Relativizes a file to a local file name
 	 *
-	 * @param file The file to turn to local space
+	 * @param file
+	 *            The file to turn to local space
 	 * @return The local file name
 	 */
 	public static String fileToLocalName(File file) {
@@ -321,8 +343,10 @@ public class FileManager {
 	/**
 	 * Relativizes a file to a local file name
 	 *
-	 * @param file    The file to turn to local space
-	 * @param basedir The directory to relativize to
+	 * @param file
+	 *            The file to turn to local space
+	 * @param basedir
+	 *            The directory to relativize to
 	 * @return The local file name
 	 */
 	private static String fileToLocalName(File file, File basedir) {
