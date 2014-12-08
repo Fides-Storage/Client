@@ -116,7 +116,7 @@ public class EncryptionManager {
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
-			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "THe program is unable to continue.", e.getMessage());
+			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "The program is unable to continue.", e.getMessage());
 			System.exit(1); // We can't continue
 			return null;
 		} finally {
