@@ -104,7 +104,7 @@ public class App {
 			checker.start();
 
 			Timer timer = new Timer("CheckTimer");
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), CHECK_TIME, CHECK_TIME);
+			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, CHECK_TIME);
 
 			// TODO: We need to place this somewhere, but we do not know where jet
 			// serverConnector.disconnect();

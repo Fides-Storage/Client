@@ -1,6 +1,5 @@
 package org.fides.client.files;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -159,6 +158,7 @@ public class FileSyncManager {
 		try (InputStream in = fileManager.readFile(fileName);
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
+			out.flush();
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
@@ -213,6 +213,7 @@ public class FileSyncManager {
 			in = fileManager.readFile(fileName);
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
+			out.flush();
 			String hash = KeyGenerator.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
 
@@ -223,6 +224,9 @@ public class FileSyncManager {
 		} catch (IOException e) {
 			log.error(e);
 			succesful = false;
+		} finally {
+			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
 		}
 		// TODO: Code is temporary, the disconnect will be removed eventually
 		encManager.getConnector().disconnect();
@@ -232,7 +236,6 @@ public class FileSyncManager {
 			encManager.updateKeyFile(keyFile);
 			// TODO: Code is temporary, the disconnect will be removed eventually
 			encManager.getConnector().disconnect();
-
 		}
 		return succesful;
 
@@ -266,7 +269,7 @@ public class FileSyncManager {
 			} else {
 				outFile = fileManager.addFile(fileName);
 			}
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			log.error(e);
 			return false;
 		}
