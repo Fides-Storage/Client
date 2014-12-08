@@ -218,6 +218,15 @@ public class FileManager {
 			log.error("File does already exist: " + file);
 			throw new IOException("File does already exist: " + file);
 		}
+		File parent = file.getParentFile();
+		if (!parent.exists()) {
+			boolean created = parent.mkdirs();
+			if (!created) {
+				log.error("File parent can not be created: " + parent);
+				throw new IOException("File parent can not be created: " + parent);
+			}
+		}
+
 		file.createNewFile();
 		if (!file.canWrite()) {
 			log.error("File can not be written: " + file);
