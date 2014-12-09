@@ -32,7 +32,7 @@ import org.fides.encryption.KeyGenerator;
  * 
  * @author Koen
  * @author Thijs
- *
+ * 
  */
 public class EncryptionManager {
 	/**
@@ -173,8 +173,7 @@ public class EncryptionManager {
 	/**
 	 * Encrypts a file and sends it to the {@link ServerConnector}
 	 * 
-	 * @return
-	 * 		a pair of a location and an {@link OutputStream} that writes to the location the server
+	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
 	 */
@@ -206,9 +205,8 @@ public class EncryptionManager {
 	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
 	 *
 	 * @param clientFile
-	 *          The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
-	 * @return
-	 * 			The {@link OutputStream} used for writing
+	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
+	 * @return The {@link OutputStream} used for writing
 	 * @throws InvalidClientFileException
 	 */
 	public OutputStream updateFile(ClientFile clientFile) throws InvalidClientFileException {
@@ -230,10 +228,10 @@ public class EncryptionManager {
 
 	/**
 	 * Removes the given ClientFile on the server
+	 * 
 	 * @param clientFile
-	 * 			The {@link ClientFile} to be removed
-	 * @return
-	 * 			Whether the file has been removed or not
+	 *            The {@link ClientFile} to be removed
+	 * @return Whether the file has been removed or not
 	 * @throws InvalidClientFileException
 	 */
 	public boolean removeFile(ClientFile clientFile) throws InvalidClientFileException {

@@ -82,13 +82,13 @@ public final class LocalHashes {
 
 	/**
 	 * Removes a hash from the localhashes
+	 * 
 	 * @param fileName
-	 * 			The filename of the hash
-	 * @return
-	 * 			Whether the remove was successful or not
+	 *            The filename of the hash
+	 * @return Whether the remove was successful or not
 	 */
 	public boolean removeHash(String fileName) {
-		if(fileName != null) {
+		if (fileName != null) {
 			localHashes.remove(fileName);
 			saveHashes();
 			return true;
