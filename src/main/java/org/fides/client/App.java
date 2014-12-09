@@ -21,6 +21,7 @@ import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
@@ -115,11 +116,14 @@ public class App {
 
 	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {
 		InetSocketAddress serverAddress = null;
+		X509Certificate certificate = null;
 		boolean validCertificate = false;
+
 		while (!validCertificate) {
 			boolean connected = false;
 			while (!connected) {
-				serverAddress = ServerAddressScreen.getAddress();
+
+				serverAddress = getServerAddress();
 				try {
 					if (serverAddress != null) {
 						connected = serverConnector.connect(serverAddress);
@@ -139,11 +143,43 @@ public class App {
 			Certificate[] certificates = serverConnector.getServerCertificates();
 			serverConnector.disconnect();
 
+			// TODO: validate all certificates
 			if (certificates.length > 0) {
-				validCertificate = CertificateValidationScreen.validateCertificate((X509Certificate) certificates[0]);
+				certificate = (X509Certificate) certificates[0];
+				// TODO: validate certificate it self
+
+				validCertificate = checkValidCertificate(certificate);
+
 			}
 		}
+
+		// success, save address and certifcate to config
+		UserProperties.getInstance().setServerAddress(serverAddress);
+		UserProperties.getInstance().setCertificate(certificate);
+
 		return serverAddress;
+	}
+
+	private static InetSocketAddress getServerAddress() {
+		String host = UserProperties.getInstance().getHost();
+		int hostPort = UserProperties.getInstance().getHostPort();
+
+		if (StringUtils.isNotEmpty(host) && hostPort >= 1 && hostPort <= 65535) {
+			return new InetSocketAddress(host, hostPort);
+		} else {
+			return ServerAddressScreen.getAddress();
+		}
+	}
+
+	private static boolean checkValidCertificate(X509Certificate certificate) {
+		// Check saved certificate with current one
+		String certificateId = UserProperties.getInstance().getCertificateId();
+		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
+		if (StringUtils.isNotEmpty(certificateId) && StringUtils.isNotEmpty(certificateIssuer)) {
+			return certificate.getSerialNumber().toString().equals(certificateId) && certificate.getIssuerX500Principal().getName().equals(certificateIssuer);
+		}
+
+		return CertificateValidationScreen.validateCertificate(certificate);
 	}
 
 }
