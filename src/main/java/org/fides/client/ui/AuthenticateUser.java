@@ -136,9 +136,13 @@ public class AuthenticateUser {
 					frame.dispose();
 					return false;
 				}
+			} else if (login) {
+				labelPasswordConfirmation.setVisible(false);
+				passwordConfirmation.setVisible(false);
+				passwordConfirmation.setText(null);
 			} else {
-				labelPasswordConfirmation.setVisible(!login);
-				passwordConfirmation.setVisible(!login);
+				labelPasswordConfirmation.setVisible(true);
+				passwordConfirmation.setVisible(true);
 			}
 
 			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
