@@ -21,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.components.Actions;
 import org.fides.components.Responses;
+import org.fides.components.virtualstream.VirtualInputStream;
+import org.fides.components.virtualstream.VirtualOutputStream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -304,7 +306,7 @@ public class ServerConnector {
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has(Responses.SUCCESSFUL)) {
 				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return in;
+					return new VirtualInputStream(in);
 				} else {
 					// TODO: Read error message.
 				}
@@ -333,7 +335,7 @@ public class ServerConnector {
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has(Responses.SUCCESSFUL)) {
 				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return out;
+					return new VirtualOutputStream(out);
 				} else {
 					// TODO: Read error message.
 				}
@@ -364,7 +366,7 @@ public class ServerConnector {
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has(Responses.SUCCESSFUL)) {
 				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return in;
+					return new VirtualInputStream(in);
 				} else {
 					// TODO: Read error message.
 				}
@@ -394,7 +396,7 @@ public class ServerConnector {
 			if (requestResponse.has(Responses.SUCCESSFUL)) {
 				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
 					String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
-					return new OutputStreamData(out, location);
+					return new OutputStreamData(new VirtualOutputStream(out), location);
 				} else {
 					// TODO: Read error message.
 				}
@@ -425,7 +427,7 @@ public class ServerConnector {
 			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 			if (requestResponse.has(Responses.SUCCESSFUL)) {
 				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return out;
+					return new VirtualOutputStream(out);
 				} else {
 					// TODO: Read error message.
 				}
@@ -440,4 +442,25 @@ public class ServerConnector {
 		return false;
 	}
 
+	/**
+	 * After an upload or update this function has to be called to check if the action was successful
+	 * 
+	 * @return true if the last upload or update was successful, othwise false
+	 */
+	public boolean checkUploadSuccessful() {
+		try {
+			String message = in.readUTF();
+			JsonObject response = new Gson().fromJson(message, JsonObject.class);
+			if (response.has(Responses.SUCCESSFUL)) {
+				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return true;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
+		return false;
+	}
 }
