@@ -67,6 +67,9 @@ public final class LocalHashes {
 		saveHashes();
 	}
 
+	/**
+	 * Saves the Properties with the current hashes
+	 */
 	private synchronized void saveHashes() {
 		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
 		try (OutputStream out = new FileOutputStream(file)) {
@@ -75,6 +78,23 @@ public final class LocalHashes {
 			// We accept this
 			log.warn(e);
 		}
+	}
+
+	/**
+	 * Removes a hash from the localhashes
+	 * @param fileName
+	 * 			The filename of the hash
+	 * @return
+	 * 			Whether the remove was successful or not
+	 */
+	public boolean removeHash(String fileName) {
+		if(fileName != null) {
+			localHashes.remove(fileName);
+			saveHashes();
+			return true;
+		}
+		log.debug("Given filename was NULL");
+		return false;
 	}
 
 	/**

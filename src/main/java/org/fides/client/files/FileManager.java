@@ -24,9 +24,8 @@ import org.fides.client.tools.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
- * 
+ *
  * @author Koen
- * 
  */
 public class FileManager {
 	/**
@@ -36,7 +35,7 @@ public class FileManager {
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
-	 * 
+	 *
 	 * @param keyFile
 	 *            The {@link KeyFile} originating from the server
 	 * @return The collection of {@link FileCompareResult} with the differences between a server({@link KeyFile})
@@ -78,7 +77,7 @@ public class FileManager {
 
 	/**
 	 * The compare check for a file on the server
-	 * 
+	 *
 	 * @param serverName
 	 *            The name of the file on the server
 	 * @param keyFile
@@ -95,7 +94,7 @@ public class FileManager {
 
 	/**
 	 * The compare check for a file on the server
-	 * 
+	 *
 	 * @param serverName
 	 *            The name of the file on the server
 	 * @param clientFileNames
@@ -126,7 +125,7 @@ public class FileManager {
 
 	/**
 	 * The compare check for a local file
-	 * 
+	 *
 	 * @param clientName
 	 *            The name of the local file
 	 * @param keyFile
@@ -143,7 +142,7 @@ public class FileManager {
 
 	/**
 	 * The compare check for a local file
-	 * 
+	 *
 	 * @param clientName
 	 *            The name of the local file
 	 * @param clientFileNames
@@ -168,13 +167,16 @@ public class FileManager {
 				// Did not exist here (its added local)
 				result = new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED);
 			}
+		} else {
+			result = new FileCompareResult(clientName, CompareResultType.LOCAL_REMOVED);
 		}
+
 		return result;
 	}
 
 	/**
 	 * The compare check for when a file exists on the server and client
-	 * 
+	 *
 	 * @param fileName
 	 *            The name of the file (local and on server)
 	 * @param keyFile
@@ -205,7 +207,7 @@ public class FileManager {
 
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
-	 * 
+	 *
 	 * @param fileName
 	 *            The name of the file
 	 * @return The {@link OutputStream} to write to the file
@@ -237,7 +239,7 @@ public class FileManager {
 
 	/**
 	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
-	 * 
+	 *
 	 * @param fileName
 	 *            The name of the file to create, in local space
 	 * @return The {@link OutputStream} to write to the file
@@ -259,7 +261,7 @@ public class FileManager {
 
 	/**
 	 * Removes a file
-	 * 
+	 *
 	 * @param fileName
 	 *            The name of the file to update, in local space
 	 * @return true if removed
@@ -276,7 +278,7 @@ public class FileManager {
 
 	/**
 	 * Reads a file
-	 * 
+	 *
 	 * @param fileName
 	 *            The name of the file to read, in local space
 	 * @return An {@link InputStream} reading from the file
@@ -294,7 +296,7 @@ public class FileManager {
 
 	/**
 	 * Add all files and {@link File} in subdirectories to a list;
-	 * 
+	 *
 	 * @param directory
 	 *            The directory to look in
 	 * @param files
@@ -318,7 +320,7 @@ public class FileManager {
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
 	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
 	 * different PCs
-	 * 
+	 *
 	 * @param files
 	 *            The file to turn to local space
 	 * @param directory
@@ -337,7 +339,7 @@ public class FileManager {
 
 	/**
 	 * Relativizes a file to a local file name
-	 * 
+	 *
 	 * @param file
 	 *            The file to turn to local space
 	 * @return The local file name
@@ -349,7 +351,7 @@ public class FileManager {
 
 	/**
 	 * Relativizes a file to a local file name
-	 * 
+	 *
 	 * @param file
 	 *            The file to turn to local space
 	 * @param basedir
