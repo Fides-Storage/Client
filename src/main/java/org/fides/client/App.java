@@ -148,7 +148,7 @@ public class App {
 				certificate = (X509Certificate) certificates[0];
 				// TODO: validate certificate it self
 
-				validCertificate = checkValidCertificate(certificate);
+				validCertificate = checkCertificateAccepted(certificate);
 
 			}
 		}
@@ -171,7 +171,7 @@ public class App {
 		}
 	}
 
-	private static boolean checkValidCertificate(X509Certificate certificate) {
+	private static boolean checkCertificateAccepted(X509Certificate certificate) {
 		// Check saved certificate with current one
 		String certificateId = UserProperties.getInstance().getCertificateId();
 		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
