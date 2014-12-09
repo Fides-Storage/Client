@@ -68,6 +68,7 @@ public class FileSyncManager {
 		keyFile = encManager.requestKeyFile();
 
 		if (keyFile == null) {
+			encManager.getConnector().disconnect();
 			return false;
 		}
 
@@ -94,16 +95,18 @@ public class FileSyncManager {
 		KeyFile keyFile = encManager.requestKeyFile();
 
 		if (keyFile == null) {
+			encManager.getConnector().disconnect();
 			return false;
 		}
 
-		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
-		log.debug(result);
-		if (result != null) {
-			return handleCompareResult(result);
+		FileCompareResult compareResult = fileManager.checkClientSideFile(fileName, keyFile);
+		log.debug(compareResult);
+		boolean result = false;
+		if (compareResult != null) {
+			result = handleCompareResult(compareResult);
 		}
 		encManager.getConnector().disconnect();
-		return false;
+		return result;
 	}
 
 	/**
