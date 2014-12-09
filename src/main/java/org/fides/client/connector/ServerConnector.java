@@ -94,7 +94,7 @@ public class ServerConnector {
 	 *            The {@link InetSocketAddress} with the server's address
 	 * @return true if the connection was successfull
 	 */
-	public boolean connect(InetSocketAddress address) throws UnknownHostException, ConnectException {
+	public boolean init(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
@@ -110,6 +110,33 @@ public class ServerConnector {
 			savedAddress = address;
 
 			return true;
+		} catch (ConnectException e) {
+			throw e;
+		} catch (UnknownHostException e) {
+			throw e;
+		} catch (IOException e) {
+			throw new ConnectException(e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Connects to the server which is set in the {@link ServerConnector#init(InetSocketAddress)} function.
+	 * 
+	 * @throws UnknownHostException
+	 * @throws ConnectException
+	 */
+	public void connect() throws UnknownHostException, ConnectException {
+		try {
+			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+
+			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
+			sslsocket.connect(savedAddress);
+
+			SSLSession session = sslsocket.getSession();
+			serverCertificates = session.getPeerCertificates();
+
+			out = new DataOutputStream(sslsocket.getOutputStream());
+			in = new DataInputStream(sslsocket.getInputStream());
 		} catch (ConnectException e) {
 			throw e;
 		} catch (UnknownHostException e) {
@@ -268,8 +295,9 @@ public class ServerConnector {
 	public InputStream requestKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			if (!loggedIn) {
+				login(savedUsername, savedPasswordHash);
+			}
 			JsonObject keyFileRequest = new JsonObject();
 			keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
 			out.writeUTF(new Gson().toJson(keyFileRequest));
@@ -296,8 +324,9 @@ public class ServerConnector {
 	public OutputStream updateKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			if (!loggedIn) {
+				login(savedUsername, savedPasswordHash);
+			}
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
 			out.writeUTF(new Gson().toJson(fileRequest));
@@ -325,8 +354,9 @@ public class ServerConnector {
 	public InputStream requestFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			if (!loggedIn) {
+				login(savedUsername, savedPasswordHash);
+			}
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
 			fileRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -354,8 +384,9 @@ public class ServerConnector {
 	public OutputStreamData uploadFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			if (!loggedIn) {
+				login(savedUsername, savedPasswordHash);
+			}
 			JsonObject uploadRequest = new JsonObject();
 			uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
 			out.writeUTF(new Gson().toJson(uploadRequest));
@@ -384,8 +415,9 @@ public class ServerConnector {
 	public OutputStream updateFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			if (!loggedIn) {
+				login(savedUsername, savedPasswordHash);
+			}
 			JsonObject updateRequest = new JsonObject();
 			updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
 			updateRequest.addProperty(Actions.Properties.LOCATION, location);

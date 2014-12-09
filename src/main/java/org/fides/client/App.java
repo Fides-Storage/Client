@@ -57,7 +57,7 @@ public class App {
 		}
 
 		try {
-			serverConnector.connect(serverAddress);
+			serverConnector.init(serverAddress);
 		} catch (ConnectException | UnknownHostException e) {
 			log.error(e);
 			System.exit(1);
@@ -122,7 +122,7 @@ public class App {
 				serverAddress = ServerAddressScreen.getAddress();
 				try {
 					if (serverAddress != null) {
-						connected = serverConnector.connect(serverAddress);
+						connected = serverConnector.init(serverAddress);
 					} else {
 						break;
 					}
