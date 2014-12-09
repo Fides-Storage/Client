@@ -6,6 +6,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -146,14 +148,18 @@ public class App {
 			// TODO: validate all certificates
 			if (certificates.length > 0) {
 				certificate = (X509Certificate) certificates[0];
-				// TODO: validate certificate it self
+
+				if (!checkValidCertificate(certificate)) {
+					ErrorMessageScreen.showErrorMessage("Server certificate not valid!!!!");
+					System.exit(1);
+				}
 
 				validCertificate = checkCertificateAccepted(certificate);
 
 			}
 		}
 
-		// success, save address and certifcate to config
+		// success, save address and certificate to config
 		UserProperties.getInstance().setServerAddress(serverAddress);
 		UserProperties.getInstance().setCertificate(certificate);
 
@@ -182,4 +188,18 @@ public class App {
 		return CertificateValidationScreen.validateCertificate(certificate);
 	}
 
+	private static boolean checkValidCertificate(X509Certificate certificate) {
+
+		try {
+			certificate.checkValidity();
+			// The rest of the checks are done by SSLSocket, if failed the socket is closed
+			return true;
+		} catch (CertificateExpiredException e) {
+			log.error(e);
+		} catch (CertificateNotYetValidException e) {
+			log.error(e);
+		}
+
+		return false;
+	}
 }
