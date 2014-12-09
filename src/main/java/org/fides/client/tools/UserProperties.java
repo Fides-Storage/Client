@@ -182,7 +182,7 @@ public final class UserProperties {
 	 */
 	public int getHostPort() {
 		String hostPort = properties.getProperty(HOSTPORT_KEY);
-		if (StringUtils.isNotEmpty(hostPort)) {
+		if (StringUtils.isNotEmpty(hostPort) && StringUtils.isNumeric(hostPort)) {
 			return Integer.parseInt(hostPort);
 		}
 		return 0;

@@ -184,7 +184,7 @@ public class AuthenticateUser {
 		return execute(LOGIN, new ArrayList<String>(), serverConnector, usernameString, passwordHashString);
 	}
 
-	private static Boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordHashString) {
+	private static boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordHashString) {
 		// Check if there were any errors
 		if (errorMessages.isEmpty()) {
 			if (option == LOGIN) {
