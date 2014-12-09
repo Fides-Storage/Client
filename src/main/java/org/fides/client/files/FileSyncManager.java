@@ -174,7 +174,6 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
 			out.flush();
-			out.close();
 		} catch (IOException e) {
 			log.error(e);
 			return false;
@@ -202,7 +201,7 @@ public class FileSyncManager {
 	 * @param fileName
 	 *            name of the removed file
 	 * @return whether the remove was successful or not
-	 *
+	 * 
 	 */
 	private boolean handleLocalRemoved(final String fileName) {
 		// Get the keyfile

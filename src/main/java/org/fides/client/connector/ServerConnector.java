@@ -477,6 +477,7 @@ public class ServerConnector {
 			JsonObject response = new Gson().fromJson(message, JsonObject.class);
 			if (response.has(Responses.SUCCESSFUL)) {
 				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					log.debug("Upload was successful");
 					return true;
 				} else {
 					// TODO: Read error message.
