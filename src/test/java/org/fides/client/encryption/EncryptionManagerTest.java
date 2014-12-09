@@ -15,9 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.fides.client.connector.EncryptedOutputStreamData;
@@ -26,9 +24,8 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
-import org.junit.Rule;
+import org.fides.encryption.KeyGenerator;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 /**
