@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
@@ -14,15 +15,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
+import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 /**
@@ -216,6 +222,35 @@ public class EncryptionManagerTest {
 
 		} catch (Exception e) {
 			fail("An unexpected exception has occured: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Tests the remove file.
+	 */
+	@Test
+	public void testRemoveFile() {
+		// Create a mock of the ServerConnector to catch the call to updateKeyFile.
+		ServerConnector mockConnector = mock(ServerConnector.class);
+
+		// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
+		EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
+
+		//Validate a nullpointerexception
+		try {
+			manager.removeFile(null);
+			fail("An expected NullPointerException was not thrown");
+		} catch (Exception e) {
+			assertTrue(e instanceof NullPointerException);
+		}
+
+		//Validate InvalidClientFileException
+		try {
+			ClientFile clientFile = new ClientFile(null, null, null, null);
+			manager.removeFile(clientFile);
+			fail("An expected InvalidClientFileException was not thrown");
+		} catch (Exception e) {
+			assertTrue(e instanceof InvalidClientFileException);
 		}
 	}
 }

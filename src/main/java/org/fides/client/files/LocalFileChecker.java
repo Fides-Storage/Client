@@ -24,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
 
 /**
@@ -176,6 +177,12 @@ public class LocalFileChecker extends Thread {
 			// Transform string to local space and upload (or remove)
 			String localName = FileManager.fileToLocalName(child.toFile());
 			if (!StringUtils.isBlank(localName)) {
+				syncManager.checkClientFile(localName);
+			}
+		} else if (kind == ENTRY_DELETE) {
+			// Transform string to local space and remove
+			String localName = FileManager.fileToLocalName(child.toFile());
+			if (!StringUtils.isBlank(localName) && LocalHashes.getInstance().containsHash(localName)) {
 				syncManager.checkClientFile(localName);
 			}
 		}
