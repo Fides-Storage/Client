@@ -85,12 +85,11 @@ public class LocalFileCheckTest {
 			thread.interrupt();
 		}
 		thread = null;
+		Thread.sleep(1000);
 		FileUtils.deleteDirectory(testDir);
 		testDir = null;
 		calledFiles.clear();
 		calledFiles = null;
-
-		Thread.sleep(20);
 	}
 
 	/**
@@ -110,7 +109,7 @@ public class LocalFileCheckTest {
 		thread.start();
 
 		// Give it some time to start
-		Thread.sleep(100);
+		Thread.sleep(1000);
 
 		// Create some files
 		File file1 = new File(testDir, "File1.txt");
@@ -146,7 +145,7 @@ public class LocalFileCheckTest {
 		}
 
 		// Give it some time to process
-		Thread.sleep(100);
+		Thread.sleep(1000);
 
 		assertEquals(7, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));

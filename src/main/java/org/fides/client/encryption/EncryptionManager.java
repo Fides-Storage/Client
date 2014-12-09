@@ -40,7 +40,7 @@ import org.fides.client.ui.ErrorMessageScreen;
  * 
  * @author Koen
  * @author Thijs
- *
+ * 
  */
 public class EncryptionManager {
 	/**
@@ -159,6 +159,7 @@ public class EncryptionManager {
 				outEncrypted.flush();
 				dout.flush();
 				out.flush();
+				outEncrypted.close();
 				return connector.checkUploadSuccessful();
 			} catch (IOException e) {
 				log.error(e);
@@ -224,7 +225,7 @@ public class EncryptionManager {
 
 	/**
 	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
-	 *
+	 * 
 	 * @param clientFile
 	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
 	 * @return The {@link OutputStream} used for writing

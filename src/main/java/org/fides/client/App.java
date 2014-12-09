@@ -76,17 +76,17 @@ public class App {
 
 			FileManager fileManager = new FileManager();
 			EncryptionManager encManager = new EncryptionManager(serverConnector, passwordString);
-			serverConnector.disconnect();
 
 			// Check if the user already has a keyfile.
 			InputStream keyFileStream = serverConnector.requestKeyFile();
+
+			// TODO: Check if it's not locked.
 			if (keyFileStream != null) {
 				try {
 					if (keyFileStream.read() == -1) {
+						keyFileStream.close();
 						log.debug("No keyfile available, new key generated");
-						serverConnector.disconnect();
-						encManager.updateKeyFile(new KeyFile());
-						encManager.getConnector().disconnect();
+						log.debug("Uploading succeeded: " + encManager.updateKeyFile(new KeyFile()));
 					} else {
 						log.debug("A keyfile is available on the server");
 					}
@@ -95,10 +95,9 @@ public class App {
 					e.printStackTrace();
 				} finally {
 					IOUtils.closeQuietly(keyFileStream);
-					serverConnector.disconnect();
 				}
 			}
-
+			serverConnector.disconnect();
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
