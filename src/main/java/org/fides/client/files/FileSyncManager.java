@@ -166,24 +166,34 @@ public class FileSyncManager {
 
 		EncryptedOutputStreamData outData = encManager.uploadFile();
 
-		// Upload the file
+		// Create a message digest for creating a file hash/checksum
 		MessageDigest messageDigest = FileUtil.createFileDigest();
+
+		// Upload the file
 		try (InputStream in = fileManager.readFile(fileName);
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
-			LocalHashes.getInstance().setHash(fileName, hash);
-			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
+			out.close();
 		} catch (IOException e) {
 			log.error(e);
 			return false;
 		}
 
-		// Update the keyfile
-		encManager.updateKeyFile(keyFile);
+		// Check if it is successful
+		boolean successful = encManager.getConnector().checkUploadSuccessful();
 
-		return true;
+		// If successful update the administration
+		if (successful) {
+			String hash = KeyGenerator.toHex(messageDigest.digest());
+			LocalHashes.getInstance().setHash(fileName, hash);
+			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
+
+			// Update the keyfile TODO: what if it fails
+			encManager.updateKeyFile(keyFile);
+		}
+
+		return successful;
 	}
 
 	/**
@@ -220,7 +230,7 @@ public class FileSyncManager {
 			return false;
 		}
 
-		// Update the keyfile
+		// Update the keyfile TODO: what if it fails
 		encManager.updateKeyFile(keyFile);
 
 		return true;
@@ -251,15 +261,24 @@ public class FileSyncManager {
 			ClientFile clientFile = keyFile.getClientFileByName(fileName);
 			outEnc = encManager.updateFile(clientFile);
 
+			// Create a digest for creating a file hash/checksum
 			MessageDigest messageDigest = FileUtil.createFileDigest();
+
+			// Copy it to the server
 			in = fileManager.readFile(fileName);
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
-			clientFile.setHash(hash);
+			out.close();
 
-			succesful = true;
+			// Check if the upload was successful
+			succesful = encManager.getConnector().checkUploadSuccessful();
+
+			if (succesful) {
+				// Create a hash and save it
+				String hash = KeyGenerator.toHex(messageDigest.digest());
+				clientFile.setHash(hash);
+			}
 		} catch (InvalidClientFileException e) {
 			log.error(e);
 			succesful = false;
@@ -273,6 +292,7 @@ public class FileSyncManager {
 
 		// Update the keyfile
 		if (succesful) {
+			// Update the keyfile TODO: what if it fails
 			encManager.updateKeyFile(keyFile);
 		}
 		return succesful;
@@ -296,8 +316,10 @@ public class FileSyncManager {
 			return false;
 		}
 
+		// Create a message digest for creating a file hash/checksum
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
+		// Get the right outputstream for update or creation
 		OutputStream outFile;
 		try {
 			if (update) {
@@ -310,10 +332,12 @@ public class FileSyncManager {
 			return false;
 		}
 
+		// Update the file
 		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			IOUtils.copy(in, out);
 
+			// Update the local saved hashes
 			String hexHash = KeyGenerator.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {

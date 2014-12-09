@@ -159,7 +159,7 @@ public class EncryptionManager {
 				outEncrypted.flush();
 				dout.flush();
 				out.flush();
-				return true;
+				return connector.checkUploadSuccessful();
 			} catch (IOException e) {
 				log.error(e);
 			} finally {
