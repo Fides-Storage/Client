@@ -117,7 +117,6 @@ public class EncryptionManager {
 			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
 			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "The program is unable to continue.", e.getMessage());
-			System.exit(1); // We can't continue
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
@@ -213,7 +212,6 @@ public class EncryptionManager {
 			// Should not happen, we close if it does
 			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
-			System.exit(1);
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
@@ -226,7 +224,7 @@ public class EncryptionManager {
 
 	/**
 	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
-	 * 
+	 *
 	 * @param clientFile
 	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
 	 * @return The {@link OutputStream} used for writing
@@ -247,6 +245,25 @@ public class EncryptionManager {
 		OutputStream encryptedOut = getEncryptionStream(out, clientFile.getKey());
 
 		return encryptedOut;
+	}
+
+	/**
+	 * Removes the given ClientFile on the server
+	 * 
+	 * @param clientFile
+	 *            The {@link ClientFile} to be removed
+	 * @return Whether the file has been removed or not
+	 * @throws InvalidClientFileException
+	 */
+	public boolean removeFile(ClientFile clientFile) throws InvalidClientFileException {
+		if (clientFile == null) {
+			throw new NullPointerException();
+		}
+		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
+			throw new InvalidClientFileException();
+		}
+
+		return connector.removeFile(clientFile.getLocation());
 	}
 
 	public ServerConnector getConnector() {

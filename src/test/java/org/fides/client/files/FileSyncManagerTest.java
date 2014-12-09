@@ -1,6 +1,8 @@
 package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -114,8 +116,18 @@ public class FileSyncManagerTest {
 	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#LOCAL_REMOVED}
 	 */
 	@Test
-	public void testHandleLocalRemoved() {
-		// TODO inplement when needed
+	public void testHandleLocalRemoved() throws InvalidClientFileException {
+		String filename = "removedLocalFile";
+		compareResults.add(new FileCompareResult(filename, CompareResultType.LOCAL_REMOVED));
+		when(encManagerMock.removeFile(Mockito.any(ClientFile.class))).thenReturn(true);
+
+		keyFile.addClientFile(new ClientFile(filename, filename, null, null));
+
+		when(encManagerMock.requestKeyFile()).thenReturn(keyFile);
+
+		// The real test
+		fileSyncManager.fileManagerCheck();
+		assertNull(keyFile.getClientFileByName(filename));
 	}
 
 	/**
@@ -158,14 +170,6 @@ public class FileSyncManagerTest {
 		// The real test
 		fileSyncManager.fileManagerCheck();
 		assertEquals("This is the added file", new String(outAdd.toByteArray()));
-	}
-
-	/**
-	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#SERVER_REMOVED}
-	 */
-	@Test
-	public void testHandleServerRemoved() {
-		// TODO inplement when needed
 	}
 
 	/**

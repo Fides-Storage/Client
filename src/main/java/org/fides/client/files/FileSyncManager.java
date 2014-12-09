@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.Collection;
@@ -53,10 +55,14 @@ public class FileSyncManager {
 	 * Compare the local files and server files and sync them
 	 * 
 	 * @return true is successful
-	 * @throws IOException
 	 */
 	public synchronized boolean fileManagerCheck() {
-		encManager.getConnector().connect();
+		try {
+			encManager.getConnector().connect();
+		} catch (ConnectException | UnknownHostException e) {
+			log.error(e);
+			return false;
+		}
 		KeyFile keyFile;
 
 		keyFile = encManager.requestKeyFile();
@@ -77,10 +83,14 @@ public class FileSyncManager {
 	 * Compare the local files and server files and sync them
 	 * 
 	 * @return true is successful
-	 * @throws IOException
 	 */
 	public synchronized boolean checkClientFile(String fileName) {
-		encManager.getConnector().connect();
+		try {
+			encManager.getConnector().connect();
+		} catch (ConnectException | UnknownHostException e) {
+			log.error(e);
+			return false;
+		}
 		KeyFile keyFile = encManager.requestKeyFile();
 
 		if (keyFile == null) {
@@ -104,36 +114,36 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleCompareResult(FileCompareResult result) {
-		boolean succesful = false;
+		boolean successful = false;
 		switch (result.getResultType()) {
 		case LOCAL_ADDED:
-			succesful = handleLocalAdded(result.getName());
+			successful = handleLocalAdded(result.getName());
 			break;
 		case LOCAL_REMOVED:
-			succesful = handleLocalRemoved(result.getName());
+			successful = handleLocalRemoved(result.getName());
 			break;
 		case LOCAL_UPDATED:
-			succesful = handleLocalUpdated(result.getName());
+			successful = handleLocalUpdated(result.getName());
 			break;
 		case SERVER_ADDED:
 			// False because it is a new file
-			succesful = handleServerAddedOrUpdated(result.getName(), false);
+			successful = handleServerAddedOrUpdated(result.getName(), false);
 			break;
 		case SERVER_REMOVED:
-			succesful = handleServerRemoved(result.getName());
+			successful = handleServerRemoved(result.getName());
 			break;
 		case SERVER_UPDATED:
 			// True because it is an update
-			succesful = handleServerAddedOrUpdated(result.getName(), true);
+			successful = handleServerAddedOrUpdated(result.getName(), true);
 			break;
 		case CONFLICTED:
-			succesful = handleConflict(result.getName());
+			successful = handleConflict(result.getName());
 			break;
 		default:
 			log.error("Invalid CompareResult");
 			break;
 		}
-		return succesful;
+		return successful;
 	}
 
 	/**

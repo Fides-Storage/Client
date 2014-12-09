@@ -438,7 +438,31 @@ public class ServerConnector {
 		return null;
 	}
 
+	/**
+	 * Requests a stream from the server for removing a file
+	 * 
+	 * @param location
+	 *            the location of the file to remove
+	 * @return true if the file is successfully removed, false otherwise
+	 */
 	public boolean removeFile(String location) {
+		try {
+			login(savedUsername, savedPasswordHash);
+			JsonObject removeRequest = new JsonObject();
+			removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
+			removeRequest.addProperty(Actions.Properties.LOCATION, location);
+			out.writeUTF(new Gson().toJson(removeRequest));
+			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+			if (requestResponse.has(Responses.SUCCESSFUL)) {
+				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					return true;
+				} else {
+					// TODO: Read error message.
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
 		return false;
 	}
 
