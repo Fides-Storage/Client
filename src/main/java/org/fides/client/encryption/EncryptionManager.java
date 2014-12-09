@@ -173,7 +173,8 @@ public class EncryptionManager {
 	/**
 	 * Encrypts a file and sends it to the {@link ServerConnector}
 	 * 
-	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
+	 * @return
+	 * 		a pair of a location and an {@link OutputStream} that writes to the location the server
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
 	 */
@@ -205,8 +206,9 @@ public class EncryptionManager {
 	 * Encrypts a updated file and sends it to the {@link ServerConnector} so the server can update it
 	 *
 	 * @param clientFile
-	 *            The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
-	 * @return The {@link OutputStream} used for writing
+	 *          The {@link ClientFile} containing the location of the file on the server and the key to encrypt it
+	 * @return
+	 * 			The {@link OutputStream} used for writing
 	 * @throws InvalidClientFileException
 	 */
 	public OutputStream updateFile(ClientFile clientFile) throws InvalidClientFileException {
