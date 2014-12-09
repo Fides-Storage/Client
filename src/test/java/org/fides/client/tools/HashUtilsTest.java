@@ -2,6 +2,7 @@ package org.fides.client.tools;
 
 import static org.junit.Assert.assertEquals;
 
+import org.fides.tools.HashUtils;
 import org.junit.Test;
 
 /**

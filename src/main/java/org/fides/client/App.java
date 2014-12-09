@@ -21,7 +21,7 @@ import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
-import org.fides.client.tools.HashUtils;
+import org.fides.tools.HashUtils;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
