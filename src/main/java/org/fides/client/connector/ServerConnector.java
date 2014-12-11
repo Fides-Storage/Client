@@ -486,6 +486,7 @@ public class ServerConnector {
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
+		log.error("The last upload was not successful");
 		return false;
 	}
 }

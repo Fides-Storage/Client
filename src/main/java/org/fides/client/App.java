@@ -85,8 +85,7 @@ public class App {
 				try {
 					if (keyFileStream.read() == -1) {
 						keyFileStream.close();
-						log.debug("No keyfile available, new key generated");
-						log.debug("Uploading succeeded: " + encManager.updateKeyFile(new KeyFile()));
+						encManager.updateKeyFile(new KeyFile());
 					} else {
 						log.debug("A keyfile is available on the server");
 					}
