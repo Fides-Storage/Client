@@ -258,7 +258,7 @@ public class EncryptionManager {
 	 */
 	public boolean removeFile(ClientFile clientFile) throws InvalidClientFileException {
 		if (clientFile == null) {
-			throw new NullPointerException();
+			return false;
 		}
 		if (clientFile.getKey() == null || StringUtils.isBlank(clientFile.getLocation())) {
 			throw new InvalidClientFileException();
