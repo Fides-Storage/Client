@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
+import org.fides.components.UserMessage;
 import org.fides.tools.HashUtils;
 
 /**
@@ -153,7 +154,7 @@ public class AuthenticateUser {
 				passwordConfirmation.setVisible(!(option == LOGIN));
 			}
 
-			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
+			ArrayList<UserMessage> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
 			String usernameHashString = HashUtils.hash(usernameString);
 			String passwordHashString = HashUtils.hash(passwordString);
@@ -184,13 +185,13 @@ public class AuthenticateUser {
 		String passwordHashString = UserProperties.getInstance().getPasswordHash();
 
 		if (StringUtils.isNotEmpty(usernameHashString) && StringUtils.isNotEmpty(passwordHashString)) {
-			return execute(LOGIN, new ArrayList<String>(), serverConnector, usernameHashString, passwordHashString);
+			return execute(LOGIN, new ArrayList<UserMessage>(), serverConnector, usernameHashString, passwordHashString);
 		}
 
 		return false;
 	}
 
-	private static boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
+	private static boolean execute(int option, ArrayList<UserMessage> errorMessages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
 		// Check if there were any errors
 		if (errorMessages.isEmpty()) {
 			if (option == LOGIN) {
@@ -201,59 +202,63 @@ public class AuthenticateUser {
 					return true;
 				} else {
 					log.debug(serverConnector.getErrorMessage(Actions.LOGIN));
-					errorMessages.add("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN));
+					errorMessages.add(new UserMessage("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN), true));
 				}
 			}
 			if (option == REGISTER) {
 				if (serverConnector.register(usernameHashString, passwordHashString)) {
 					log.debug("Register successful");
-					errorMessages.add("Register successful");
+					errorMessages.add(new UserMessage("Register successful", false));
 					return true;
 				} else {
 					log.debug(serverConnector.getErrorMessage(Actions.CREATEUSER));
-					errorMessages.add("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER));
+					errorMessages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER), true));
 				}
 			}
 		}
 		return false;
 	}
 
-	private static ArrayList<String> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
+	private static ArrayList<UserMessage> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
 
-		ArrayList<String> errorMessages = new ArrayList<String>();
+		ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
 
 		// Check for empty username
 		if (StringUtils.isBlank(usernameString)) {
-			errorMessages.add("Username can not be blank");
+			errorMessages.add(new UserMessage("Username can not be blank", true));
 		}
 		// Check for empty port and if the port is an integer
 		if (StringUtils.isBlank(passwordString)) {
-			errorMessages.add("Password can not be blank");
+			errorMessages.add(new UserMessage("Password can not be blank", true));
 		}
 
 		// Ask for confirm password if needed
 		if (option == 1) {
 			// Check for confirm password
 			if (StringUtils.isBlank(confirmPassword)) {
-				errorMessages.add("Please confirm your password");
+				errorMessages.add(new UserMessage("Please confirm your password", true));
 			}
 			if (!StringUtils.isBlank(confirmPassword) && !confirmPassword.equals(passwordString)) {
-				errorMessages.add("Password not confirmed");
+				errorMessages.add(new UserMessage("Password not confirmed", true));
 			}
 		}
 
 		return errorMessages;
 	}
 
-	private static void setErrorLabels(JPanel errorPanel, ArrayList<String> errors)
+	private static void setErrorLabels(JPanel errorPanel, ArrayList<UserMessage> errors)
 	{
 		errorPanel.removeAll();
 		errorPanel.setVisible(true);
 
-		for (String error : errors) {
+		for (UserMessage error : errors) {
 			JLabel errorLabel = new JLabel();
-			errorLabel.setText(error);
-			errorLabel.setForeground(Color.red);
+			errorLabel.setText(error.message);
+			if (error.error) {
+				errorLabel.setForeground(Color.red);
+			} else {
+				errorLabel.setForeground(Color.green);
+			}
 			errorPanel.add(errorLabel);
 		}
 	}
