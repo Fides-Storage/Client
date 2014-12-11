@@ -1,6 +1,5 @@
 package org.fides.client.ui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -20,6 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fides.components.UserMessage;
+import org.fides.tools.UiUtils;
 
 /**
  * UI Screen where the user enters a hostname and a portnumber.
@@ -36,11 +37,11 @@ public class ServerAddressScreen {
 		frame.setUndecorated(true);
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-		
+
 		// Create a Panel
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		
+
 		// Add a panel where the inputfields can be added
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new GridLayout(2, 1, 0, 5));
@@ -90,21 +91,21 @@ public class ServerAddressScreen {
 		while (option == 0) {
 			option = JOptionPane.showOptionDialog(frame, mainPanel, "Choose Fides Server", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
-			ArrayList<String> errorMessages = new ArrayList<String>();
+			ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
 			// Check for empty hostname
 			if (StringUtils.isBlank(hostName.getText())) {
-				errorMessages.add("Hostname can not be blank");
+				errorMessages.add(new UserMessage("Hostname can not be blank", true));
 			}
 			// Check for empty port and if the port is an integer
 			if (StringUtils.isBlank(port.getText())) {
-				errorMessages.add("Port can not be blank");
+				errorMessages.add(new UserMessage("Port can not be blank", true));
 			} else if (!tryParseInt(port.getText())) {
-				errorMessages.add("Port has to be a valid number");
+				errorMessages.add(new UserMessage("Port has to be a valid number", true));
 			} else {
 				// Check if the port is a valid port.
 				int portInt = Integer.parseInt(port.getText());
 				if (portInt < 0 || portInt > 65535) {
-					errorMessages.add("Port has to be a valid port");
+					errorMessages.add(new UserMessage("Port has to be a valid port", true));
 				}
 			}
 			// Check if there were any errors, if not, the address is returned.
@@ -113,25 +114,12 @@ public class ServerAddressScreen {
 				return new InetSocketAddress(hostName.getText(), Integer.parseInt(port.getText()));
 			} else {
 				// If there were errors, they are added to the dialog and it gets shown again.
-				setErrorLabels(errorPanel, errorMessages);
+				UiUtils.setMessageLabels(errorPanel, errorMessages);
 			}
 		}
 		frame.dispose();
 		// The user pressed 'cancel' or the close button.
 		return null;
-	}
-
-	private static void setErrorLabels(JPanel errorPanel, ArrayList<String> errors)
-	{
-		errorPanel.removeAll();
-		errorPanel.setVisible(true);
-
-		for (String error : errors) {
-			JLabel errorLabel = new JLabel();
-			errorLabel.setText(error);
-			errorLabel.setForeground(Color.red);
-			errorPanel.add(errorLabel);
-		}
 	}
 
 	private static boolean tryParseInt(String value) {

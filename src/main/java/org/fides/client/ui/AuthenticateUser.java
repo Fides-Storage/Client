@@ -1,6 +1,5 @@
 package org.fides.client.ui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -27,6 +26,7 @@ import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
 import org.fides.components.UserMessage;
 import org.fides.tools.HashUtils;
+import org.fides.tools.UiUtils;
 
 /**
  * Authenticate user by asking username and password, or ask to register
@@ -172,7 +172,7 @@ public class AuthenticateUser {
 			}
 
 			// If there were errors, they are added to the dialog and it gets shown again.
-			setMessageLabels(messagePanel, messages);
+			UiUtils.setMessageLabels(messagePanel, messages);
 		}
 
 		frame.dispose();
@@ -244,23 +244,6 @@ public class AuthenticateUser {
 		}
 
 		return messages;
-	}
-
-	private static void setMessageLabels(JPanel messagePanel, ArrayList<UserMessage> messages)
-	{
-		messagePanel.removeAll();
-		messagePanel.setVisible(true);
-
-		for (UserMessage message : messages) {
-			JLabel messageLabel = new JLabel();
-			messageLabel.setText(message.message);
-			if (message.error) {
-				messageLabel.setForeground(Color.red);
-			} else {
-				messageLabel.setForeground(Color.green);
-			}
-			messagePanel.add(messageLabel);
-		}
 	}
 
 }
