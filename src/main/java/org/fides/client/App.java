@@ -184,7 +184,7 @@ public class App {
 	 *            the given certificate
 	 * @return if certificate is the same
 	 */
-	protected static boolean checkCertificateAccepted(X509Certificate certificate) {
+	private static boolean checkCertificateAccepted(X509Certificate certificate) {
 		// Check saved certificate with current one
 		String certificateId = UserProperties.getInstance().getCertificateId();
 		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
