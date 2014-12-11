@@ -78,11 +78,11 @@ public class AuthenticateUser {
 		inputPanel.setLayout(new GridLayout(3, 1, 0, 5));
 
 		// Add a panel where errors can be shown later
-		JPanel errorPanel = new JPanel();
-		errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS));
-		errorPanel.setVisible(false);
-		errorPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		mainPanel.add(errorPanel);
+		JPanel messagePanel = new JPanel();
+		messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+		messagePanel.setVisible(false);
+		messagePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		mainPanel.add(messagePanel);
 
 		// Add a label to the panel
 		JLabel labelUsername = new JLabel("Username:");
@@ -154,12 +154,12 @@ public class AuthenticateUser {
 				passwordConfirmation.setVisible(!(option == LOGIN));
 			}
 
-			ArrayList<UserMessage> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
+			ArrayList<UserMessage> messages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
 			String usernameHashString = HashUtils.hash(usernameString);
 			String passwordHashString = HashUtils.hash(passwordString);
 
-			Boolean authenticated = execute(option, errorMessages, serverConnector, usernameHashString, passwordHashString);
+			Boolean authenticated = execute(option, messages, serverConnector, usernameHashString, passwordHashString);
 
 			if (authenticated) {
 				if (option == LOGIN) {
@@ -172,7 +172,7 @@ public class AuthenticateUser {
 			}
 
 			// If there were errors, they are added to the dialog and it gets shown again.
-			setErrorLabels(errorPanel, errorMessages);
+			setMessageLabels(messagePanel, messages);
 		}
 
 		frame.dispose();
@@ -191,9 +191,9 @@ public class AuthenticateUser {
 		return false;
 	}
 
-	private static boolean execute(int option, ArrayList<UserMessage> errorMessages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
+	private static boolean execute(int option, ArrayList<UserMessage> messages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
 		// Check if there were any errors
-		if (errorMessages.isEmpty()) {
+		if (messages.isEmpty()) {
 			if (option == LOGIN) {
 				if (serverConnector.login(usernameHashString, passwordHashString)) {
 					log.debug("login successful");
@@ -202,17 +202,17 @@ public class AuthenticateUser {
 					return true;
 				} else {
 					log.debug(serverConnector.getErrorMessage(Actions.LOGIN));
-					errorMessages.add(new UserMessage("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN), true));
+					messages.add(new UserMessage("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN), true));
 				}
 			}
 			if (option == REGISTER) {
 				if (serverConnector.register(usernameHashString, passwordHashString)) {
 					log.debug("Register successful");
-					errorMessages.add(new UserMessage("Register successful", false));
+					messages.add(new UserMessage("Register successful", false));
 					return true;
 				} else {
 					log.debug(serverConnector.getErrorMessage(Actions.CREATEUSER));
-					errorMessages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER), true));
+					messages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER), true));
 				}
 			}
 		}
@@ -221,45 +221,45 @@ public class AuthenticateUser {
 
 	private static ArrayList<UserMessage> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
 
-		ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
+		ArrayList<UserMessage> messages = new ArrayList<UserMessage>();
 
 		// Check for empty username
 		if (StringUtils.isBlank(usernameString)) {
-			errorMessages.add(new UserMessage("Username can not be blank", true));
+			messages.add(new UserMessage("Username can not be blank", true));
 		}
 		// Check for empty port and if the port is an integer
 		if (StringUtils.isBlank(passwordString)) {
-			errorMessages.add(new UserMessage("Password can not be blank", true));
+			messages.add(new UserMessage("Password can not be blank", true));
 		}
 
 		// Ask for confirm password if needed
 		if (option == 1) {
 			// Check for confirm password
 			if (StringUtils.isBlank(confirmPassword)) {
-				errorMessages.add(new UserMessage("Please confirm your password", true));
+				messages.add(new UserMessage("Please confirm your password", true));
 			}
 			if (!StringUtils.isBlank(confirmPassword) && !confirmPassword.equals(passwordString)) {
-				errorMessages.add(new UserMessage("Password not confirmed", true));
+				messages.add(new UserMessage("Password not confirmed", true));
 			}
 		}
 
-		return errorMessages;
+		return messages;
 	}
 
-	private static void setErrorLabels(JPanel errorPanel, ArrayList<UserMessage> errors)
+	private static void setMessageLabels(JPanel messagePanel, ArrayList<UserMessage> messages)
 	{
-		errorPanel.removeAll();
-		errorPanel.setVisible(true);
+		messagePanel.removeAll();
+		messagePanel.setVisible(true);
 
-		for (UserMessage error : errors) {
-			JLabel errorLabel = new JLabel();
-			errorLabel.setText(error.message);
-			if (error.error) {
-				errorLabel.setForeground(Color.red);
+		for (UserMessage message : messages) {
+			JLabel messageLabel = new JLabel();
+			messageLabel.setText(message.message);
+			if (message.error) {
+				messageLabel.setForeground(Color.red);
 			} else {
-				errorLabel.setForeground(Color.green);
+				messageLabel.setForeground(Color.green);
 			}
-			errorPanel.add(errorLabel);
+			messagePanel.add(messageLabel);
 		}
 	}
 
