@@ -18,7 +18,7 @@ import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
-import org.fides.encryption.KeyGenerator;
+import org.fides.tools.HashUtils;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -179,7 +179,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
+			String hash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 		} catch (IOException e) {
@@ -275,7 +275,7 @@ public class FileSyncManager {
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
+			String hash = HashUtils.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
 
 			succesful = true;
@@ -339,7 +339,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			IOUtils.copy(in, out);
 
-			String hexHash = KeyGenerator.toHex(messageDigest.digest());
+			String hexHash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {
 			log.error(e);
