@@ -13,12 +13,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.encryption.KeyGenerator;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
+import org.fides.tools.HashUtils;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -162,7 +162,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest)) {
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
+			String hash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 		} catch (IOException e) {
@@ -182,10 +182,10 @@ public class FileSyncManager {
 
 	/**
 	 * Handles a remove of a local file
+	 * 
 	 * @param fileName
-	 * 		name of the removed file
-	 * @return
-	 * 		whether the remove was successful or not
+	 *            name of the removed file
+	 * @return whether the remove was successful or not
 	 *
 	 */
 	private boolean handleLocalRemoved(final String fileName) {
@@ -198,7 +198,7 @@ public class FileSyncManager {
 			return false;
 		}
 
-		//Get ClientFile from keyfile
+		// Get ClientFile from keyfile
 		ClientFile file = keyFile.getClientFileByName(fileName);
 		try {
 			// Remove the file on the server
@@ -206,7 +206,7 @@ public class FileSyncManager {
 			// TODO: Code is temporary, the disconnect will be removed eventually
 			encManager.getConnector().disconnect();
 
-			if(result) {
+			if (result) {
 				// Remove file from keyfile
 				keyFile.removeClientFileByName(fileName);
 
@@ -258,7 +258,7 @@ public class FileSyncManager {
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			out.flush();
-			String hash = KeyGenerator.toHex(messageDigest.digest());
+			String hash = HashUtils.toHex(messageDigest.digest());
 			clientFile.setHash(hash);
 
 			succesful = true;
@@ -322,7 +322,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			IOUtils.copy(in, out);
 
-			String hexHash = KeyGenerator.toHex(messageDigest.digest());
+			String hexHash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {
 			log.error(e);
@@ -339,21 +339,21 @@ public class FileSyncManager {
 
 	/**
 	 * Handle a removed file on the server, this will remove the file locally
+	 * 
 	 * @param fileName
-	 * 			The filename of the removed file
-	 * @return
-	 * 			Whether the file hash been removed or not
+	 *            The filename of the removed file
+	 * @return Whether the file hash been removed or not
 	 */
 	private boolean handleServerRemoved(final String fileName) {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.canWrite()) {
 			boolean result = fileManager.removeFile(fileName);
-			if(result) {
-				//Remove the local hash
+			if (result) {
+				// Remove the local hash
 				LocalHashes.getInstance().removeHash(fileName);
 			}
-			//Remove the File
+			// Remove the File
 			return result;
 		}
 		return false;

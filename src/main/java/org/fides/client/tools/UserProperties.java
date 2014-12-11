@@ -189,6 +189,18 @@ public final class UserProperties {
 	}
 
 	/**
+	 * Get server address of the server
+	 * 
+	 * @return server address of the server
+	 */
+	public InetSocketAddress getServerAddress() {
+		if (StringUtils.isNotEmpty(getHost()) && getHostPort() > 0 & getHostPort() <= 65535) {
+			return new InetSocketAddress(getHost(), getHostPort());
+		}
+		return null;
+	}
+
+	/**
 	 * Saves the server address to config file
 	 * 
 	 * @param serverAddress

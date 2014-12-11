@@ -182,7 +182,12 @@ public class AuthenticateUser {
 	private static boolean authenticateUserFromConfig(ServerConnector serverConnector) {
 		String usernameHashString = UserProperties.getInstance().getUsernameHash();
 		String passwordHashString = UserProperties.getInstance().getPasswordHash();
-		return execute(LOGIN, new ArrayList<String>(), serverConnector, usernameHashString, passwordHashString);
+
+		if (StringUtils.isNotEmpty(usernameHashString) && StringUtils.isNotEmpty(passwordHashString)) {
+			return execute(LOGIN, new ArrayList<String>(), serverConnector, usernameHashString, passwordHashString);
+		}
+
+		return false;
 	}
 
 	private static boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
