@@ -184,7 +184,6 @@ public class ServerConnector {
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 					if (loggedIn) {
-						// TODO: Gets removed when we finish the custom IOStream.
 						savedUsername = username;
 						savedPasswordHash = passwordHash;
 					}
@@ -214,9 +213,8 @@ public class ServerConnector {
 	 * @return if registered succeeded
 	 */
 	public boolean register(String username, String passwordHash) {
-		if (isConnected()) {
+		if (isConnected() && !isLoggedIn()) {
 			try {
-
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
 				user.addProperty(Actions.Properties.USERNAME, username);
@@ -296,20 +294,20 @@ public class ServerConnector {
 	 */
 	public InputStream requestKeyFile() {
 		try {
-			// TODO: Should be removed after implementing a custom IOStream
-			if (!loggedIn) {
-				login(savedUsername, savedPasswordHash);
-			}
-			JsonObject keyFileRequest = new JsonObject();
-			keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
-			out.writeUTF(new Gson().toJson(keyFileRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return new VirtualInputStream(in);
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject keyFileRequest = new JsonObject();
+				keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
+				out.writeUTF(new Gson().toJson(keyFileRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						return new VirtualInputStream(in);
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -325,20 +323,20 @@ public class ServerConnector {
 	 */
 	public OutputStream updateKeyFile() {
 		try {
-			// TODO: Should be removed after implementing a custom IOStream
-			if (!loggedIn) {
-				login(savedUsername, savedPasswordHash);
-			}
-			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
-			out.writeUTF(new Gson().toJson(fileRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return new VirtualOutputStream(out);
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject fileRequest = new JsonObject();
+				fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
+				out.writeUTF(new Gson().toJson(fileRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						return new VirtualOutputStream(out);
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -355,21 +353,21 @@ public class ServerConnector {
 	 */
 	public InputStream requestFile(String location) {
 		try {
-			// TODO: Should be removed after implementing a custom IOStream
-			if (!loggedIn) {
-				login(savedUsername, savedPasswordHash);
-			}
-			JsonObject fileRequest = new JsonObject();
-			fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
-			fileRequest.addProperty(Actions.Properties.LOCATION, location);
-			out.writeUTF(new Gson().toJson(fileRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return new VirtualInputStream(in);
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject fileRequest = new JsonObject();
+				fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
+				fileRequest.addProperty(Actions.Properties.LOCATION, location);
+				out.writeUTF(new Gson().toJson(fileRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						return new VirtualInputStream(in);
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -385,21 +383,21 @@ public class ServerConnector {
 	 */
 	public OutputStreamData uploadFile() {
 		try {
-			// TODO: Should be removed after implementing a custom IOStream
-			if (!loggedIn) {
-				login(savedUsername, savedPasswordHash);
-			}
-			JsonObject uploadRequest = new JsonObject();
-			uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
-			out.writeUTF(new Gson().toJson(uploadRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
-					String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
-					return new OutputStreamData(new VirtualOutputStream(out), location);
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject uploadRequest = new JsonObject();
+				uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
+				out.writeUTF(new Gson().toJson(uploadRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
+						String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
+						return new OutputStreamData(new VirtualOutputStream(out), location);
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -416,21 +414,21 @@ public class ServerConnector {
 	 */
 	public OutputStream updateFile(String location) {
 		try {
-			// TODO: Should be removed after implementing a custom IOStream
-			if (!loggedIn) {
-				login(savedUsername, savedPasswordHash);
-			}
-			JsonObject updateRequest = new JsonObject();
-			updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
-			updateRequest.addProperty(Actions.Properties.LOCATION, location);
-			out.writeUTF(new Gson().toJson(updateRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return new VirtualOutputStream(out);
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject updateRequest = new JsonObject();
+				updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
+				updateRequest.addProperty(Actions.Properties.LOCATION, location);
+				out.writeUTF(new Gson().toJson(updateRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						return new VirtualOutputStream(out);
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -447,18 +445,21 @@ public class ServerConnector {
 	 */
 	public boolean removeFile(String location) {
 		try {
-			login(savedUsername, savedPasswordHash);
-			JsonObject removeRequest = new JsonObject();
-			removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
-			removeRequest.addProperty(Actions.Properties.LOCATION, location);
-			out.writeUTF(new Gson().toJson(removeRequest));
-			JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
-			if (requestResponse.has(Responses.SUCCESSFUL)) {
-				if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					return true;
-				} else {
-					// TODO: Read error message.
+			if (login(savedUsername, savedPasswordHash)) {
+				JsonObject removeRequest = new JsonObject();
+				removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
+				removeRequest.addProperty(Actions.Properties.LOCATION, location);
+				out.writeUTF(new Gson().toJson(removeRequest));
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						return true;
+					} else {
+						// TODO: Read error message.
+					}
 				}
+			} else {
+				log.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
