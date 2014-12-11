@@ -23,8 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
-import org.fides.tools.HashUtils;
+import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
+import org.fides.tools.HashUtils;
 
 /**
  * Authenticate user by asking username and password, or ask to register
@@ -38,6 +39,12 @@ public class AuthenticateUser {
 	 */
 	private static Logger log = LogManager.getLogger(AuthenticateUser.class);
 
+	private static final int LOGIN = 0;
+
+	private static final int REGISTER = 1;
+
+	private static final int CANCEL = 2;
+
 	/**
 	 * Authenticate user, you can login and register
 	 * 
@@ -47,6 +54,15 @@ public class AuthenticateUser {
 	 */
 	public static boolean authenticateUser(ServerConnector serverConnector) {
 
+		if (authenticateUserFromConfig(serverConnector)) {
+			return true;
+		}
+
+		return authenticateUserWithUi(serverConnector);
+
+	}
+
+	private static boolean authenticateUserWithUi(ServerConnector serverConnector) {
 		JFrame frame = new JFrame();
 		frame.setUndecorated(true);
 		frame.setVisible(true);
@@ -113,21 +129,17 @@ public class AuthenticateUser {
 
 		// Place the three buttons for login, register and cancel and show the dialog
 		String[] options = new String[] { "Login", "Register", "Cancel" };
-		int option = 0;
+		int option = LOGIN;
 
-		while (option == 0 || option == 1 || option == 2) {
+		while (option == LOGIN || option == REGISTER || option == CANCEL) {
 			option = JOptionPane.showOptionDialog(frame, mainPanel, "Enter credentials", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-
-			Boolean login = option == 0;
-			Boolean register = option == 1;
-			Boolean cancel = option == 2;
 
 			// Get values from form
 			String usernameString = username.getText();
 			String passwordString = new String(password.getPassword());
 			String confirmPassword = new String(passwordConfirmation.getPassword());
 
-			if (cancel) {
+			if (option == CANCEL) {
 				if (labelPasswordConfirmation.isVisible()) {
 					labelPasswordConfirmation.setVisible(false);
 					passwordConfirmation.setVisible(false);
@@ -137,20 +149,22 @@ public class AuthenticateUser {
 					return false;
 				}
 			} else {
-				labelPasswordConfirmation.setVisible(!login);
-				passwordConfirmation.setVisible(!login);
+				labelPasswordConfirmation.setVisible(!(option == LOGIN));
+				passwordConfirmation.setVisible(!(option == LOGIN));
 			}
 
 			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
-			Boolean authenticated = execute(option, errorMessages, serverConnector, usernameString, passwordString);
+			String usernameHashString = HashUtils.hash(usernameString);
+			String passwordHashString = HashUtils.hash(passwordString);
+
+			Boolean authenticated = execute(option, errorMessages, serverConnector, usernameHashString, passwordHashString);
 
 			if (authenticated) {
-				if (login) {
+				if (option == LOGIN) {
 					frame.dispose();
 					return true;
-
-				} else if (register) {
+				} else if (option == REGISTER) {
 					labelPasswordConfirmation.setVisible(false);
 					passwordConfirmation.setVisible(false);
 				}
@@ -163,28 +177,30 @@ public class AuthenticateUser {
 		frame.dispose();
 
 		return false;
-
 	}
 
-	private static Boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameString, String passwordString) {
-		Boolean login = option == 0;
-		Boolean register = option == 1;
-		// Boolean cancel = option == 2;
+	private static boolean authenticateUserFromConfig(ServerConnector serverConnector) {
+		String usernameHashString = UserProperties.getInstance().getUsernameHash();
+		String passwordHashString = UserProperties.getInstance().getPasswordHash();
+		return execute(LOGIN, new ArrayList<String>(), serverConnector, usernameHashString, passwordHashString);
+	}
 
+	private static boolean execute(int option, ArrayList<String> errorMessages, ServerConnector serverConnector, String usernameHashString, String passwordHashString) {
 		// Check if there were any errors
 		if (errorMessages.isEmpty()) {
-			if (login) {
-
-				if (serverConnector.login(HashUtils.hash(usernameString), HashUtils.hash(passwordString))) {
+			if (option == LOGIN) {
+				if (serverConnector.login(usernameHashString, passwordHashString)) {
 					log.debug("login successful");
+					UserProperties.getInstance().setPasswordHash(passwordHashString);
+					UserProperties.getInstance().setUsernameHash(usernameHashString);
 					return true;
 				} else {
 					log.debug(serverConnector.getErrorMessage(Actions.LOGIN));
 					errorMessages.add("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN));
 				}
 			}
-			if (register) {
-				if (serverConnector.register(HashUtils.hash(usernameString), HashUtils.hash(passwordString))) {
+			if (option == REGISTER) {
+				if (serverConnector.register(usernameHashString, passwordHashString)) {
 					log.debug("Register successful");
 					errorMessages.add("Register successful");
 					return true;

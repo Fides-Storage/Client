@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +48,36 @@ public final class UserProperties {
 	private static final String FILE_DIRECTORY_KEY = "FidesFiles";
 
 	/**
+	 * The key to get the user name
+	 */
+	private static final String USERNAMEHASH_KEY = "UsernameHash";
+
+	/**
+	 * The key to get the password hash
+	 */
+	private static final String PASSWORDHASH_KEY = "PasswordHash";
+
+	/**
+	 * The key to get the server host
+	 */
+	private static final String HOST_KEY = "Host";
+
+	/**
+	 * The key to get the server host port
+	 */
+	private static final String HOSTPORT_KEY = "HostPort";
+
+	/**
+	 * The certificate id
+	 */
+	private static final String CERTIFICATEID_KEY = "CertificateId";
+
+	/**
+	 * The certificate issuer
+	 */
+	private static final String CERTIFICATEISSUER_KEY = "CertificateIssuer";
+
+	/**
 	 * Singleton instance
 	 */
 	private static UserProperties instance;
@@ -54,11 +86,6 @@ public final class UserProperties {
 	 * The properties used for storing the settings
 	 */
 	private Properties properties;
-
-	/**
-	 * The {@link File} representing the directory in which files can be saves
-	 */
-	private File fileDirectory;
 
 	/**
 	 * Constructor, reads the {@link UserProperties}
@@ -83,20 +110,23 @@ public final class UserProperties {
 			log.error(e);
 		}
 
-		// Create the a file referencing the the location were the files should be saved
+		createFileDirectory();
+
+	}
+
+	/**
+	 * Create the a file referencing the the location were the files should be saved
+	 */
+	private void createFileDirectory() {
 		String fileDirectoryName = properties.getProperty(FILE_DIRECTORY_KEY);
 		if (StringUtils.isBlank(fileDirectoryName)) {
 			fileDirectoryName = DEFAULT_FILE_DIR;
 
-			try {
-				properties.setProperty(FILE_DIRECTORY_KEY, new File(fileDirectoryName).getCanonicalPath());
-			} catch (IOException e) {
-				log.debug(e);
-			}
+			properties.setProperty(FILE_DIRECTORY_KEY, fileDirectoryName);
 
 			saveProperties();
 		}
-		fileDirectory = new File(fileDirectoryName);
+		File fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
 			if (!fileDirectory.mkdirs()) {
 				log.error("File directory can not be created");
@@ -104,10 +134,100 @@ public final class UserProperties {
 				System.exit(1);
 			}
 		}
+
 	}
 
 	public File getFileDirectory() {
-		return fileDirectory;
+		return new File(properties.getProperty(FILE_DIRECTORY_KEY));
+	}
+
+	public String getUsernameHash() {
+		return properties.getProperty(USERNAMEHASH_KEY);
+	}
+
+	/**
+	 * Save user name hash
+	 * 
+	 * @param usernameHash
+	 *            the given user name hash to save
+	 */
+	public void setUsernameHash(String usernameHash) {
+		properties.setProperty(USERNAMEHASH_KEY, usernameHash);
+		saveProperties();
+	}
+
+	public String getPasswordHash() {
+		return properties.getProperty(PASSWORDHASH_KEY);
+	}
+
+	/**
+	 * Save password hash
+	 * 
+	 * @param passwordHash
+	 *            the given password hash to save
+	 */
+	public void setPasswordHash(String passwordHash) {
+		properties.setProperty(PASSWORDHASH_KEY, passwordHash);
+		saveProperties();
+	}
+
+	public String getHost() {
+		return properties.getProperty(HOST_KEY);
+	}
+
+	/**
+	 * Get host port
+	 * 
+	 * @return host port, if empty turn 0
+	 */
+	public int getHostPort() {
+		String hostPort = properties.getProperty(HOSTPORT_KEY);
+		if (StringUtils.isNotEmpty(hostPort) && StringUtils.isNumeric(hostPort)) {
+			return Integer.parseInt(hostPort);
+		}
+		return 0;
+	}
+
+	/**
+	 * Saves the server address to config file
+	 * 
+	 * @param serverAddress
+	 *            address of the server
+	 */
+	public void setServerAddress(InetSocketAddress serverAddress) {
+		properties.setProperty(HOST_KEY, serverAddress.getHostString());
+		properties.setProperty(HOSTPORT_KEY, Integer.toString(serverAddress.getPort()));
+		saveProperties();
+	}
+
+	/**
+	 * Get certificate id
+	 * 
+	 * @return certificate id
+	 */
+	public String getCertificateId() {
+		return properties.getProperty(CERTIFICATEID_KEY);
+	}
+
+	/**
+	 * Get certificate issuer
+	 * 
+	 * @return certificate issuer
+	 */
+	public String getCertificateIssuer() {
+		return properties.getProperty(CERTIFICATEISSUER_KEY);
+	}
+
+	/**
+	 * Saves the certificate to config file
+	 * 
+	 * @param certificate
+	 *            certificate to save
+	 */
+	public void setCertificate(X509Certificate certificate) {
+		properties.setProperty(CERTIFICATEID_KEY, certificate.getSerialNumber().toString());
+		properties.setProperty(CERTIFICATEISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		saveProperties();
 	}
 
 	/**
