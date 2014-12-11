@@ -44,6 +44,9 @@ public class EncryptionManager {
 
 	private final String password;
 
+	/** Size of the salt used in generating the master key, it should NEVER change */
+	public static final int SALT_SIZE = 16; // 128 bit
+
 	/**
 	 * Constructor
 	 * 
@@ -80,9 +83,9 @@ public class EncryptionManager {
 		try {
 			din = new DataInputStream(in);
 
-			byte[] saltBytes = new byte[EncryptionUtils.SALT_SIZE];
+			byte[] saltBytes = new byte[SALT_SIZE];
 			int pbkdf2Rounds = din.readInt();
-			din.read(saltBytes, 0, EncryptionUtils.SALT_SIZE);
+			din.read(saltBytes, 0, SALT_SIZE);
 
 			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
@@ -123,13 +126,13 @@ public class EncryptionManager {
 			OutputStream outEncrypted = null;
 			try {
 
-				byte[] saltBytes = KeyGenerator.getSalt(EncryptionUtils.SALT_SIZE);
+				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 				int pbkdf2Rounds = KeyGenerator.getRounds();
 
 				Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
 				dout.writeInt(pbkdf2Rounds);
-				dout.write(saltBytes, 0, EncryptionUtils.SALT_SIZE);
+				dout.write(saltBytes, 0, SALT_SIZE);
 
 				outEncrypted = EncryptionUtils.getEncryptionStream(dout, key);
 				ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
