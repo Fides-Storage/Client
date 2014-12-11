@@ -155,8 +155,9 @@ public class AuthenticateUser {
 
 			ArrayList<String> errorMessages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
 
-			String usernameHashString = HashUtils.hash(usernameString);
 			String passwordHashString = HashUtils.hash(passwordString);
+			//Make a usernameHash based on the passwordHash and the username
+			String usernameHashString = HashUtils.hash(passwordHashString + usernameString);
 
 			Boolean authenticated = execute(option, errorMessages, serverConnector, usernameHashString, passwordHashString);
 
