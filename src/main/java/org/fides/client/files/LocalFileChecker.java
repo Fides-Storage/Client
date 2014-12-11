@@ -57,6 +57,7 @@ public class LocalFileChecker extends Thread {
 	 * @param syncManager
 	 */
 	public LocalFileChecker(FileSyncManager syncManager) {
+		super("LocalFileChecker Thread");
 		this.syncManager = syncManager;
 		handleThread = new Thread(new Runnable() {
 			@Override
@@ -64,6 +65,7 @@ public class LocalFileChecker extends Thread {
 				for (;;) {
 					try {
 						EventPair pair = eventsQueue.take();
+						log.debug("Event: " + pair.child + " on " + pair.child);
 						handleEvent(pair.kind, pair.child);
 					} catch (InterruptedException e) {
 						log.error(e);
@@ -84,6 +86,7 @@ public class LocalFileChecker extends Thread {
 			return;
 		}
 		for (;;) {
+			log.debug("Run for start");
 			// wait for key to be signaled
 			WatchKey key;
 			try {
@@ -107,6 +110,7 @@ public class LocalFileChecker extends Thread {
 					break;
 				}
 			}
+			log.debug("Run for end");
 		} // End for(;;) loop
 
 	} // End run
@@ -118,6 +122,7 @@ public class LocalFileChecker extends Thread {
 	 *            The key to handle
 	 */
 	private void handleKey(WatchKey key) {
+		log.debug("-HandleKey for start");
 		Path dir = keys.get(key);
 		if (dir == null) {
 			log.error("WatchKey not recognized!!");
@@ -134,6 +139,7 @@ public class LocalFileChecker extends Thread {
 				eventsQueue.add(pair);
 			}
 		}
+		log.debug("-HandleKey for end");
 	}
 
 	/**
@@ -145,6 +151,8 @@ public class LocalFileChecker extends Thread {
 	 *            The location of the event
 	 */
 	private void handleEvent(WatchEvent.Kind<?> kind, Path child) {
+		log.debug("--HandleEvent for start");
+		log.debug("--Event " + kind + " on " + child);
 		// We can ignore an Overflow
 		if (kind == OVERFLOW) {
 			return;
@@ -186,6 +194,7 @@ public class LocalFileChecker extends Thread {
 				syncManager.checkClientFile(localName);
 			}
 		}
+		log.debug("--HandleEvent for end");
 	}
 
 	/**
