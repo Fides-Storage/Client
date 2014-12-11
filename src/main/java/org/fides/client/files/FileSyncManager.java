@@ -276,6 +276,7 @@ public class FileSyncManager {
 			if (succesful) {
 				// Create a hash and save it
 				String hash = KeyGenerator.toHex(messageDigest.digest());
+				LocalHashes.getInstance().setHash(fileName, hash);
 				clientFile.setHash(hash);
 			}
 		} catch (InvalidClientFileException e) {
