@@ -17,6 +17,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.components.Actions;
@@ -253,22 +254,21 @@ public class ServerConnector {
 
 	/**
 	 * Disconnect the current connection
-	 * 
-	 * @return true if disconnect was successful
 	 */
-	public boolean disconnect() {
+	public void disconnect() {
 		try {
-			in.close();
-			out.close();
-			sslsocket.close();
-			return true;
+			JsonObject user = new JsonObject();
+			user.addProperty(Actions.ACTION, Actions.DISCONNECT);
+			out.writeUTF(new Gson().toJson(user));
+			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e);
 		} finally {
 			loggedIn = false;
+			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
+			IOUtils.closeQuietly(sslsocket);
 		}
-
-		return false;
 	}
 
 	/**
