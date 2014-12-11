@@ -72,7 +72,7 @@ public class LocalFileChecker extends Thread {
 					}
 				}
 			}
-		}, "HandleThread");
+		}, "Handle Thread");
 	}
 
 	@Override

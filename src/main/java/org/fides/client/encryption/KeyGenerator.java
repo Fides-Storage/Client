@@ -23,7 +23,7 @@ public final class KeyGenerator {
 
 	private static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
-	private static int pbkdf2Iterations = 1000;
+	private static final int PBKDF2_DEFAULT_ROUNDS = 1000;
 
 	private static SecureRandom random = new SecureRandom();
 
@@ -50,7 +50,7 @@ public final class KeyGenerator {
 	 * @return the default number of rounds
 	 */
 	public static int getRounds() {
-		return pbkdf2Iterations;
+		return PBKDF2_DEFAULT_ROUNDS;
 	}
 
 	/**
@@ -67,8 +67,8 @@ public final class KeyGenerator {
 	 * @return a Key which was generated with PBKDF2
 	 */
 	public static Key generateKey(String password, byte[] salt, int rounds, int keyByteSize) {
-		pbkdf2Iterations = rounds;
-		return pbkdf2(password.toCharArray(), salt, pbkdf2Iterations, keyByteSize);
+		log.debug("generateKey rounds: " + rounds);
+		return pbkdf2(password.toCharArray(), salt, rounds, keyByteSize);
 	}
 
 	/**
