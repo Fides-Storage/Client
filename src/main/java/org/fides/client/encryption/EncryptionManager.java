@@ -22,7 +22,6 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
-import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.encryption.EncryptionUtils;
 import org.fides.encryption.KeyGenerator;
 
@@ -96,8 +95,6 @@ public class EncryptionManager {
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
-			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "The program is unable to continue.", e.getMessage());
-			System.exit(1); // We can't continue
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
@@ -186,14 +183,12 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
-			System.exit(1);
+			return null;
 		} catch (InvalidKeySpecException e) {
 			// Should not happen, we close if it does
-			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
-			System.exit(1);
+			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
