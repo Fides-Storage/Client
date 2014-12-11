@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.encryption.KeyGenerator;
+import org.fides.tools.HashUtils;
 
 /**
  * Some utilities which have to do with files
@@ -50,7 +50,7 @@ public final class FileUtil {
 				// Should never happen
 				log.error(e);
 			}
-			fileHash = KeyGenerator.toHex(messageDigest.digest());
+			fileHash = HashUtils.toHex(messageDigest.digest());
 		}
 
 		return fileHash;

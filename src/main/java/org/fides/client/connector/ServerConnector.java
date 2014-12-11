@@ -19,6 +19,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
 import org.fides.components.Responses;
 
@@ -69,13 +70,6 @@ public class ServerConnector {
 	 */
 	private boolean loggedIn = false;
 
-	// TODO: Move this to properties
-	private String savedUsername;
-
-	private String savedPasswordHash;
-
-	private InetSocketAddress savedAddress;
-
 	/**
 	 * The constructor for the ServerConnector
 	 */
@@ -107,8 +101,6 @@ public class ServerConnector {
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
 
-			savedAddress = address;
-
 			return true;
 		} catch (ConnectException e) {
 			throw e;
@@ -129,7 +121,7 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Login user with given username and passwordHash
+	 * Login user with given usernameHash and passwordHash
 	 * 
 	 * @param usernameHash
 	 *            name of the user
@@ -142,7 +134,7 @@ public class ServerConnector {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.LOGIN);
-				user.addProperty(Actions.Properties.USERNAME, usernameHash);
+				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
@@ -153,11 +145,6 @@ public class ServerConnector {
 						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
-					if (loggedIn) {
-						// TODO: Gets removed when we finish the custom IOStream.
-						savedUsername = usernameHash;
-						savedPasswordHash = passwordHash;
-					}
 				} else {
 					loggedIn = false;
 				}
@@ -175,10 +162,10 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Register the user with given username and passwordHash
+	 * Register the user with given usernameHash and passwordHash
 	 * 
 	 * @param usernameHash
-	 *            the given username
+	 *            the given usernameHash
 	 * @param passwordHash
 	 *            of the account
 	 * @return if registered succeeded
@@ -189,7 +176,7 @@ public class ServerConnector {
 
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
-				user.addProperty(Actions.Properties.USERNAME, usernameHash);
+				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
@@ -268,8 +255,8 @@ public class ServerConnector {
 	public InputStream requestKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject keyFileRequest = new JsonObject();
 			keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
 			out.writeUTF(new Gson().toJson(keyFileRequest));
@@ -296,8 +283,8 @@ public class ServerConnector {
 	public OutputStream updateKeyFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
 			out.writeUTF(new Gson().toJson(fileRequest));
@@ -325,8 +312,8 @@ public class ServerConnector {
 	public InputStream requestFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject fileRequest = new JsonObject();
 			fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
 			fileRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -354,8 +341,8 @@ public class ServerConnector {
 	public OutputStreamData uploadFile() {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject uploadRequest = new JsonObject();
 			uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
 			out.writeUTF(new Gson().toJson(uploadRequest));
@@ -384,8 +371,8 @@ public class ServerConnector {
 	public OutputStream updateFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject updateRequest = new JsonObject();
 			updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
 			updateRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -414,8 +401,8 @@ public class ServerConnector {
 	public boolean removeFile(String location) {
 		try {
 			// TODO: Should be removed after implementing a custom IOStream
-			connect(savedAddress);
-			login(savedUsername, savedPasswordHash);
+			connect(UserProperties.getInstance().getServerAddress());
+			login(UserProperties.getInstance().getUsernameHash(), UserProperties.getInstance().getPasswordHash());
 			JsonObject removeRequest = new JsonObject();
 			removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
 			removeRequest.addProperty(Actions.Properties.LOCATION, location);

@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +24,7 @@ import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
 import org.fides.encryption.KeyGenerator;
+import org.fides.tools.HashUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -128,12 +128,12 @@ public class EncryptionManagerTest {
 			assertTrue(mockOut.size() > 0);
 
 			// Check if encrypting the same file twice gives different results
-			String result1 = KeyGenerator.toHex(mockOut.toByteArray());
+			String result1 = HashUtils.toHex(mockOut.toByteArray());
 			mockOut.reset();
 			outputStreamData = manager.uploadFile();
 			outputStreamData.getOutputStream().write(MESSAGE);
 			outputStreamData.getOutputStream().close();
-			String result2 = KeyGenerator.toHex(mockOut.toByteArray());
+			String result2 = HashUtils.toHex(mockOut.toByteArray());
 			assertTrue(mockOut.size() > 0);
 			assertNotEquals(result1, result2);
 		} catch (Exception e) {
@@ -233,7 +233,7 @@ public class EncryptionManagerTest {
 		// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
 		EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
 
-		//Validate a nullpointerexception
+		// Validate a nullpointerexception
 		try {
 			manager.removeFile(null);
 			fail("An expected NullPointerException was not thrown");
@@ -241,7 +241,7 @@ public class EncryptionManagerTest {
 			assertTrue(e instanceof NullPointerException);
 		}
 
-		//Validate InvalidClientFileException
+		// Validate InvalidClientFileException
 		try {
 			ClientFile clientFile = new ClientFile(null, null, null, null);
 			manager.removeFile(clientFile);

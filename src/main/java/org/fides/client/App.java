@@ -6,6 +6,8 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -21,12 +23,13 @@ import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
-import org.fides.tools.HashUtils;
+import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
+import org.fides.tools.HashUtils;
 
 /**
  * Client application
@@ -116,11 +119,14 @@ public class App {
 
 	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {
 		InetSocketAddress serverAddress = null;
+		X509Certificate certificate = null;
 		boolean validCertificate = false;
+
 		while (!validCertificate) {
 			boolean connected = false;
 			while (!connected) {
-				serverAddress = ServerAddressScreen.getAddress();
+
+				serverAddress = getServerAddress();
 				try {
 					if (serverAddress != null) {
 						connected = serverConnector.connect(serverAddress);
@@ -140,11 +146,68 @@ public class App {
 			Certificate[] certificates = serverConnector.getServerCertificates();
 			serverConnector.disconnect();
 
+			// TODO: validate all certificates
 			if (certificates.length > 0) {
-				validCertificate = CertificateValidationScreen.validateCertificate((X509Certificate) certificates[0]);
+				certificate = (X509Certificate) certificates[0];
+
+				if (!checkValidCertificate(certificate)) {
+					ErrorMessageScreen.showErrorMessage("Server certificate not valid!!!!");
+					System.exit(1);
+				}
+
+				validCertificate = checkCertificateAccepted(certificate);
+
 			}
 		}
+
+		// success, save address and certificate to config
+		UserProperties.getInstance().setServerAddress(serverAddress);
+		UserProperties.getInstance().setCertificate(certificate);
+
 		return serverAddress;
 	}
 
+	private static InetSocketAddress getServerAddress() {
+		String host = UserProperties.getInstance().getHost();
+		int hostPort = UserProperties.getInstance().getHostPort();
+
+		if (StringUtils.isNotEmpty(host) && hostPort >= 1 && hostPort <= 65535) {
+			return new InetSocketAddress(host, hostPort);
+		} else {
+			return ServerAddressScreen.getAddress();
+		}
+	}
+
+	/**
+	 * Check certificate if same as user settings
+	 * 
+	 * @param certificate
+	 *            the given certificate
+	 * @return if certificate is the same
+	 */
+	private static boolean checkCertificateAccepted(X509Certificate certificate) {
+		// Check saved certificate with current one
+		String certificateId = UserProperties.getInstance().getCertificateId();
+		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
+		if (StringUtils.isNotEmpty(certificateId) && StringUtils.isNotEmpty(certificateIssuer)) {
+			return certificate.getSerialNumber().toString().equals(certificateId) && certificate.getIssuerX500Principal().getName().equals(certificateIssuer);
+		}
+
+		return CertificateValidationScreen.validateCertificate(certificate);
+	}
+
+	private static boolean checkValidCertificate(X509Certificate certificate) {
+
+		try {
+			certificate.checkValidity();
+			// The rest of the checks are done by SSLSocket, if failed the socket is closed
+			return true;
+		} catch (CertificateExpiredException e) {
+			log.error(e);
+		} catch (CertificateNotYetValidException e) {
+			log.error(e);
+		}
+
+		return false;
+	}
 }
