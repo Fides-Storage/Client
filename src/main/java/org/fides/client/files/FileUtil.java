@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.encryption.KeyGenerator;
+import org.fides.encryption.KeyGenerator;
 
 /**
  * Some utilities which have to do with files

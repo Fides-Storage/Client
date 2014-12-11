@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.client.encryption.KeyGenerator;
+import org.fides.encryption.KeyGenerator;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;

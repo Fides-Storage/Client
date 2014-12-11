@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import org.fides.encryption.KeyGenerator;
 import org.junit.Test;
 
 /**

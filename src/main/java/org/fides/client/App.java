@@ -21,6 +21,7 @@ import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
+import org.fides.tools.HashUtils;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
@@ -71,7 +72,7 @@ public class App {
 
 			String passwordString = null;
 			while (StringUtils.isBlank(passwordString)) {
-				passwordString = PasswordScreen.getPassword();
+				passwordString = HashUtils.hash(PasswordScreen.getPassword());
 			}
 
 			FileManager fileManager = new FileManager();

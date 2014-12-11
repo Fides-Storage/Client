@@ -131,18 +131,18 @@ public class ServerConnector {
 	/**
 	 * Login user with given username and passwordHash
 	 * 
-	 * @param username
+	 * @param usernameHash
 	 *            name of the user
 	 * @param passwordHash
 	 *            to login
 	 * @return true if succeeded
 	 */
-	public boolean login(String username, String passwordHash) {
+	public boolean login(String usernameHash, String passwordHash) {
 		if (isConnected() && !loggedIn) {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.LOGIN);
-				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.USERNAME, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
@@ -155,7 +155,7 @@ public class ServerConnector {
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 					if (loggedIn) {
 						// TODO: Gets removed when we finish the custom IOStream.
-						savedUsername = username;
+						savedUsername = usernameHash;
 						savedPasswordHash = passwordHash;
 					}
 				} else {
@@ -177,19 +177,19 @@ public class ServerConnector {
 	/**
 	 * Register the user with given username and passwordHash
 	 * 
-	 * @param username
+	 * @param usernameHash
 	 *            the given username
 	 * @param passwordHash
 	 *            of the account
 	 * @return if registered succeeded
 	 */
-	public boolean register(String username, String passwordHash) {
+	public boolean register(String usernameHash, String passwordHash) {
 		if (isConnected()) {
 			try {
 
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
-				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.USERNAME, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
