@@ -54,7 +54,7 @@ public class LocalFileCheckTest {
 		calledFiles = new HashSet<>();
 
 		syncManagerMock = Mockito.mock(FileSyncManager.class);
-		Mockito.when(syncManagerMock.checkClientFile(Matchers.anyString())).then(new Answer<Boolean>() {
+		Mockito.when(syncManagerMock.checkClientSideFile(Matchers.anyString())).then(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock invocation) throws Throwable {
 				calledFiles.add(invocation.getArgumentAt(0, String.class));
@@ -105,6 +105,8 @@ public class LocalFileCheckTest {
 		fileChange.createNewFile();
 		File preSubDir = new File(testDir, "preSubDir");
 		preSubDir.mkdir();
+		File fileRemoveSub = new File(preSubDir, "FileRemoveSub.txt");
+		fileRemoveSub.createNewFile();
 
 		thread = new LocalFileChecker(syncManagerMock);
 		thread.start();
@@ -119,6 +121,19 @@ public class LocalFileCheckTest {
 		file1b.createNewFile();
 		File file1c = new File(testDir, "File1c.txt");
 		file1c.createNewFile();
+
+		// Create and remove
+		File fileCreateRemove = new File(testDir, "FileCR.txt");
+		assertTrue(fileCreateRemove.createNewFile());
+		assertTrue(fileCreateRemove.delete());
+
+		// Create and remove subdir
+		File fileCreateRemoveSub = new File(testDir, "FileCRS.txt");
+		assertTrue(fileCreateRemoveSub.createNewFile());
+		assertTrue(fileCreateRemoveSub.delete());
+
+		// Remove subdir
+		assertTrue(fileRemoveSub.delete());
 
 		// Create a sub directory
 		File subDir = new File(testDir, "subDir");
@@ -148,10 +163,15 @@ public class LocalFileCheckTest {
 		// Give it some time to process
 		Thread.sleep(100);
 
-		assertEquals(7, calledFiles.size());
+		System.out.println(calledFiles);
+
+		assertEquals(10, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));
 		assertTrue(calledFiles.contains("File1b.txt"));
 		assertTrue(calledFiles.contains("File1c.txt"));
+		assertTrue(calledFiles.contains("preSubDir/FileRemoveSub.txt"));
+		assertTrue(calledFiles.contains("FileCR.txt"));
+		assertTrue(calledFiles.contains("FileCRS.txt"));
 		assertTrue(calledFiles.contains("fileChange.txt"));
 		assertTrue(calledFiles.contains("subDir/File2.txt"));
 		assertTrue(calledFiles.contains("subDir/subDir2/File3.txt"));

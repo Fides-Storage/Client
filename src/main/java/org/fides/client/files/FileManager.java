@@ -155,7 +155,7 @@ public class FileManager {
 		FileCompareResult result = null;
 		// Does the local file exist
 		File file = new File(UserProperties.getInstance().getFileDirectory(), clientName);
-		if (file.exists()) {
+		if (file.exists() && file.isFile()) {
 			// I have the file
 			if (serverFileNames.contains(clientName)) {
 				// We both have the file
@@ -167,7 +167,7 @@ public class FileManager {
 				// Did not exist here (its added local)
 				result = new FileCompareResult(clientName, CompareResultType.LOCAL_ADDED);
 			}
-		} else {
+		} else if (LocalHashes.getInstance().containsHash(clientName)) {
 			result = new FileCompareResult(clientName, CompareResultType.LOCAL_REMOVED);
 		}
 

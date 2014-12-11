@@ -13,12 +13,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.encryption.KeyGenerator;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
+import org.fides.encryption.KeyGenerator;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -80,21 +80,38 @@ public class FileSyncManager {
 	 * @return true is successful
 	 * @throws IOException
 	 */
-	public synchronized boolean checkClientFile(String fileName) {
+	public synchronized boolean checkClientSideFile(String fileName) {
+		if (!validClientSideFile(fileName)) {
+			return false;
+		}
+
 		KeyFile keyFile = encManager.requestKeyFile();
 		// TODO: Code is temporary, the disconnect will be removed eventually
 		encManager.getConnector().disconnect();
-
 		if (keyFile == null) {
 			return false;
 		}
 
 		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
 		log.debug(result);
+		boolean completed = false;
 		if (result != null) {
-			return handleCompareResult(result);
+			completed = handleCompareResult(result);
 		}
-		return false;
+		return completed;
+	}
+
+	/**
+	 * Checks if a local file is a valid client side file. This is the case when the {@link File} does exist and is a
+	 * file or the {@link LocalHashes} does contain it
+	 * 
+	 * @param fileName
+	 *            The local space name of the file
+	 * @return true if valid, else false
+	 */
+	protected boolean validClientSideFile(String fileName) {
+		File file = new File(UserProperties.getInstance().getFileDirectory(), fileName);
+		return (file.exists() && file.isFile()) || LocalHashes.getInstance().containsHash(fileName);
 	}
 
 	/**
@@ -182,10 +199,10 @@ public class FileSyncManager {
 
 	/**
 	 * Handles a remove of a local file
+	 * 
 	 * @param fileName
-	 * 		name of the removed file
-	 * @return
-	 * 		whether the remove was successful or not
+	 *            name of the removed file
+	 * @return whether the remove was successful or not
 	 *
 	 */
 	private boolean handleLocalRemoved(final String fileName) {
@@ -198,7 +215,7 @@ public class FileSyncManager {
 			return false;
 		}
 
-		//Get ClientFile from keyfile
+		// Get ClientFile from keyfile
 		ClientFile file = keyFile.getClientFileByName(fileName);
 		try {
 			// Remove the file on the server
@@ -206,7 +223,7 @@ public class FileSyncManager {
 			// TODO: Code is temporary, the disconnect will be removed eventually
 			encManager.getConnector().disconnect();
 
-			if(result) {
+			if (result) {
 				// Remove file from keyfile
 				keyFile.removeClientFileByName(fileName);
 
@@ -339,21 +356,21 @@ public class FileSyncManager {
 
 	/**
 	 * Handle a removed file on the server, this will remove the file locally
+	 * 
 	 * @param fileName
-	 * 			The filename of the removed file
-	 * @return
-	 * 			Whether the file hash been removed or not
+	 *            The filename of the removed file
+	 * @return Whether the file hash been removed or not
 	 */
 	private boolean handleServerRemoved(final String fileName) {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.canWrite()) {
 			boolean result = fileManager.removeFile(fileName);
-			if(result) {
-				//Remove the local hash
+			if (result) {
+				// Remove the local hash
 				LocalHashes.getInstance().removeHash(fileName);
 			}
-			//Remove the File
+			// Remove the File
 			return result;
 		}
 		return false;
