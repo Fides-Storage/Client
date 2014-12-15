@@ -2,6 +2,7 @@ package org.fides.client.tools;
 
 import static org.junit.Assert.assertEquals;
 
+import org.fides.tools.HashUtils;
 import org.junit.Test;
 
 /**
@@ -18,7 +19,7 @@ public class HashUtilsTest {
 	@Test
 	public void testHashFunction() {
 		String hashTest = HashUtils.hash("This is a test string");
-		assertEquals("cXrFBpUNoMy2QEzdXnWR9yAYogy8onyKQj6cnlYmrGE=", hashTest);
+		assertEquals("717ac506950da0ccb6404cdd5e7591f72018a20cbca27c8a423e9c9e5626ac61", hashTest);
 	}
 
 	/**

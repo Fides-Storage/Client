@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import org.fides.encryption.KeyGenerator;
+import org.fides.tools.HashUtils;
 import org.junit.Test;
 
 /**
@@ -24,8 +26,8 @@ public class KeyGeneratorTest {
 		final String correctHash = "cfe2eda0e288b7fb60431d4eaaceee0554caeab591e6c1adecd2b82c5660fd92";
 		final int rounds = 1000;
 
-		byte[] generatedHash = KeyGenerator.generateKey(password, KeyGenerator.fromHex(salt), rounds, keySize).getEncoded();
-		assertEquals(correctHash, KeyGenerator.toHex(generatedHash));
+		byte[] generatedHash = KeyGenerator.generateKey(password, HashUtils.fromHex(salt), rounds, keySize).getEncoded();
+		assertEquals(correctHash, HashUtils.toHex(generatedHash));
 		assertEquals(keySize, generatedHash.length);
 	}
 

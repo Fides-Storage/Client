@@ -16,23 +16,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.engines.CamelliaEngine;
-import org.bouncycastle.crypto.io.CipherInputStream;
-import org.bouncycastle.crypto.io.CipherOutputStream;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.OutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.files.InvalidClientFileException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.KeyFile;
-import org.fides.client.ui.ErrorMessageScreen;
+import org.fides.encryption.EncryptionUtils;
+import org.fides.encryption.KeyGenerator;
 
 /**
  * The {@link EncryptionManager} handles the encryption and decryption of an {@link InputStream} before it is passed on
@@ -48,24 +39,12 @@ public class EncryptionManager {
 	 */
 	private static Logger log = LogManager.getLogger(EncryptionManager.class);
 
-	/**
-	 * The algorithm used for encryption and decryption, when changing it dont forgot to update the
-	 * {@link EncryptionManager#createCipher()}
-	 */
-	private static final String ALGORITHM = "Camellia";
-
-	/** The algorithm used for encryption and decryption */
-	private static final int KEY_SIZE = 32; // 256 bit
-
-	/** The IV used to initiate the cipher */
-	private static final byte[] IV = { 0x46, 0x69, 0x64, 0x65, 0x73, 0x2, 0x69, 0x73, 0x20, 0x53, 0x65, 0x63, 0x75, 0x72, 0x65, 0x21 };
-
-	/** Size of the salt used in generating the master key, it should NEVER change */
-	private static final int SALT_SIZE = 16; // 128 bit
-
 	private final ServerConnector connector;
 
 	private final String password;
+
+	/** Size of the salt used in generating the master key, it should NEVER change */
+	public static final int SALT_SIZE = 16; // 128 bit
 
 	/**
 	 * Constructor
@@ -107,16 +86,15 @@ public class EncryptionManager {
 			int pbkdf2Rounds = din.readInt();
 			din.read(saltBytes, 0, SALT_SIZE);
 
-			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
-			inDecrypted = new ObjectInputStream(getDecryptionStream(din, key));
+			inDecrypted = new ObjectInputStream(EncryptionUtils.getDecryptionStream(din, key));
 			KeyFile keyFile;
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO: At this point we are not sure what to do here, discuss this
 			log.error(e);
-			ErrorMessageScreen.showErrorMessage("The keyfile can not be retrieved.", "The program is unable to continue.", e.getMessage());
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
@@ -148,12 +126,12 @@ public class EncryptionManager {
 				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 				int pbkdf2Rounds = KeyGenerator.getRounds();
 
-				Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, KEY_SIZE);
+				Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
 				dout.writeInt(pbkdf2Rounds);
 				dout.write(saltBytes, 0, SALT_SIZE);
 
-				outEncrypted = getEncryptionStream(dout, key);
+				outEncrypted = EncryptionUtils.getEncryptionStream(dout, key);
 				ObjectOutputStream objectOut = new ObjectOutputStream(outEncrypted);
 				objectOut.writeObject(keyFile);
 				outEncrypted.flush();
@@ -190,7 +168,7 @@ public class EncryptionManager {
 		InputStream in = connector.requestFile(clientFile.getLocation());
 
 		Key key = clientFile.getKey();
-		return getDecryptionStream(in, key);
+		return EncryptionUtils.getDecryptionStream(in, key);
 	}
 
 	/**
@@ -203,23 +181,22 @@ public class EncryptionManager {
 	public EncryptedOutputStreamData uploadFile() {
 		Key key = null;
 		try {
-			key = KeyGenerator.generateRandomKey(ALGORITHM, KEY_SIZE);
+			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
-			System.exit(1);
+			return null;
 		} catch (InvalidKeySpecException e) {
 			// Should not happen, we close if it does
-			ErrorMessageScreen.showErrorMessage(e.getMessage());
 			log.error(e);
+			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
 			throw new NullPointerException();
 		}
 
-		OutputStream encryptOut = getEncryptionStream(outStreamData.getOutputStream(), key);
+		OutputStream encryptOut = EncryptionUtils.getEncryptionStream(outStreamData.getOutputStream(), key);
 		return new EncryptedOutputStreamData(encryptOut, outStreamData.getLocation(), key);
 	}
 
@@ -243,7 +220,7 @@ public class EncryptionManager {
 		if (out == null) {
 			throw new NullPointerException();
 		}
-		OutputStream encryptedOut = getEncryptionStream(out, clientFile.getKey());
+		OutputStream encryptedOut = EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
 
 		return encryptedOut;
 	}
@@ -270,52 +247,4 @@ public class EncryptionManager {
 	public ServerConnector getConnector() {
 		return connector;
 	}
-
-	/**
-	 * Create a n {@link InputStream} that decrypts and encrypted {@link InputStream}
-	 * 
-	 * @param in
-	 *            The stream to decrypt
-	 * @param key
-	 *            The {@link Key} to use
-	 * @return An decrypting {@link InputStream}
-	 */
-	private InputStream getDecryptionStream(InputStream in, Key key) {
-		BufferedBlockCipher cipher = createCipher();
-
-		KeyParameter keyParam = new KeyParameter(key.getEncoded());
-		CipherParameters params = new ParametersWithIV(keyParam, IV);
-		cipher.reset();
-		// false because are decrypting
-		cipher.init(false, params);
-
-		return new CipherInputStream(in, cipher);
-	}
-
-	/**
-	 * Create a n {@link OutputStream} that encrypts and encrypted {@link OutputStream}
-	 * 
-	 * @param out
-	 *            The stream to encrypt
-	 * @param key
-	 *            The {@link Key} to use
-	 * @return An encrypting {@link OutputStream}
-	 */
-	private OutputStream getEncryptionStream(OutputStream out, Key key) {
-		BufferedBlockCipher cipher = createCipher();
-
-		KeyParameter keyParam = new KeyParameter(key.getEncoded());
-		CipherParameters params = new ParametersWithIV(keyParam, IV);
-		cipher.reset();
-		// true because are encrypting
-		cipher.init(true, params);
-
-		return new CipherOutputStream(out, cipher);
-	}
-
-	/** Create the cipher to use */
-	private BufferedBlockCipher createCipher() {
-		return new PaddedBufferedBlockCipher(new CBCBlockCipher(new CamelliaEngine()), new PKCS7Padding());
-	}
-
 }

@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
 
 /**
@@ -62,13 +61,13 @@ public class LocalFileChecker extends Thread {
 		handleThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for (;;) {
-					try {
+				try {
+					for (;;) {
 						EventPair pair = eventsQueue.take();
 						handleEvent(pair.kind, pair.child);
-					} catch (InterruptedException e) {
-						log.error(e);
 					}
+				} catch (InterruptedException e) {
+					log.error("LocalFileChecker handle interrupted: " + e);
 				}
 			}
 		}, "Handle Thread");
@@ -109,7 +108,6 @@ public class LocalFileChecker extends Thread {
 				}
 			}
 		} // End for(;;) loop
-
 	} // End run
 
 	/**
@@ -151,9 +149,16 @@ public class LocalFileChecker extends Thread {
 			return;
 		}
 
-		if (Files.isDirectory(child)) {
-			// Change is a directory
+		log.debug(kind + " : " + child);
 
+		if (Files.isRegularFile(child)) {
+			// Transform string to local space and upload (or remove)
+			String localName = FileManager.fileToLocalName(child.toFile());
+			if (!StringUtils.isBlank(localName)) {
+				syncManager.checkClientSideFile(localName);
+			}
+		} else if (Files.isDirectory(child)) {
+			// Change is a directory
 			if (kind == ENTRY_CREATE) {
 				// We want to watch it from now on
 				try {
@@ -172,17 +177,11 @@ public class LocalFileChecker extends Thread {
 					checkSubPath(subFile.toPath());
 				}
 			}
-		} else if (Files.isRegularFile(child)) {
-			// Transform string to local space and upload (or remove)
-			String localName = FileManager.fileToLocalName(child.toFile());
-			if (!StringUtils.isBlank(localName)) {
-				syncManager.checkClientFile(localName);
-			}
 		} else if (kind == ENTRY_DELETE) {
 			// Transform string to local space and remove
 			String localName = FileManager.fileToLocalName(child.toFile());
-			if (!StringUtils.isBlank(localName) && LocalHashes.getInstance().containsHash(localName)) {
-				syncManager.checkClientFile(localName);
+			if (!StringUtils.isBlank(localName)) {
+				syncManager.checkClientSideFile(localName);
 			}
 		}
 	}
@@ -198,7 +197,7 @@ public class LocalFileChecker extends Thread {
 			// Transform string to local space and upload (or remove)
 			String localName = FileManager.fileToLocalName(subPath.toFile());
 			if (!StringUtils.isBlank(localName)) {
-				syncManager.checkClientFile(localName);
+				syncManager.checkClientSideFile(localName);
 			}
 		} else if (Files.isDirectory(subPath)) {
 			try {

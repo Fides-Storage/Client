@@ -72,12 +72,11 @@ public class ServerConnector {
 	 */
 	private boolean loggedIn = false;
 
-	// TODO: Move this to properties
-	private String savedUsername;
+	private InetSocketAddress savedAddress;
+
+	private String savedUsernameHash;
 
 	private String savedPasswordHash;
-
-	private InetSocketAddress savedAddress;
 
 	/**
 	 * The constructor for the ServerConnector
@@ -109,8 +108,6 @@ public class ServerConnector {
 
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
-
-			savedAddress = address;
 
 			return true;
 		} catch (ConnectException e) {
@@ -159,20 +156,20 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Login user with given username and passwordHash
+	 * Login user with given usernameHash and passwordHash
 	 * 
-	 * @param username
+	 * @param usernameHash
 	 *            name of the user
 	 * @param passwordHash
 	 *            to login
 	 * @return true if succeeded
 	 */
-	public boolean login(String username, String passwordHash) {
+	public boolean login(String usernameHash, String passwordHash) {
 		if (isConnected() && !loggedIn) {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.LOGIN);
-				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
@@ -184,7 +181,7 @@ public class ServerConnector {
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
 					if (loggedIn) {
-						savedUsername = username;
+						savedUsernameHash = usernameHash;
 						savedPasswordHash = passwordHash;
 					}
 				} else {
@@ -204,20 +201,20 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Register the user with given username and passwordHash
+	 * Register the user with given usernameHash and passwordHash
 	 * 
-	 * @param username
-	 *            the given username
+	 * @param usernameHash
+	 *            the given usernameHash
 	 * @param passwordHash
 	 *            of the account
 	 * @return if registered succeeded
 	 */
-	public boolean register(String username, String passwordHash) {
+	public boolean register(String usernameHash, String passwordHash) {
 		if (isConnected() && !isLoggedIn()) {
 			try {
 				JsonObject user = new JsonObject();
 				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
-				user.addProperty(Actions.Properties.USERNAME, username);
+				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
 				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
 
 				out.writeUTF(new Gson().toJson(user));
@@ -294,7 +291,7 @@ public class ServerConnector {
 	 */
 	public InputStream requestKeyFile() {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject keyFileRequest = new JsonObject();
 				keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
 				out.writeUTF(new Gson().toJson(keyFileRequest));
@@ -323,7 +320,7 @@ public class ServerConnector {
 	 */
 	public OutputStream updateKeyFile() {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject fileRequest = new JsonObject();
 				fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
 				out.writeUTF(new Gson().toJson(fileRequest));
@@ -353,7 +350,7 @@ public class ServerConnector {
 	 */
 	public InputStream requestFile(String location) {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject fileRequest = new JsonObject();
 				fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
 				fileRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -383,7 +380,7 @@ public class ServerConnector {
 	 */
 	public OutputStreamData uploadFile() {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject uploadRequest = new JsonObject();
 				uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
 				out.writeUTF(new Gson().toJson(uploadRequest));
@@ -414,7 +411,7 @@ public class ServerConnector {
 	 */
 	public OutputStream updateFile(String location) {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject updateRequest = new JsonObject();
 				updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
 				updateRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -445,7 +442,7 @@ public class ServerConnector {
 	 */
 	public boolean removeFile(String location) {
 		try {
-			if (login(savedUsername, savedPasswordHash)) {
+			if (login(savedUsernameHash, savedPasswordHash)) {
 				JsonObject removeRequest = new JsonObject();
 				removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
 				removeRequest.addProperty(Actions.Properties.LOCATION, location);

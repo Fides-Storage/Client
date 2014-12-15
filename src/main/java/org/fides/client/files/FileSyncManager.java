@@ -15,12 +15,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.client.encryption.KeyGenerator;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
+import org.fides.tools.HashUtils;
 
 /**
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
@@ -83,30 +83,48 @@ public class FileSyncManager {
 	/**
 	 * Compare the local files and server files and sync them
 	 * 
+	 * @param fileName
+	 *            the name of the file
 	 * @return true is successful
 	 */
-	public synchronized boolean checkClientFile(String fileName) {
-		try {
-			encManager.getConnector().connect();
-		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
+	public synchronized boolean checkClientSideFile(String fileName) {
+		if (!validClientSideFile(fileName)) {
 			return false;
 		}
-		KeyFile keyFile = encManager.requestKeyFile();
+
+		KeyFile keyFile = null;
+		try {
+			encManager.getConnector().connect();
+			keyFile = encManager.requestKeyFile();
+		} catch (ConnectException | UnknownHostException e) {
+			log.error(e);
+		}
 
 		if (keyFile == null) {
 			encManager.getConnector().disconnect();
 			return false;
 		}
 
-		FileCompareResult compareResult = fileManager.checkClientSideFile(fileName, keyFile);
-		log.debug(compareResult);
-		boolean result = false;
-		if (compareResult != null) {
-			result = handleCompareResult(compareResult);
+		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
+		log.debug(result);
+		boolean completed = false;
+		if (result != null) {
+			completed = handleCompareResult(result);
 		}
-		encManager.getConnector().disconnect();
-		return result;
+		return completed;
+	}
+
+	/**
+	 * Checks if a local file is a valid client side file. This is the case when the {@link File} does exist and is a
+	 * file or the {@link LocalHashes} does contain it
+	 * 
+	 * @param fileName
+	 *            The local space name of the file
+	 * @return true if valid, else false
+	 */
+	protected boolean validClientSideFile(String fileName) {
+		File file = new File(UserProperties.getInstance().getFileDirectory(), fileName);
+		return (file.exists() && file.isFile()) || LocalHashes.getInstance().containsHash(fileName);
 	}
 
 	/**
@@ -184,7 +202,7 @@ public class FileSyncManager {
 
 		// If successful update the administration
 		if (successful) {
-			String hash = KeyGenerator.toHex(messageDigest.digest());
+			String hash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
 
@@ -201,7 +219,7 @@ public class FileSyncManager {
 	 * @param fileName
 	 *            name of the removed file
 	 * @return whether the remove was successful or not
-	 * 
+	 *
 	 */
 	private boolean handleLocalRemoved(final String fileName) {
 		// Get the keyfile
@@ -268,6 +286,7 @@ public class FileSyncManager {
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			out.flush();
+			// TODO Check if this is the thing that broke stuff
 			out.close();
 
 			// Check if the upload was successful
@@ -275,7 +294,7 @@ public class FileSyncManager {
 
 			if (succesful) {
 				// Create a hash and save it
-				String hash = KeyGenerator.toHex(messageDigest.digest());
+				String hash = HashUtils.toHex(messageDigest.digest());
 				LocalHashes.getInstance().setHash(fileName, hash);
 				clientFile.setHash(hash);
 			}
@@ -337,8 +356,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			IOUtils.copy(in, out);
 
-			// Update the local saved hashes
-			String hexHash = KeyGenerator.toHex(messageDigest.digest());
+			String hexHash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
 		} catch (IOException e) {
 			log.error(e);
