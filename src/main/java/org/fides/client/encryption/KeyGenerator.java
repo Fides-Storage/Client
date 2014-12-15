@@ -67,7 +67,6 @@ public final class KeyGenerator {
 	 * @return a Key which was generated with PBKDF2
 	 */
 	public static Key generateKey(String password, byte[] salt, int rounds, int keyByteSize) {
-		log.debug("generateKey rounds: " + rounds);
 		return pbkdf2(password.toCharArray(), salt, rounds, keyByteSize);
 	}
 
