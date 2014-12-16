@@ -395,8 +395,9 @@ public class FileSyncManager {
 	}
 
 	/**
-	 * This removes the folder and all underli
+	 * This removes the folder and all underlying folders
 	 * @param folder
+	 * 			the folder to remove
 	 */
 	private void deleteFolder(File folder) {
 		boolean isRoot = folder.equals(UserProperties.getInstance().getFileDirectory());
