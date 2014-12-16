@@ -253,7 +253,7 @@ public final class UserProperties {
 	 * @param secondes
 	 *            between checks
 	 */
-	public void setCheckTime(int secondes) {
+	public void setCheckTimeInSeconds(int secondes) {
 		if (secondes >= 1) {
 			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
 			saveProperties();
@@ -265,23 +265,22 @@ public final class UserProperties {
 	 * 
 	 * @return The time used to check changes with the server in seconds
 	 */
-	public int getCheckTime() {
+	public int getCheckTimeInSeconds() {
 		String checkTime = properties.getProperty(CHECK_TIME_KEY);
 		int parsedCheckTime = 0;
 		if (StringUtils.isNotBlank(checkTime) && StringUtils.isNumeric(checkTime)) {
 			parsedCheckTime = Integer.parseInt(checkTime);
 		}
 
-		if (parsedCheckTime > 0) {
-			return parsedCheckTime;
-		}
-
 		/**
 		 * Failback to 5 min if not set or incorrect
 		 */
-		setCheckTime(300);
+		if (parsedCheckTime <= 0) {
+			parsedCheckTime = 300;
+			setCheckTimeInSeconds(parsedCheckTime);
+		}
 
-		return 300;
+		return parsedCheckTime;
 
 	}
 

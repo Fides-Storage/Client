@@ -10,6 +10,7 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +106,8 @@ public class App {
 			checker.start();
 
 			Timer timer = new Timer("CheckTimer");
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, UserProperties.getInstance().getCheckTime());
+			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
+			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
 
 			// TODO: We need to place this somewhere, but we do not know where jet
 			// serverConnector.disconnect();
