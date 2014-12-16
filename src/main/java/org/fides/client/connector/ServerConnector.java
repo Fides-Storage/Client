@@ -109,6 +109,8 @@ public class ServerConnector {
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
 
+			savedAddress = address;
+
 			return true;
 		} catch (ConnectException e) {
 			throw e;
