@@ -20,6 +20,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
 import org.fides.components.Responses;
 import org.fides.components.virtualstream.VirtualInputStream;
@@ -72,12 +73,6 @@ public class ServerConnector {
 	 */
 	private boolean loggedIn = false;
 
-	private InetSocketAddress savedAddress;
-
-	private String savedUsernameHash;
-
-	private String savedPasswordHash;
-
 	/**
 	 * The constructor for the ServerConnector
 	 */
@@ -109,8 +104,6 @@ public class ServerConnector {
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
 
-			savedAddress = address;
-
 			return true;
 		} catch (ConnectException e) {
 			throw e;
@@ -132,7 +125,7 @@ public class ServerConnector {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
-			sslsocket.connect(savedAddress);
+			sslsocket.connect(UserProperties.getInstance().getServerAddress());
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -182,10 +175,6 @@ public class ServerConnector {
 						errorMessages.put(Actions.LOGIN, userAnswer.get(Responses.ERROR).getAsString());
 					}
 					loggedIn = userAnswer.get(Responses.SUCCESSFUL).getAsBoolean();
-					if (loggedIn) {
-						savedUsernameHash = usernameHash;
-						savedPasswordHash = passwordHash;
-					}
 				} else {
 					loggedIn = false;
 				}
@@ -293,7 +282,8 @@ public class ServerConnector {
 	 */
 	public InputStream requestKeyFile() {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject keyFileRequest = new JsonObject();
 				keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
 				out.writeUTF(new Gson().toJson(keyFileRequest));
@@ -322,7 +312,8 @@ public class ServerConnector {
 	 */
 	public OutputStream updateKeyFile() {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject fileRequest = new JsonObject();
 				fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
 				out.writeUTF(new Gson().toJson(fileRequest));
@@ -352,7 +343,8 @@ public class ServerConnector {
 	 */
 	public InputStream requestFile(String location) {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject fileRequest = new JsonObject();
 				fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
 				fileRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -382,7 +374,8 @@ public class ServerConnector {
 	 */
 	public OutputStreamData uploadFile() {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject uploadRequest = new JsonObject();
 				uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
 				out.writeUTF(new Gson().toJson(uploadRequest));
@@ -413,7 +406,8 @@ public class ServerConnector {
 	 */
 	public OutputStream updateFile(String location) {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject updateRequest = new JsonObject();
 				updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
 				updateRequest.addProperty(Actions.Properties.LOCATION, location);
@@ -444,7 +438,8 @@ public class ServerConnector {
 	 */
 	public boolean removeFile(String location) {
 		try {
-			if (login(savedUsernameHash, savedPasswordHash)) {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
 				JsonObject removeRequest = new JsonObject();
 				removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
 				removeRequest.addProperty(Actions.Properties.LOCATION, location);
