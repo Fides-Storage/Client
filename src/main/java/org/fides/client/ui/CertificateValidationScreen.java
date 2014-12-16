@@ -18,15 +18,19 @@ import javax.swing.border.TitledBorder;
  * UI where a password can be submitted by a user
  */
 public class CertificateValidationScreen {
-	/** An html tab */
+	/**
+	 * An html tab
+	 */
 	private static final String TAB = "&#09;";
 
-	/** An html whitespace */
+	/**
+	 * An html whitespace
+	 */
 	private static final String WHITESPACE = "&nbsp;";
 
 	/**
 	 * Show a dialog where the user can see and validate the certificate's information.
-	 * 
+	 *
 	 * @return whether the user accepts the server certificate
 	 */
 	public static boolean validateCertificate(X509Certificate certificate) {
@@ -34,7 +38,7 @@ public class CertificateValidationScreen {
 		frame.setUndecorated(true);
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-		
+
 		// Create a Panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -60,15 +64,12 @@ public class CertificateValidationScreen {
 
 		frame.dispose();
 		// If Accept was pressed, return true
-		if (option >= 0 && options[option].equals("Accept")) {
-			return true;
-		}
-		return false;
+		return option >= 0 && options[option].equals("Accept");
 	}
 
 	/**
 	 * Creates a userfriendly string with the certificate's information
-	 * 
+	 *
 	 * @param certificate
 	 *            The certificate to convert to a pretty string.
 	 * @return The userfriendly string
@@ -117,7 +118,7 @@ public class CertificateValidationScreen {
 
 	/**
 	 * Creates a userfriendly string with the certificate's information
-	 * 
+	 *
 	 * @param principal
 	 *            The principal to convert to a pretty string.
 	 * @return The userfriendly string
