@@ -381,6 +381,9 @@ public class FileSyncManager {
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.canWrite()) {
 			boolean result = fileManager.removeFile(fileName);
+
+			deleteFolder(file.getParentFile());
+
 			if (result) {
 				// Remove the local hash
 				LocalHashes.getInstance().removeHash(fileName);
@@ -389,6 +392,21 @@ public class FileSyncManager {
 			return result;
 		}
 		return false;
+	}
+
+	/**
+	 * This removes the folder and all underlying folders
+	 * @param folder
+	 * 			the folder to remove
+	 */
+	private void deleteFolder(File folder) {
+		boolean isRoot = folder.equals(UserProperties.getInstance().getFileDirectory());
+		//If the folder is empty, remove the folder
+		File[] fileList = folder.listFiles();
+		if (fileList != null && fileList.length == 0 && folder.canWrite() && !isRoot) {
+			folder.delete();
+			deleteFolder(folder.getParentFile());
+		}
 	}
 
 	private boolean handleConflict(final String fileName) {
