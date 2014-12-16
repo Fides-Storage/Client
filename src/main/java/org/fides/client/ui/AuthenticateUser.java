@@ -26,7 +26,6 @@ import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
 import org.fides.components.UserMessage;
 import org.fides.tools.HashUtils;
-import org.fides.tools.UiUtils;
 
 /**
  * Authenticate user by asking username and password, or ask to register

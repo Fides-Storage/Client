@@ -20,7 +20,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fides.components.UserMessage;
-import org.fides.tools.UiUtils;
 
 /**
  * UI Screen where the user enters a hostname and a portnumber.
