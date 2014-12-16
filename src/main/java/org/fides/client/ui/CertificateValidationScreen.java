@@ -27,7 +27,7 @@ public class CertificateValidationScreen {
 	/**
 	 * Show a dialog where the user can see and validate the certificate's information.
 	 * 
-	 * @return wether the user accepts the server certificate
+	 * @return whether the user accepts the server certificate
 	 */
 	public static boolean validateCertificate(X509Certificate certificate) {
 		JFrame frame = new JFrame();
