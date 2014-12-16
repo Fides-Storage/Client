@@ -22,6 +22,10 @@ public class CertificateValidationScreen {
 	 * An html tab
 	 */
 	private static final String TAB = "&#09;";
+	/**
+	 * 2 html tabs
+	 */
+	private static final String DOUBLETAB = "&#09;&#09;";
 
 	/**
 	 * An html whitespace
@@ -104,7 +108,7 @@ public class CertificateValidationScreen {
 		// Adds the certificate's dates to the string
 		builder.append("<br><br><b>Issued on:</b>" + TAB + TAB);
 		builder.append(certificate.getNotBefore());
-		builder.append("<br><b>Expires on: </b>" + TAB);
+		builder.append("<br><b>Expires on: </b>" + DOUBLETAB);
 		builder.append(certificate.getNotAfter());
 
 		// Adds some extra info to the string
@@ -126,9 +130,9 @@ public class CertificateValidationScreen {
 	private static String readablePrincipal(X500Principal principal) {
 		String readable = principal.getName();
 		readable = readable.substring(0, readable.indexOf(",L="));
-		readable = readable.replace("CN=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Common Name: " + TAB);
+		readable = readable.replace("CN=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Common Name: " + DOUBLETAB);
 		readable = readable.replace(",OU=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization Unit: " + TAB);
-		readable = readable.replace(",O=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization: " + TAB);
+		readable = readable.replace(",O=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization: " + DOUBLETAB);
 		return readable;
 	}
 
