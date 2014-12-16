@@ -10,7 +10,6 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,11 +35,6 @@ import org.fides.tools.HashUtils;
  * 
  */
 public class App {
-	/**
-	 * The time used to check changes with the server TODO: Shouldn't this be in the settings?
-	 */
-	private static final long CHECK_TIME = TimeUnit.MINUTES.toMillis(5);
-
 	/**
 	 * Log for this class
 	 */
@@ -71,11 +65,14 @@ public class App {
 
 		if (isAuthenticated && serverConnector.isConnected()) {
 
-			// TODO: Do normal work, we are going to loop here
-
-			String passwordString = null;
-			while (StringUtils.isBlank(passwordString)) {
-				passwordString = HashUtils.hash(PasswordScreen.getPassword());
+			/**
+			 * Do normal work, we are going to loop here
+			 */
+			String passwordString = PasswordScreen.getPassword();
+			if (StringUtils.isNotBlank(passwordString)) {
+				passwordString = HashUtils.hash(passwordString);
+			} else {
+				System.exit(0);
 			}
 
 			FileManager fileManager = new FileManager();
@@ -108,7 +105,7 @@ public class App {
 			checker.start();
 
 			Timer timer = new Timer("CheckTimer");
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, CHECK_TIME);
+			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, UserProperties.getInstance().getCheckTime());
 
 			// TODO: We need to place this somewhere, but we do not know where jet
 			// serverConnector.disconnect();
@@ -135,10 +132,13 @@ public class App {
 					}
 				} catch (UnknownHostException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to host " + serverAddress.getHostName());
+					break;
 				} catch (ConnectException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to " + serverAddress.getHostName() + ":" + serverAddress.getPort());
+					break;
 				}
 			}
+
 			if (!connected) {
 				return null;
 			}
@@ -171,7 +171,7 @@ public class App {
 		String host = UserProperties.getInstance().getHost();
 		int hostPort = UserProperties.getInstance().getHostPort();
 
-		if (StringUtils.isNotEmpty(host) && hostPort >= 1 && hostPort <= 65535) {
+		if (StringUtils.isNotBlank(host) && hostPort >= 1 && hostPort <= 65535) {
 			return new InetSocketAddress(host, hostPort);
 		} else {
 			return ServerAddressScreen.getAddress();
@@ -189,7 +189,7 @@ public class App {
 		// Check saved certificate with current one
 		String certificateId = UserProperties.getInstance().getCertificateId();
 		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
-		if (StringUtils.isNotEmpty(certificateId) && StringUtils.isNotEmpty(certificateIssuer)) {
+		if (StringUtils.isNotBlank(certificateId) && StringUtils.isNotBlank(certificateIssuer)) {
 			return certificate.getSerialNumber().toString().equals(certificateId) && certificate.getIssuerX500Principal().getName().equals(certificateIssuer);
 		}
 

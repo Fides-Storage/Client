@@ -78,6 +78,11 @@ public final class UserProperties {
 	private static final String CERTIFICATEISSUER_KEY = "CertificateIssuer";
 
 	/**
+	 * The time used to check changes with the server in seconds
+	 */
+	private static final String CHECK_TIME_KEY = "CheckTime";
+
+	/**
 	 * Singleton instance
 	 */
 	private static UserProperties instance;
@@ -182,7 +187,7 @@ public final class UserProperties {
 	 */
 	public int getHostPort() {
 		String hostPort = properties.getProperty(HOSTPORT_KEY);
-		if (StringUtils.isNotEmpty(hostPort) && StringUtils.isNumeric(hostPort)) {
+		if (StringUtils.isNotBlank(hostPort) && StringUtils.isNumeric(hostPort)) {
 			return Integer.parseInt(hostPort);
 		}
 		return 0;
@@ -194,7 +199,7 @@ public final class UserProperties {
 	 * @return server address of the server
 	 */
 	public InetSocketAddress getServerAddress() {
-		if (StringUtils.isNotEmpty(getHost()) && getHostPort() > 0 & getHostPort() <= 65535) {
+		if (StringUtils.isNotBlank(getHost()) && getHostPort() > 0 & getHostPort() <= 65535) {
 			return new InetSocketAddress(getHost(), getHostPort());
 		}
 		return null;
@@ -240,6 +245,44 @@ public final class UserProperties {
 		properties.setProperty(CERTIFICATEID_KEY, certificate.getSerialNumber().toString());
 		properties.setProperty(CERTIFICATEISSUER_KEY, certificate.getIssuerX500Principal().getName());
 		saveProperties();
+	}
+
+	/**
+	 * Sets the check time
+	 * 
+	 * @param secondes
+	 *            between checks
+	 */
+	public void setCheckTime(int secondes) {
+		if (secondes >= 1) {
+			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
+			saveProperties();
+		}
+	}
+
+	/**
+	 * Get the check time
+	 * 
+	 * @return The time used to check changes with the server in seconds
+	 */
+	public int getCheckTime() {
+		String checkTime = properties.getProperty(CHECK_TIME_KEY);
+		int parsedCheckTime = 0;
+		if (StringUtils.isNotBlank(checkTime) && StringUtils.isNumeric(checkTime)) {
+			parsedCheckTime = Integer.parseInt(checkTime);
+		}
+
+		if (parsedCheckTime > 0) {
+			return parsedCheckTime;
+		}
+
+		/**
+		 * Failback to 5 min if not set or incorrect
+		 */
+		setCheckTime(300);
+
+		return 300;
+
 	}
 
 	/**

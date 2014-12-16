@@ -184,7 +184,7 @@ public class AuthenticateUser {
 		String usernameHashString = UserProperties.getInstance().getUsernameHash();
 		String passwordHashString = UserProperties.getInstance().getPasswordHash();
 
-		if (StringUtils.isNotEmpty(usernameHashString) && StringUtils.isNotEmpty(passwordHashString)) {
+		if (StringUtils.isNotBlank(usernameHashString) && StringUtils.isNotBlank(passwordHashString)) {
 			return execute(LOGIN, new ArrayList<UserMessage>(), serverConnector, usernameHashString, passwordHashString);
 		}
 
