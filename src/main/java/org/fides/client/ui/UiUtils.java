@@ -6,10 +6,22 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.fides.components.UserMessage;
-
+/**
+ * Ui utilities
+ * 
+ * @author jesse
+ *
+ */
 public class UiUtils {
 
+	/**
+	 * Display all message to panel
+	 * 
+	 * @param messagePanel
+	 *            panel to show the messages on
+	 * @param messages
+	 *            messages to show
+	 */
 	public static void setMessageLabels(JPanel messagePanel, ArrayList<UserMessage> messages)
 	{
 		messagePanel.removeAll();
@@ -17,8 +29,8 @@ public class UiUtils {
 
 		for (UserMessage message : messages) {
 			JLabel messageLabel = new JLabel();
-			messageLabel.setText(message.message);
-			if (message.error) {
+			messageLabel.setText(message.getMessage());
+			if (message.isError()) {
 				messageLabel.setForeground(Color.red);
 			} else {
 				messageLabel.setForeground(Color.green);

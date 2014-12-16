@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
-import org.fides.components.UserMessage;
 import org.fides.tools.HashUtils;
 
 /**

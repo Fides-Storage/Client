@@ -19,7 +19,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fides.components.UserMessage;
 
 /**
  * UI Screen where the user enters a hostname and a portnumber.
