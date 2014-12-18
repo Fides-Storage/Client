@@ -20,6 +20,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.tools.CommunicationUtil;
 import org.fides.client.tools.UserProperties;
 import org.fides.components.Actions;
 import org.fides.components.Responses;
@@ -162,12 +163,10 @@ public class ServerConnector {
 	public boolean login(String usernameHash, String passwordHash) {
 		if (isConnected() && !loggedIn) {
 			try {
-				JsonObject user = new JsonObject();
-				user.addProperty(Actions.ACTION, Actions.LOGIN);
-				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
-				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
-
-				out.writeUTF(new Gson().toJson(user));
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(Actions.Properties.USERNAME_HASH, usernameHash);
+				properties.put(Actions.Properties.PASSWORD_HASH, passwordHash);
+				CommunicationUtil.requestActionWithProperties(out, Actions.LOGIN, properties);
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has(Responses.SUCCESSFUL)) {
@@ -203,12 +202,10 @@ public class ServerConnector {
 	public boolean register(String usernameHash, String passwordHash) {
 		if (isConnected() && !isLoggedIn()) {
 			try {
-				JsonObject user = new JsonObject();
-				user.addProperty(Actions.ACTION, Actions.CREATEUSER);
-				user.addProperty(Actions.Properties.USERNAME_HASH, usernameHash);
-				user.addProperty(Actions.Properties.PASSWORD_HASH, passwordHash);
-
-				out.writeUTF(new Gson().toJson(user));
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(Actions.Properties.USERNAME_HASH, usernameHash);
+				properties.put(Actions.Properties.PASSWORD_HASH, passwordHash);
+				CommunicationUtil.requestActionWithProperties(out, Actions.CREATEUSER, properties);
 
 				JsonObject userAnswer = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (userAnswer.has(Responses.SUCCESSFUL)) {
@@ -243,14 +240,13 @@ public class ServerConnector {
 	 */
 	public void disconnect() {
 		try {
-			JsonObject user = new JsonObject();
-			user.addProperty(Actions.ACTION, Actions.DISCONNECT);
-			out.writeUTF(new Gson().toJson(user));
+			CommunicationUtil.requestAction(out, Actions.DISCONNECT);
 			out.flush();
 		} catch (IOException e) {
 			log.error(e);
 		} finally {
 			loggedIn = false;
+			errorMessages = new HashMap<>();
 			IOUtils.closeQuietly(in);
 			IOUtils.closeQuietly(out);
 			IOUtils.closeQuietly(sslsocket);
@@ -284,15 +280,14 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject keyFileRequest = new JsonObject();
-				keyFileRequest.addProperty(Actions.ACTION, Actions.GETKEYFILE);
-				out.writeUTF(new Gson().toJson(keyFileRequest));
+				CommunicationUtil.requestAction(out, Actions.GETKEYFILE);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 						return new VirtualInputStream(in);
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.GETKEYFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -314,15 +309,14 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject fileRequest = new JsonObject();
-				fileRequest.addProperty(Actions.ACTION, Actions.UPDATEKEYFILE);
-				out.writeUTF(new Gson().toJson(fileRequest));
+				CommunicationUtil.requestAction(out, Actions.UPDATEKEYFILE);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 						return new VirtualOutputStream(out);
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.UPDATEKEYFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -345,16 +339,16 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject fileRequest = new JsonObject();
-				fileRequest.addProperty(Actions.ACTION, Actions.GETFILE);
-				fileRequest.addProperty(Actions.Properties.LOCATION, location);
-				out.writeUTF(new Gson().toJson(fileRequest));
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(Actions.Properties.LOCATION, location);
+				CommunicationUtil.requestActionWithProperties(out, Actions.GETFILE, properties);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 						return new VirtualInputStream(in);
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.GETFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -376,16 +370,15 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject uploadRequest = new JsonObject();
-				uploadRequest.addProperty(Actions.ACTION, Actions.UPLOADFILE);
-				out.writeUTF(new Gson().toJson(uploadRequest));
+				CommunicationUtil.requestAction(out, Actions.UPLOADFILE);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean() && requestResponse.has(Actions.Properties.LOCATION)) {
 						String location = requestResponse.get(Actions.Properties.LOCATION).getAsString();
 						return new OutputStreamData(new VirtualOutputStream(out), location);
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.UPLOADFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -408,16 +401,16 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject updateRequest = new JsonObject();
-				updateRequest.addProperty(Actions.ACTION, Actions.UPDATEFILE);
-				updateRequest.addProperty(Actions.Properties.LOCATION, location);
-				out.writeUTF(new Gson().toJson(updateRequest));
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(Actions.Properties.LOCATION, location);
+				CommunicationUtil.requestActionWithProperties(out, Actions.UPDATEFILE, properties);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 						return new VirtualOutputStream(out);
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.UPDATEFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -440,16 +433,16 @@ public class ServerConnector {
 		try {
 			UserProperties userProperties = UserProperties.getInstance();
 			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
-				JsonObject removeRequest = new JsonObject();
-				removeRequest.addProperty(Actions.ACTION, Actions.REMOVEFILE);
-				removeRequest.addProperty(Actions.Properties.LOCATION, location);
-				out.writeUTF(new Gson().toJson(removeRequest));
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(Actions.Properties.LOCATION, location);
+				CommunicationUtil.requestActionWithProperties(out, Actions.REMOVEFILE, properties);
+
 				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
 				if (requestResponse.has(Responses.SUCCESSFUL)) {
 					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
 						return true;
 					} else {
-						// TODO: Read error message.
+						errorMessages.put(Actions.REMOVEFILE, requestResponse.get(Responses.ERROR).getAsString());
 					}
 				}
 			} else {
@@ -475,7 +468,7 @@ public class ServerConnector {
 					log.debug("Upload was successful");
 					return true;
 				} else {
-					// TODO: Read error message.
+					errorMessages.put(Actions.UPLOADFILE, response.get(Responses.ERROR).getAsString());
 				}
 			}
 		} catch (IOException e) {
