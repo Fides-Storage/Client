@@ -282,16 +282,20 @@ public class FileManager {
 	 * @param fileName
 	 *            The name of the file to read, in local space
 	 * @return An {@link InputStream} reading from the file
-	 * @throws FileNotFoundException
 	 */
-	public InputStream readFile(String fileName) throws FileNotFoundException {
+	public InputStream readFile(String fileName) {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canRead()) {
 			log.error("File can not be read: " + file);
 			return null;
 		}
-		return new FileInputStream(file);
+		try {
+			return new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			log.debug(e);
+			return null;
+		}
 	}
 
 	/**
