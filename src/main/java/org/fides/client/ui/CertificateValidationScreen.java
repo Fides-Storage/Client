@@ -18,14 +18,6 @@ import javax.swing.border.TitledBorder;
  * UI where a password can be submitted by a user
  */
 public class CertificateValidationScreen {
-	/**
-	 * An html tab
-	 */
-	private static final String TAB = "&#09;";
-	/**
-	 * 2 html tabs
-	 */
-	private static final String DOUBLETAB = "&#09;&#09;";
 
 	/**
 	 * An html whitespace
@@ -87,36 +79,37 @@ public class CertificateValidationScreen {
 			builder.append("<b>This certificate has been verified for the following usages:</b>");
 			if (usages != null) {
 				for (String usage : usages) {
-					builder.append("<br>" + TAB);
+					builder.append("<br>");
 					builder.append(usage);
 				}
 			} else {
-				builder.append("<br>" + TAB + "(none)");
+				builder.append("<br> (none)");
 			}
 		} catch (CertificateParsingException e) {
 			builder.append("<b>An exception has occurred while parsing the certificate usages.</b>");
 		}
 
+		builder.append("<table>");
+
 		// Adds the Subject's principal to the string
-		builder.append("<br><br><b>Certificate issued for:</b>");
+		builder.append(createRow("Certificate issued for:"));
 		builder.append(readablePrincipal(certificate.getSubjectX500Principal()));
 
 		// Adds the Issuer's principal to the string
-		builder.append("<br><br><b>Certificate issued by:</b>");
+		builder.append(createRow("Certificate issued by:"));
 		builder.append(readablePrincipal(certificate.getIssuerX500Principal()));
 
 		// Adds the certificate's dates to the string
-		builder.append("<br><br><b>Issued on:</b>" + TAB + TAB);
-		builder.append(certificate.getNotBefore());
-		builder.append("<br><b>Expires on: </b>" + DOUBLETAB);
-		builder.append(certificate.getNotAfter());
+		builder.append(createRow("Issued on:", certificate.getNotBefore().toString()));
+
+		builder.append(createRow("Expires on: ", certificate.getNotAfter().toString()));
 
 		// Adds some extra info to the string
-		builder.append("<br><br><b>Certificate Serial Number:</b>" + TAB);
-		builder.append(certificate.getSerialNumber());
-		builder.append("<br><b>Certificate generated with:</b>" + TAB);
-		builder.append(certificate.getSigAlgName());
+		builder.append(createRow("Certificate Serial Number:", certificate.getSerialNumber().toString()));
 
+		builder.append(createRow("Certificate generated with:", certificate.getSigAlgName()));
+
+		builder.append("</table>");
 		return builder.toString();
 	}
 
@@ -130,10 +123,29 @@ public class CertificateValidationScreen {
 	private static String readablePrincipal(X500Principal principal) {
 		String readable = principal.getName();
 		readable = readable.substring(0, readable.indexOf(",L="));
-		readable = readable.replace("CN=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Common Name: " + DOUBLETAB);
-		readable = readable.replace(",OU=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization Unit: " + TAB);
-		readable = readable.replace(",O=", "<br>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization: " + DOUBLETAB);
+		readable = readable.replace("CN=", "<tr><td>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Common Name: </td><td>") + "</td></tr>";
+		readable = readable.replace(",OU=", "<tr><td>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization Unit: </td><td>") + "</td></tr>";
+		readable = readable.replace(",O=", "<tr><td>" + WHITESPACE + WHITESPACE + WHITESPACE + WHITESPACE + "Organization: </td><td>") + "</td></tr>";
 		return readable;
 	}
 
+	/**
+	 * Create a row for inside the table
+	 * 
+	 * @param name
+	 *            the first column which will be bolt
+	 * @param values
+	 *            the other columns which wont be bolt
+	 * @return a row as string that can be placed inside a table
+	 */
+	private static String createRow(String name, String... values) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<tr>");
+		builder.append(String.format("<td><b>%s</b></td>", name));
+		for (String value : values) {
+			builder.append(String.format("<td>%s</td>", value));
+		}
+		builder.append("</tr>");
+		return builder.toString();
+	}
 }
