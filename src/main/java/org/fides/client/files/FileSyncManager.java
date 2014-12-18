@@ -111,6 +111,8 @@ public class FileSyncManager {
 		if (result != null) {
 			completed = handleCompareResult(result);
 		}
+
+		encManager.getConnector().disconnect();
 		return completed;
 	}
 
@@ -396,12 +398,13 @@ public class FileSyncManager {
 
 	/**
 	 * This removes the folder and all underlying folders
+	 * 
 	 * @param folder
-	 * 			the folder to remove
+	 *            the folder to remove
 	 */
 	private void deleteFolder(File folder) {
 		boolean isRoot = folder.equals(UserProperties.getInstance().getFileDirectory());
-		//If the folder is empty, remove the folder
+		// If the folder is empty, remove the folder
 		File[] fileList = folder.listFiles();
 		if (fileList != null && fileList.length == 0 && folder.canWrite() && !isRoot) {
 			folder.delete();
