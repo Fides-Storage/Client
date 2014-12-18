@@ -75,8 +75,8 @@ public class ServerConnectorTest {
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
 		try {
-			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATEUSER + "\",\"" + Actions.Properties.USERNAME_HASH + "" +
-				"\":\"usernameTest\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\"}", readByteArrayAsData.readUTF());
+			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATEUSER + "\",\"" + Actions.Properties.PASSWORD_HASH + "" +
+				"\":\"passwordTest\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\"}", readByteArrayAsData.readUTF());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -110,7 +110,7 @@ public class ServerConnectorTest {
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
 		try {
 			assertEquals(
-				"{\"" + Actions.ACTION + "\":\"" + Actions.LOGIN + "\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\"}",
+				"{\"" + Actions.ACTION + "\":\"" + Actions.LOGIN + "\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\"}",
 				readByteArrayAsData.readUTF());
 		} catch (IOException e) {
 			fail(e.getMessage());
