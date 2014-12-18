@@ -57,7 +57,6 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean fileManagerCheck() {
-		System.out.println("fileManagerCheck START");
 		try {
 			encManager.getConnector().connect();
 		} catch (ConnectException | UnknownHostException e) {
@@ -82,7 +81,6 @@ public class FileSyncManager {
 		encManager.updateKeyFile(keyFile);
 
 		encManager.getConnector().disconnect();
-		System.out.println("fileManagerCheck END");
 		return true;
 	}
 
@@ -94,7 +92,6 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean checkClientSideFile(String fileName) {
-		System.out.println("checkClientSideFile START");
 		if (!validClientSideFile(fileName)) {
 			return false;
 		}
@@ -123,7 +120,6 @@ public class FileSyncManager {
 		encManager.updateKeyFile(keyFile);
 
 		encManager.getConnector().disconnect();
-		System.out.println("checkClientSideFile End");
 		return completed;
 	}
 
