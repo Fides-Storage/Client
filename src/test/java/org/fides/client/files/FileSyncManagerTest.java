@@ -29,8 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests for the {@link FileSyncManager}
- * 
- * @author Koen
  *
  */
 @RunWith(PowerMockRunner.class)

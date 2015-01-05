@@ -33,9 +33,6 @@ import com.google.gson.JsonObject;
 /**
  * This class makes it possible to connect to a server and communicate with it
  * 
- * @author Jesse
- * @author Niels
- * @author Tom
  */
 public class ServerConnector {
 
@@ -75,7 +72,7 @@ public class ServerConnector {
 	private boolean loggedIn = false;
 
 	/**
-	 * The constructor for the ServerConnector
+	 * The constructor for the ServerConnector, adds a certificate to the list of trusted certificates.
 	 */
 	public ServerConnector() {
 		// For testing purposes only

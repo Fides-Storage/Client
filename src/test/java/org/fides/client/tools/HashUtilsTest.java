@@ -8,8 +8,6 @@ import org.junit.Test;
 /**
  * Test class for hash utilities
  * 
- * @author Niels
- * 
  */
 public class HashUtilsTest {
 

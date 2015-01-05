@@ -28,8 +28,6 @@ import org.fides.client.tools.UserProperties;
 
 /**
  * Checks the local file system for changes
- * 
- * @author Koen
  *
  */
 public class LocalFileChecker extends Thread {
@@ -51,7 +49,7 @@ public class LocalFileChecker extends Thread {
 	private Path basePath;
 
 	/**
-	 * Constructor
+	 * Constructor for LocalFileChecker. Creates an extra thread to handle the events.
 	 * 
 	 * @param syncManager
 	 */
@@ -247,8 +245,6 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * A class containing and {@link WatchEvent} and a {@link Path}
 	 * 
-	 * @author Koen
-	 *
 	 */
 	private static final class EventPair {
 		private WatchEvent.Kind<?> kind;

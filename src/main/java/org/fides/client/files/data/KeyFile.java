@@ -8,8 +8,6 @@ import java.util.Map;
 /**
  * The file contains a collection of {@link ClientFile} containing the location of files on the server and the key to
  * decrypt them.
- * 
- * @author Koen
  *
  */
 public class KeyFile implements Serializable {

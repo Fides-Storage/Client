@@ -16,8 +16,6 @@ import org.fides.client.ui.ErrorMessageScreen;
 
 /**
  * Contains the settings on where files should be saved.
- * 
- * @author Koen
  *
  */
 public final class UserProperties {

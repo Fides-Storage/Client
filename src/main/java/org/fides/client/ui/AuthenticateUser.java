@@ -29,8 +29,6 @@ import org.fides.tools.HashUtils;
 /**
  * Authenticate user by asking username and password, or ask to register
  * 
- * @author jesse
- * 
  */
 public class AuthenticateUser {
 	/**

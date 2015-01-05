@@ -28,8 +28,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 /**
  * A {@link Runnable} which checks the local filesystem for changes
  * 
- * @author Koen
- * 
  */
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)

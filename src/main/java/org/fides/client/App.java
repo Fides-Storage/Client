@@ -32,7 +32,7 @@ import org.fides.client.ui.ServerAddressScreen;
 import org.fides.tools.HashUtils;
 
 /**
- * Client application
+ * Main class for the client application
  * 
  */
 public class App {

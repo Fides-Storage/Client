@@ -2,8 +2,6 @@ package org.fides.client.ui;
 
 /**
  * Small wrapper for a user message
- * 
- * @author jesse
  *
  */
 public class UserMessage {
