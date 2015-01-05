@@ -32,7 +32,7 @@ public class FidesTrayIcon {
 	private final FileSyncManager syncManager;
 
 	/**
-	 * The constructor. It needs a FileSyncManager to prevent the
+	 * The constructor. It needs a FileSyncManager to prevent critical actions from being interrupted.
 	 * 
 	 * @param syncManager
 	 */
@@ -40,8 +40,11 @@ public class FidesTrayIcon {
 		this.syncManager = syncManager;
 	}
 
-	public void addSystemTray() {
-		// Check the SystemTray is supported
+	/**
+	 * Adds the icon to the system tray.
+	 */
+	public void addToSystemTray() {
+		// Check if the SystemTray is supported
 		if (!SystemTray.isSupported()) {
 			System.out.println("SystemTray is not supported");
 			return;
@@ -94,6 +97,9 @@ public class FidesTrayIcon {
 		}
 	}
 
+	/**
+	 * Exits the Fides application
+	 */
 	private void exit() {
 		try {
 			syncManager.waitForStop();
@@ -104,6 +110,9 @@ public class FidesTrayIcon {
 		}
 	}
 
+	/**
+	 * Opens the Fides folder
+	 */
 	private void openFolder() {
 		try {
 			Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
