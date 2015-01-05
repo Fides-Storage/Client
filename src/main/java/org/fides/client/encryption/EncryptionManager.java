@@ -41,7 +41,7 @@ public class EncryptionManager {
 
 	private final ServerConnector connector;
 
-	private final String password;
+	private String password;
 
 	/** Size of the salt used in generating the master key, it should NEVER change */
 	public static final int SALT_SIZE = 16; // 128 bit
@@ -64,13 +64,29 @@ public class EncryptionManager {
 		this.password = password;
 	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
-	 * 
+	 *
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
 	public KeyFile requestKeyFile() {
+		return requestKeyFile(password);
+	}
+
+	/**
+	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
+	 *
+	 * @param password for the decryption of the keyfile
+	 *
+	 * @return The decrypted {@link KeyFile}
+	 * @throws IOException
+	 */
+	public KeyFile requestKeyFile(String password) {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			log.error("Server connector does not give an InputStream for a keyfile");
@@ -93,8 +109,6 @@ public class EncryptionManager {
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO: At this point we are not sure what to do here, discuss this
-			log.error(e);
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
