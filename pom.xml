@@ -86,6 +86,14 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/java/resources/images</directory>
+				<includes>
+					<include>*.png</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
