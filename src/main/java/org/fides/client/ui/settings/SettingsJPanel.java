@@ -22,9 +22,16 @@ public abstract class SettingsJPanel extends JPanel {
 	}
 
 	/**
+	 * Validate the settings
+	 *
+	 * @return true if validated
+	 */
+	public abstract boolean validateSettings();
+
+	/**
 	 * Apply the settings
-	 * 
-	 * @return true is succesfull
+	 *
+	 * @return true if succesful
 	 */
 	public abstract boolean applySettings();
 
