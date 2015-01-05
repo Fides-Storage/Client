@@ -10,8 +10,6 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +30,7 @@ import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UserMessage;
+import org.fides.client.ui.settings.SettingsFrame;
 import org.fides.tools.HashUtils;
 
 /**
@@ -134,10 +133,9 @@ public class App {
 
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
 			trayIcon.addSystemTray();
+			new SettingsFrame(syncManager);
 
-			Timer timer = new Timer("CheckTimer");
-			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
+			FileCheckTask.startCheckTimer(syncManager);
 		}
 
 	}

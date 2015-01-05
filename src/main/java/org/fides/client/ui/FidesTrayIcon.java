@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.tools.UserProperties;
+import org.fides.client.ui.settings.SettingsFrame;
 
 /**
  * This class is responsible for adding an icon to the systemtray. This icon has a context menu with the options to open
@@ -53,6 +54,13 @@ public class FidesTrayIcon {
 		final PopupMenu popup = new PopupMenu();
 		final TrayIcon trayIcon = new TrayIcon(icon);
 		final SystemTray tray = SystemTray.getSystemTray();
+
+		trayIcon.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				openFolder();
+			}
+		});
 
 		// Create a pop-up menu components
 		MenuItem openFolderItem = new MenuItem("Open Folder");
@@ -113,6 +121,6 @@ public class FidesTrayIcon {
 	}
 
 	private void openSettings() {
-		// TODO: Fill
+		new SettingsFrame(syncManager);
 	}
 }
