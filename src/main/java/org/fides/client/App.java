@@ -78,7 +78,27 @@ public class App {
 				/**
 				 * Do normal work, we are going to loop here
 				 */
-				String passwordString = PasswordScreen.getPassword(messages);
+
+				// Check if the user already has a keyfile.
+				boolean hasKeyFile = false;
+				InputStream keyFileStream = serverConnector.requestKeyFile();
+
+				if (keyFileStream != null) {
+					try {
+						if (keyFileStream.read() == -1) {
+							hasKeyFile = false;
+						} else {
+							log.debug("A keyfile is available on the server");
+							hasKeyFile = true;
+						}
+					} catch (IOException e) {
+						log.error(e);
+					} finally {
+						IOUtils.closeQuietly(keyFileStream);
+					}
+				}
+
+				String passwordString = PasswordScreen.getPassword(messages, !hasKeyFile);
 				if (StringUtils.isNotBlank(passwordString)) {
 					passwordString = HashUtils.hash(passwordString);
 				} else {
@@ -87,22 +107,8 @@ public class App {
 
 				encManager = new EncryptionManager(serverConnector, passwordString);
 
-				// Check if the user already has a keyfile.
-				InputStream keyFileStream = serverConnector.requestKeyFile();
-
-				if (keyFileStream != null) {
-					try {
-						if (keyFileStream.read() == -1) {
-							keyFileStream.close();
-							encManager.updateKeyFile(new KeyFile());
-						} else {
-							log.debug("A keyfile is available on the server");
-						}
-					} catch (IOException e) {
-						log.error(e);
-					} finally {
-						IOUtils.closeQuietly(keyFileStream);
-					}
+				if (!hasKeyFile) {
+					encManager.updateKeyFile(new KeyFile());
 				}
 
 				// check if key file can be decrypted
