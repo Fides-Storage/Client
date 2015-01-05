@@ -1,7 +1,5 @@
 package org.fides.client;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -13,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,23 +77,7 @@ public class App {
 				 */
 
 				// Check if the user already has a keyfile.
-				boolean hasKeyFile = false;
-				InputStream keyFileStream = serverConnector.requestKeyFile();
-
-				if (keyFileStream != null) {
-					try {
-						if (keyFileStream.read() == -1) {
-							hasKeyFile = false;
-						} else {
-							log.debug("A keyfile is available on the server");
-							hasKeyFile = true;
-						}
-					} catch (IOException e) {
-						log.error(e);
-					} finally {
-						IOUtils.closeQuietly(keyFileStream);
-					}
-				}
+				boolean hasKeyFile = serverConnector.checkIfKeyFileExists();
 
 				String passwordString = PasswordScreen.getPassword(messages, !hasKeyFile);
 				if (StringUtils.isNotBlank(passwordString)) {

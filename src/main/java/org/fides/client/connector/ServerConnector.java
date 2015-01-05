@@ -269,6 +269,32 @@ public class ServerConnector {
 	}
 
 	/**
+	 * Check if the user already has a keyFile
+	 * 
+	 * @return if keyFile exists
+	 */
+	public boolean checkIfKeyFileExists() {
+		InputStream keyFileStream = requestKeyFile();
+
+		if (keyFileStream != null) {
+			try {
+				if (keyFileStream.read() == -1) {
+					return false;
+				} else {
+					log.debug("A keyfile is available on the server");
+					return true;
+				}
+			} catch (IOException e) {
+				log.error(e);
+			} finally {
+				IOUtils.closeQuietly(keyFileStream);
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Requests a keyfile from the server
 	 * 
 	 * @return An inputstream with the keyfile. If something went wrong, this will be <code>null</code>
