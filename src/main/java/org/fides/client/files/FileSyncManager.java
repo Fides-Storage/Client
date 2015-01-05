@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,14 @@ public class FileSyncManager {
 
 	private final EncryptionManager encManager;
 
+	private final Object stopLock = new Object();
+
+	private final AtomicBoolean stopBoolean = new AtomicBoolean(false);
+
+	private final Object criticalLock = new Object();
+
+	private final AtomicBoolean criticalBoolean = new AtomicBoolean(false);
+
 	/**
 	 * 
 	 * @param fileManager
@@ -57,31 +66,35 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean fileManagerCheck() {
-		try {
-			encManager.getConnector().connect();
-		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
-			return false;
-		}
-		KeyFile keyFile;
+		boolean successful = false;
+		if (!stopBoolean.get()) {
+			try {
+				encManager.getConnector().connect();
+			} catch (ConnectException | UnknownHostException e) {
+				log.error(e);
+				return false;
+			}
+			KeyFile keyFile;
 
-		keyFile = encManager.requestKeyFile();
+			keyFile = encManager.requestKeyFile();
 
-		if (keyFile == null) {
+			if (keyFile == null) {
+				encManager.getConnector().disconnect();
+				return false;
+			}
+
+			Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+			for (FileCompareResult result : results) {
+				if (stopBoolean.get()) {
+					break;
+				}
+				handleCompareResult(result, keyFile);
+			}
+
 			encManager.getConnector().disconnect();
-			return false;
+			successful = true;
 		}
-
-		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
-		for (FileCompareResult result : results) {
-			handleCompareResult(result, keyFile);
-		}
-
-		// Update the keyfile TODO: what if it fails
-		encManager.updateKeyFile(keyFile);
-
-		encManager.getConnector().disconnect();
-		return true;
+		return successful;
 	}
 
 	/**
@@ -92,7 +105,7 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean checkClientSideFile(String fileName) {
-		if (!validClientSideFile(fileName)) {
+		if (!validClientSideFile(fileName) || stopBoolean.get()) {
 			return false;
 		}
 
@@ -116,11 +129,67 @@ public class FileSyncManager {
 			completed = handleCompareResult(result, keyFile);
 		}
 
-		// Update the keyfile TODO: what if it fails
-		encManager.updateKeyFile(keyFile);
-
 		encManager.getConnector().disconnect();
 		return completed;
+	}
+
+	/**
+	 * Stops the {@link FileSyncManager} from starting new critical actions and waits for the current critical action to
+	 * finish.
+	 * 
+	 * @throws InterruptedException
+	 */
+	public void waitForStop() throws InterruptedException {
+		synchronized (stopLock) {
+			// Prevent new critical actions from starting.
+			stopBoolean.set(true);
+
+			while (criticalBoolean.get()) {
+				criticalLock.wait();
+			}
+		}
+	}
+
+	/**
+	 * Resets all locks on the FileSyncManager, reenabling it for normal use.
+	 */
+	public void reenable() {
+		synchronized (stopLock) {
+			stopBoolean.set(false);
+			criticalBoolean.set(false);
+		}
+	}
+
+	/**
+	 * Initiates the start of a critical action.
+	 * 
+	 * @return true if the critical action is allowed to be started.
+	 */
+	private boolean startCritical() {
+		System.out.println("Start Critical");
+		if (!stopBoolean.get()) {
+			if (criticalBoolean.compareAndSet(false, true)) {
+				System.out.println("Start Critical true");
+				return true;
+			} else {
+				log.error("A critical action tried to start while a critical action was already running.");
+			}
+		}
+		System.out.println("Start Critical false");
+		return false;
+	}
+
+	/**
+	 * Finishes a critical action. If a thread is waiting for the critical action to finish, it will notify this thread.
+	 */
+	private void stopCritical() {
+		System.out.println("Stop Critical");
+		criticalBoolean.set(false);
+
+		if (stopBoolean.get()) {
+			criticalLock.notifyAll();
+		}
+		System.out.println("Stop Critical true");
 	}
 
 	/**
@@ -144,6 +213,7 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleCompareResult(FileCompareResult result, KeyFile keyFile) {
+		System.out.println("Handle Event: " + result);
 		boolean successful = false;
 		switch (result.getResultType()) {
 		case LOCAL_ADDED:
@@ -184,8 +254,6 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalAdded(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
 
 		if (keyFile == null) {
 			return false;
@@ -222,10 +290,15 @@ public class FileSyncManager {
 			successful = encManager.getConnector().checkUploadSuccessful();
 		}
 		// If successful update the administration
-		if (successful) {
+		if (successful && startCritical()) {
 			String hash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hash);
 			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
+			// Update the keyfile TODO: what if it fails
+			encManager.updateKeyFile(keyFile);
+			stopCritical();
+		} else {
+			successful = false;
 		}
 		return successful;
 	}
@@ -236,35 +309,43 @@ public class FileSyncManager {
 	 * @param fileName
 	 *            name of the removed file
 	 * @return whether the remove was successful or not
-	 *
+	 * 
 	 */
 	private boolean handleLocalRemoved(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
 			return false;
 		}
 
+		boolean successful = true;
+
 		// Get ClientFile from keyfile
 		ClientFile file = keyFile.getClientFileByName(fileName);
-		try {
-			// Remove the file on the server
-			boolean result = encManager.removeFile(file);
+		if (startCritical()) {
+			try {
+				// Remove the file on the server
+				boolean result = encManager.removeFile(file);
 
-			if (result) {
-				// Remove file from keyfile
-				keyFile.removeClientFileByName(fileName);
+				if (result) {
+					// Remove file from keyfile
+					keyFile.removeClientFileByName(fileName);
 
-				// Remove the local hash
-				LocalHashes.getInstance().removeHash(fileName);
+					// Remove the local hash
+					LocalHashes.getInstance().removeHash(fileName);
+
+					// Update the keyfile TODO: what if it fails
+					encManager.updateKeyFile(keyFile);
+				}
+			} catch (InvalidClientFileException e) {
+				log.debug(e);
+				successful = false;
+			} finally {
+				stopCritical();
 			}
-		} catch (InvalidClientFileException e) {
-			log.debug(e);
-			return false;
+		} else {
+			successful = false;
 		}
 
-		return true;
+		return successful;
 	}
 
 	/**
@@ -275,14 +356,12 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalUpdated(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
+			log.debug("Keyfile was null while trying to handle a local updated file.");
 			return false;
 		}
 
-		boolean succesful = false;
+		boolean successful = false;
 
 		// Get a stream to write to
 		OutputStream outEnc = null;
@@ -300,30 +379,35 @@ public class FileSyncManager {
 			out = new DigestOutputStream(outEnc, messageDigest);
 			IOUtils.copy(in, out);
 			out.flush();
-			// TODO Check if this is the thing that broke stuff
 			out.close();
 
 			// Check if the upload was successful
-			succesful = encManager.getConnector().checkUploadSuccessful();
+			successful = encManager.getConnector().checkUploadSuccessful();
 
-			if (succesful) {
+			if (successful && startCritical()) {
 				// Create a hash and save it
 				String hash = HashUtils.toHex(messageDigest.digest());
 				LocalHashes.getInstance().setHash(fileName, hash);
 				clientFile.setHash(hash);
+				// Update the keyfile TODO: what if it fails
+				encManager.updateKeyFile(keyFile);
+				stopCritical();
+			} else {
+				successful = false;
 			}
+
 		} catch (InvalidClientFileException e) {
 			log.error(e);
-			succesful = false;
+			successful = false;
 		} catch (IOException e) {
 			log.error(e);
-			succesful = false;
+			successful = false;
 		} finally {
 			IOUtils.closeQuietly(in);
 			IOUtils.closeQuietly(out);
+			stopCritical();
 		}
-
-		return succesful;
+		return successful;
 
 	}
 
@@ -359,14 +443,12 @@ public class FileSyncManager {
 			log.error(e);
 			return false;
 		}
-
+		boolean successful = false;
 		// Update the file
 		try (InputStream in = encManager.requestFile(keyFile.getClientFileByName(fileName));
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			IOUtils.copy(in, out);
-
-			String hexHash = HashUtils.toHex(messageDigest.digest());
-			LocalHashes.getInstance().setHash(fileName, hexHash);
+			successful = true;
 		} catch (IOException e) {
 			log.error(e);
 		} catch (InvalidClientFileException e) {
@@ -374,8 +456,14 @@ public class FileSyncManager {
 		} finally {
 			IOUtils.closeQuietly(outFile);
 		}
-
-		return true;
+		if (successful && startCritical()) {
+			String hexHash = HashUtils.toHex(messageDigest.digest());
+			LocalHashes.getInstance().setHash(fileName, hexHash);
+			stopCritical();
+		} else {
+			successful = false;
+		}
+		return successful;
 	}
 
 	/**
@@ -388,7 +476,7 @@ public class FileSyncManager {
 	private boolean handleServerRemoved(final String fileName) {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
-		if (file.canWrite()) {
+		if (file.canWrite() && startCritical()) {
 			boolean result = fileManager.removeFile(fileName);
 
 			deleteFolder(file.getParentFile());
@@ -397,7 +485,7 @@ public class FileSyncManager {
 				// Remove the local hash
 				LocalHashes.getInstance().removeHash(fileName);
 			}
-			// Remove the File
+			stopCritical();
 			return result;
 		}
 		return false;

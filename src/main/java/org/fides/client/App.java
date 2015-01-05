@@ -27,6 +27,7 @@ import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
+import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.tools.HashUtils;
@@ -103,10 +104,12 @@ public class App {
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
 
+			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
+			trayIcon.addSystemTray();
+
 			Timer timer = new Timer("CheckTimer");
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
 			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
-
 		}
 
 	}
@@ -194,7 +197,6 @@ public class App {
 	}
 
 	private static boolean checkValidCertificate(X509Certificate certificate) {
-
 		try {
 			certificate.checkValidity();
 			// The rest of the checks are done by SSLSocket, if failed the socket is closed
