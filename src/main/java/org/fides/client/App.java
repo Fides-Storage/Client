@@ -9,6 +9,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
@@ -26,10 +27,15 @@ import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
+import org.fides.client.ui.ChangePasswordScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
+import org.fides.client.ui.UiUtils;
+import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
+
+import javax.swing.*;
 
 /**
  * Client application
@@ -107,6 +113,31 @@ public class App {
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
 			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
 
+			ChangePasswordScreen changePasswordScreen = new ChangePasswordScreen("Change Password", encManager);
+
+			JFrame frame = new JFrame();
+			frame.setUndecorated(true);
+			frame.setVisible(true);
+			frame.setLocationRelativeTo(null);
+
+
+			// Add a panel where errors can be shown later
+			JPanel messagePanel = new JPanel();
+			messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+			messagePanel.setVisible(false);
+			changePasswordScreen.add(messagePanel);
+
+			String[] options = new String[] { "OK", "Cancel" };
+			int option = 0;
+			while (option == 0) {
+				option = JOptionPane.showOptionDialog(frame, changePasswordScreen, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+				ArrayList<UserMessage> messages = changePasswordScreen.applySettings();
+				if (messages.isEmpty()) {
+					break;
+				} else {
+					UiUtils.setMessageLabels(messagePanel, messages);
+				}
+			}
 		}
 
 	}

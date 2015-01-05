@@ -1,6 +1,9 @@
 package org.fides.client.ui.settings;
 
+import org.fides.client.ui.UserMessage;
+
 import javax.swing.JPanel;
+import java.util.ArrayList;
 
 /**
  * A {@link JPanel} with additional methods for applying settings
@@ -22,18 +25,11 @@ public abstract class SettingsJPanel extends JPanel {
 	}
 
 	/**
-	 * Validate the settings
-	 *
-	 * @return true if validated
-	 */
-	public abstract boolean validateSettings();
-
-	/**
 	 * Apply the settings
 	 *
-	 * @return true if successful
+	 * @return ArrayList with errorMessages if there were any
 	 */
-	public abstract boolean applySettings();
+	public abstract ArrayList<UserMessage> applySettings();
 
 	public String getName() {
 		return name;

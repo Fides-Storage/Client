@@ -41,7 +41,7 @@ public class EncryptionManager {
 
 	private final ServerConnector connector;
 
-	private final String password;
+	private String password;
 
 	/** Size of the salt used in generating the master key, it should NEVER change */
 	public static final int SALT_SIZE = 16; // 128 bit
@@ -61,6 +61,10 @@ public class EncryptionManager {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		this.connector = connector;
+		this.password = password;
+	}
+
+	public void setPassword(String password) {
 		this.password = password;
 	}
 
