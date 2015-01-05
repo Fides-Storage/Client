@@ -60,6 +60,25 @@ public class FidesTrayIcon {
 
 		final SystemTray tray = SystemTray.getSystemTray();
 
+		TrayIcon trayIcon;
+		switch (tray.getTrayIconSize().width) {
+		case 16:
+			trayIcon = new TrayIcon(icon16);
+			break;
+		case 24:
+			trayIcon = new TrayIcon(icon24);
+			break;
+		case 32:
+			trayIcon = new TrayIcon(icon32);
+			break;
+		case 64:
+			trayIcon = new TrayIcon(icon64);
+			break;
+		default:
+			trayIcon = new TrayIcon(icon16);
+			trayIcon.setImageAutoSize(true);
+		}
+
 		trayIcon.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -97,25 +116,6 @@ public class FidesTrayIcon {
 		popup.add(settingsItem);
 		popup.addSeparator();
 		popup.add(exitItem);
-
-		TrayIcon trayIcon;
-		switch (SystemTray.getSystemTray().getTrayIconSize().width) {
-		case 16:
-			trayIcon = new TrayIcon(icon16);
-			break;
-		case 24:
-			trayIcon = new TrayIcon(icon24);
-			break;
-		case 32:
-			trayIcon = new TrayIcon(icon32);
-			break;
-		case 64:
-			trayIcon = new TrayIcon(icon64);
-			break;
-		default:
-			trayIcon = new TrayIcon(icon16);
-			trayIcon.setImageAutoSize(true);
-		}
 
 		trayIcon.setPopupMenu(popup);
 		Dimension iconDimension = trayIcon.getSize();
