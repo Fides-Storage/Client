@@ -27,15 +27,11 @@ import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
-import org.fides.client.ui.ChangePasswordScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
-import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
-
-import javax.swing.*;
 
 /**
  * Client application
@@ -73,38 +69,65 @@ public class App {
 
 		if (isAuthenticated && serverConnector.isConnected()) {
 
-			/**
-			 * Do normal work, we are going to loop here
-			 */
-			String passwordString = PasswordScreen.getPassword();
-			if (StringUtils.isNotBlank(passwordString)) {
-				passwordString = HashUtils.hash(passwordString);
-			} else {
-				System.exit(0);
+			EncryptionManager encManager = null;
+
+			boolean isAccepted = false;
+			ArrayList<UserMessage> messages = new ArrayList<>();
+			while (!isAccepted) {
+
+				/**
+				 * Do normal work, we are going to loop here
+				 */
+
+				// Check if the user already has a keyfile.
+				boolean hasKeyFile = false;
+				InputStream keyFileStream = serverConnector.requestKeyFile();
+
+				if (keyFileStream != null) {
+					try {
+						if (keyFileStream.read() == -1) {
+							hasKeyFile = false;
+						} else {
+							log.debug("A keyfile is available on the server");
+							hasKeyFile = true;
+						}
+					} catch (IOException e) {
+						log.error(e);
+					} finally {
+						IOUtils.closeQuietly(keyFileStream);
+					}
+				}
+
+				String passwordString = PasswordScreen.getPassword(messages, !hasKeyFile);
+				if (StringUtils.isNotBlank(passwordString)) {
+					passwordString = HashUtils.hash(passwordString);
+				} else {
+					System.exit(0);
+				}
+
+				encManager = new EncryptionManager(serverConnector, passwordString);
+
+				if (!hasKeyFile) {
+					encManager.updateKeyFile(new KeyFile());
+				}
+
+				// check if key file can be decrypted
+				KeyFile keyFile = encManager.requestKeyFile();
+
+				if (keyFile != null) {
+					isAccepted = true;
+				} else {
+					log.error("Password is incorrect");
+					messages.clear();
+					messages.add(new UserMessage("Password is incorrect", true));
+				}
+
 			}
+
+			// Disconnect after login
+			serverConnector.disconnect();
 
 			FileManager fileManager = new FileManager();
-			EncryptionManager encManager = new EncryptionManager(serverConnector, passwordString);
-
-			// Check if the user already has a keyfile.
-			InputStream keyFileStream = serverConnector.requestKeyFile();
-
-			if (keyFileStream != null) {
-				try {
-					if (keyFileStream.read() == -1) {
-						keyFileStream.close();
-						encManager.updateKeyFile(new KeyFile());
-					} else {
-						log.debug("A keyfile is available on the server");
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block, what to do when this fails?
-					e.printStackTrace();
-				} finally {
-					IOUtils.closeQuietly(keyFileStream);
-				}
-			}
-			serverConnector.disconnect();
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
@@ -113,31 +136,6 @@ public class App {
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
 			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
 
-			ChangePasswordScreen changePasswordScreen = new ChangePasswordScreen("Change Password", encManager);
-
-			JFrame frame = new JFrame();
-			frame.setUndecorated(true);
-			frame.setVisible(true);
-			frame.setLocationRelativeTo(null);
-
-
-			// Add a panel where errors can be shown later
-			JPanel messagePanel = new JPanel();
-			messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
-			messagePanel.setVisible(false);
-			changePasswordScreen.add(messagePanel);
-
-			String[] options = new String[] { "OK", "Cancel" };
-			int option = 0;
-			while (option == 0) {
-				option = JOptionPane.showOptionDialog(frame, changePasswordScreen, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-				ArrayList<UserMessage> messages = changePasswordScreen.applySettings();
-				if (messages.isEmpty()) {
-					break;
-				} else {
-					UiUtils.setMessageLabels(messagePanel, messages);
-				}
-			}
 		}
 
 	}
