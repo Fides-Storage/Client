@@ -10,6 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -40,27 +41,31 @@ public class SettingsFrame extends JFrame {
 			new CheckTimePanel(syncManager)
 		};
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		JTabbedPane tabbedPane = new JTabbedPane();
+
+		JPanel basePanel = new JPanel();
+		basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
+
+		JPanel panelTab1 = new JPanel();
+		tabbedPane.addTab("Settings", panelTab1);
+		panelTab1.setLayout(new BoxLayout(panelTab1, BoxLayout.Y_AXIS));
 
 		// Create the individual setting screens
 		Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 		Border emptyBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
-		TitledBorder tileBorder = BorderFactory.createTitledBorder(loweredetched, "title");
-		Border border = BorderFactory.createCompoundBorder(tileBorder, emptyBorder);
 		for (SettingsJPanel settingsJPanel : settingsPanels) {
+			TitledBorder tileBorder = BorderFactory.createTitledBorder(loweredetched, settingsJPanel.getName());
+			Border border = BorderFactory.createCompoundBorder(tileBorder, emptyBorder);
 			JPanel container = new JPanel(new GridLayout(1, 1));
-			tileBorder.setTitle(settingsJPanel.getName());
 			container.setBorder(border);
 			container.add(settingsJPanel);
-			panel.add(container);
+			panelTab1.add(container);
 		}
 
 		// Apply button
 		JButton applyButton = new JButton("Apply Settings");
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
 		buttonPanel.add(applyButton);
-		panel.add(buttonPanel);
 
 		applyButton.addActionListener(new ActionListener() {
 			@Override
@@ -79,8 +84,11 @@ public class SettingsFrame extends JFrame {
 			}
 		});
 
+		basePanel.add(tabbedPane);
+		basePanel.add(buttonPanel);
+
 		// Pack and show
-		setContentPane(panel);
+		setContentPane(basePanel);
 		pack();
 		setResizable(false);
 		setLocationRelativeTo(null);
