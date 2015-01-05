@@ -70,11 +70,23 @@ public class EncryptionManager {
 
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
-	 * 
+	 *
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
 	public KeyFile requestKeyFile() {
+		return requestKeyFile(password);
+	}
+
+	/**
+	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
+	 *
+	 * @param password for the decryption of the keyfile
+	 *
+	 * @return The decrypted {@link KeyFile}
+	 * @throws IOException
+	 */
+	public KeyFile requestKeyFile(String password) {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			log.error("Server connector does not give an InputStream for a keyfile");
@@ -97,8 +109,6 @@ public class EncryptionManager {
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO: At this point we are not sure what to do here, discuss this
-			log.error(e);
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);

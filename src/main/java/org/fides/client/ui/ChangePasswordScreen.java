@@ -87,8 +87,10 @@ public class ChangePasswordScreen extends SettingsJPanel {
 	}
 
 	private ArrayList<UserMessage> validateSettings() {
+		// ArrayList of UserMessages that will be returned.
 		ArrayList<UserMessage> messages = new ArrayList<>();
 
+		// Get passwords from fields
 		String oldPassword = new String(passOld.getPassword());
 		String newPassword1 = new String(passNew1.getPassword());
 		String newPassword2 = new String(passNew2.getPassword());
@@ -96,12 +98,28 @@ public class ChangePasswordScreen extends SettingsJPanel {
 		// Check for empty passwords
 		if (StringUtils.isBlank(oldPassword)) {
 			messages.add(new UserMessage("Old password can not be blank", true));
+		} else {
+			// Validate the old password by decrypting the keyfile with the given password.
+			KeyFile keyFile = null;
+			try {
+				encryptionManager.getConnector().connect();
+				// check if key file can be decrypted with the old password
+				keyFile = encryptionManager.requestKeyFile(HashUtils.hash(oldPassword));
+			} catch (ConnectException | UnknownHostException e) {
+				log.error(e);
+			} finally {
+				encryptionManager.getConnector().disconnect();
+			}
+
+			// Decryption of keyfile failed, add errormessage.
+			if (keyFile == null) {
+				messages.add(new UserMessage("Old password is incorrect", true));
+			}
 		}
-		// TODO: Validate old password
 		if (StringUtils.isBlank(newPassword1)) {
 			messages.add(new UserMessage("New password can not be blank", true));
 		} else if (!newPassword1.equals(newPassword2)) {
-			messages.add(new UserMessage("New passwords do not match", true));
+			messages.add(new UserMessage("Confirm password does not match", true));
 		}
 
 		// Set the validated password

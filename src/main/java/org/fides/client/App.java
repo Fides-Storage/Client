@@ -121,7 +121,6 @@ public class App {
 				if (keyFile != null) {
 					isAccepted = true;
 				} else {
-					log.error("Password is incorrect");
 					messages.clear();
 					messages.add(new UserMessage("Password is incorrect", true));
 				}
@@ -165,6 +164,7 @@ public class App {
 					UiUtils.setMessageLabels(messagePanel, errorMessages);
 				}
 			}
+			frame.dispose();
 		}
 
 	}
