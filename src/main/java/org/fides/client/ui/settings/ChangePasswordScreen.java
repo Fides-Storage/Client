@@ -39,13 +39,14 @@ public class ChangePasswordScreen extends SettingsJPanel {
 	private JPasswordField passNew2 = new JPasswordField(10);
 
 	/**
-	 * Constructor
-	 *
-	 * @param name
-	 *            The name of the panel
+	 * Constructor for ChangePasswordScreen, this screen extends a JPanel and can be used to show a password change
+	 * screen.
+	 * 
+	 * @param encryptionManager
+	 *            the encryptionmanager that is used for requesting and updating keyfiles
 	 */
-	public ChangePasswordScreen(String name, EncryptionManager encryptionManager) {
-		super(name);
+	public ChangePasswordScreen(EncryptionManager encryptionManager) {
+		super("Change password");
 		this.encryptionManager = encryptionManager;
 
 		JFrame frame = new JFrame();
