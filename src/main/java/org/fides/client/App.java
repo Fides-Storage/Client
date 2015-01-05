@@ -143,7 +143,6 @@ public class App {
 			Certificate[] certificates = serverConnector.getServerCertificates();
 			serverConnector.disconnect();
 
-			// TODO: validate all certificates
 			if (certificates.length > 0) {
 				certificate = (X509Certificate) certificates[0];
 
