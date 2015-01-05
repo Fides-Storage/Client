@@ -29,8 +29,6 @@ import org.fides.tools.HashUtils;
 /**
  * Authenticate user by asking username and password, or ask to register
  * 
- * @author jesse
- * 
  */
 public class AuthenticateUser {
 	/**
@@ -214,8 +212,8 @@ public class AuthenticateUser {
 					messages.add(new UserMessage("Register successful", false));
 					return true;
 				} else {
-					log.debug(serverConnector.getErrorMessage(Actions.CREATEUSER));
-					messages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATEUSER), true));
+					log.debug(serverConnector.getErrorMessage(Actions.CREATE_USER));
+					messages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATE_USER), true));
 				}
 			}
 		}

@@ -3,8 +3,6 @@ package org.fides.client.files.data;
 /**
  * A result of the {@link FileManager#compareFiles(KeyFile)} when comparing the local files and the files on the server
  * 
- * @author Koen
- * 
  */
 public class FileCompareResult {
 
@@ -13,7 +11,7 @@ public class FileCompareResult {
 	private CompareResultType resultType;
 
 	/**
-	 * Constructor
+	 * Constructor for FileCompareResult
 	 * 
 	 * @param name
 	 *            The name of the file

@@ -13,8 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Used for loading and storing local hashes
- * 
- * @author Koen
  *
  */
 public final class LocalHashes {
@@ -30,7 +28,7 @@ public final class LocalHashes {
 	private Properties localHashes = new Properties();
 
 	/**
-	 * Constructor
+	 * Constructor for LocalHashes, checks if the hash file exists and loads the local hashes
 	 */
 	private LocalHashes() {
 		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);

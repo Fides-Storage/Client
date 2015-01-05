@@ -27,8 +27,6 @@ import org.fides.tools.HashUtils;
  * Handles the synchronizing of files. It expects a fully functional and connected {@link EncryptionManager} and a
  * functional {@link FileManager}.
  * 
- * @author Koen
- * 
  */
 public class FileSyncManager {
 	/**
@@ -49,6 +47,7 @@ public class FileSyncManager {
 	private final AtomicBoolean criticalBoolean = new AtomicBoolean(false);
 
 	/**
+	 * Constructor for FileSyncManager
 	 * 
 	 * @param fileManager
 	 *            The {@link FileManager} to use

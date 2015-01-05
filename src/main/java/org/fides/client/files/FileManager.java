@@ -24,8 +24,6 @@ import org.fides.client.tools.UserProperties;
 
 /**
  * Manages the saving an loading of files and compares what files are missing, removed or changed.
- *
- * @author Koen
  */
 public class FileManager {
 	/**

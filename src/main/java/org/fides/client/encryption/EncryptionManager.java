@@ -29,11 +29,11 @@ import org.fides.encryption.KeyGenerator;
  * The {@link EncryptionManager} handles the encryption and decryption of an {@link InputStream} before it is passed on
  * to the {@link ServerConnector}. It expects a fully connected {@link ServerConnector}.
  * 
- * @author Koen
- * @author Thijs
- * 
  */
 public class EncryptionManager {
+	/** Size of the salt used in generating the master key, it should NEVER change */
+	public static final int SALT_SIZE = 16; // 128 bit
+
 	/**
 	 * Log for this class
 	 */
@@ -43,11 +43,8 @@ public class EncryptionManager {
 
 	private String password;
 
-	/** Size of the salt used in generating the master key, it should NEVER change */
-	public static final int SALT_SIZE = 16; // 128 bit
-
 	/**
-	 * Constructor
+	 * Constructor for EncryptionManager. Adds an encryption library to ensure these encryptions are supported.
 	 * 
 	 * @param connector
 	 *            The {@link ServerConnector} to use
@@ -81,7 +78,8 @@ public class EncryptionManager {
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
 	 *
-	 * @param password for the decryption of the keyfile
+	 * @param password
+	 *            for the decryption of the keyfile
 	 *
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
