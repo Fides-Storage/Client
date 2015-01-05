@@ -133,7 +133,7 @@ public class App {
 			checker.start();
 
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
-			trayIcon.addSystemTray();
+			trayIcon.addToSystemTray();
 
 			Timer timer = new Timer("CheckTimer");
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
