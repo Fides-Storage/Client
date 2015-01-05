@@ -11,7 +11,6 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.swing.ImageIcon;
 
@@ -51,11 +50,13 @@ public class FidesTrayIcon {
 			return;
 		}
 
-		URL iconUrl = getClass().getResource("/FidesIcon.png");
-		Image icon = (new ImageIcon(iconUrl, "tray icon")).getImage();
+		Image icon16 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
+		Image icon24 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
+		Image icon32 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
+		Image icon64 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
 
 		final PopupMenu popup = new PopupMenu();
-		final TrayIcon trayIcon = new TrayIcon(icon);
+
 		final SystemTray tray = SystemTray.getSystemTray();
 
 		// Create a pop-up menu components
@@ -89,8 +90,26 @@ public class FidesTrayIcon {
 		popup.addSeparator();
 		popup.add(exitItem);
 
+		TrayIcon trayIcon;
+		switch (SystemTray.getSystemTray().getTrayIconSize().width) {
+		case 16:
+			trayIcon = new TrayIcon(icon16);
+			break;
+		case 24:
+			trayIcon = new TrayIcon(icon24);
+			break;
+		case 32:
+			trayIcon = new TrayIcon(icon32);
+			break;
+		case 64:
+			trayIcon = new TrayIcon(icon64);
+			break;
+		default:
+			trayIcon = new TrayIcon(icon16);
+			trayIcon.setImageAutoSize(true);
+		}
+
 		trayIcon.setPopupMenu(popup);
-		trayIcon.setImageAutoSize(true);
 		Dimension iconDimension = trayIcon.getSize();
 		log.debug("Tray Icon Size: " + iconDimension.width + "x" + iconDimension.height);
 
@@ -118,6 +137,7 @@ public class FidesTrayIcon {
 	 * Opens the Fides folder
 	 */
 	private void openFolder() {
+		// TODO: Check if supported
 		try {
 			Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
 		} catch (IOException e) {
