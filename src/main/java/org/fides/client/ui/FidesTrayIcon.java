@@ -50,7 +50,7 @@ public class FidesTrayIcon {
 			return;
 		}
 
-		URL iconUrl = getClass().getResource("/resources/images/FidesIcon.png");
+		URL iconUrl = getClass().getResource("/FidesIcon.png");
 		Image icon = (new ImageIcon(iconUrl, "tray icon")).getImage();
 
 		final PopupMenu popup = new PopupMenu();
