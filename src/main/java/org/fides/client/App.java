@@ -27,16 +27,12 @@ import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
-import org.fides.client.ui.ChangePasswordScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
-import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
-
-import javax.swing.*;
 
 /**
  * Client application
