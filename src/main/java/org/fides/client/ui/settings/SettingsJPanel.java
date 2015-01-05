@@ -31,7 +31,7 @@ public abstract class SettingsJPanel extends JPanel {
 	/**
 	 * Apply the settings
 	 *
-	 * @return true if succesful
+	 * @return true if successful
 	 */
 	public abstract boolean applySettings();
 
