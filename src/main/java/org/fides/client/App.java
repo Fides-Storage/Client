@@ -8,8 +8,6 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -116,9 +114,7 @@ public class App {
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
 			trayIcon.addToSystemTray();
 
-			Timer timer = new Timer("CheckTimer");
-			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
+			FileCheckTask.startCheckTimer(syncManager);
 		}
 
 	}

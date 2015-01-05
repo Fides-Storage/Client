@@ -1,9 +1,10 @@
 package org.fides.client.ui.settings;
 
-import org.fides.client.ui.UserMessage;
+import java.util.List;
 
 import javax.swing.JPanel;
-import java.util.ArrayList;
+
+import org.fides.client.ui.UserMessage;
 
 /**
  * A {@link JPanel} with additional methods for applying settings
@@ -29,7 +30,7 @@ public abstract class SettingsJPanel extends JPanel {
 	 *
 	 * @return ArrayList with errorMessages if there were any
 	 */
-	public abstract ArrayList<UserMessage> applySettings();
+	public abstract List<UserMessage> applySettings();
 
 	public String getName() {
 		return name;
