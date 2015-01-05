@@ -89,6 +89,7 @@ public class FidesTrayIcon {
 		popup.add(exitItem);
 
 		trayIcon.setPopupMenu(popup);
+		trayIcon.setImageAutoSize(true);
 
 		try {
 			tray.add(trayIcon);
