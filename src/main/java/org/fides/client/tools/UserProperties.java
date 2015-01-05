@@ -48,12 +48,12 @@ public final class UserProperties {
 	/**
 	 * The key to get the user name
 	 */
-	private static final String USERNAMEHASH_KEY = "UsernameHash";
+	private static final String USERNAME_HASH_KEY = "UsernameHash";
 
 	/**
 	 * The key to get the password hash
 	 */
-	private static final String PASSWORDHASH_KEY = "PasswordHash";
+	private static final String PASSWORD_HASH_KEY = "PasswordHash";
 
 	/**
 	 * The key to get the server host
@@ -63,17 +63,17 @@ public final class UserProperties {
 	/**
 	 * The key to get the server host port
 	 */
-	private static final String HOSTPORT_KEY = "HostPort";
+	private static final String HOST_PORT_KEY = "HostPort";
 
 	/**
 	 * The certificate id
 	 */
-	private static final String CERTIFICATEID_KEY = "CertificateId";
+	private static final String CERTIFICATE_ID_KEY = "CertificateId";
 
 	/**
 	 * The certificate issuer
 	 */
-	private static final String CERTIFICATEISSUER_KEY = "CertificateIssuer";
+	private static final String CERTIFICATE_ISSUER_KEY = "CertificateIssuer";
 
 	/**
 	 * The time used to check changes with the server in seconds
@@ -145,7 +145,7 @@ public final class UserProperties {
 	}
 
 	public String getUsernameHash() {
-		return properties.getProperty(USERNAMEHASH_KEY);
+		return properties.getProperty(USERNAME_HASH_KEY);
 	}
 
 	/**
@@ -155,12 +155,12 @@ public final class UserProperties {
 	 *            the given user name hash to save
 	 */
 	public void setUsernameHash(String usernameHash) {
-		properties.setProperty(USERNAMEHASH_KEY, usernameHash);
+		properties.setProperty(USERNAME_HASH_KEY, usernameHash);
 		saveProperties();
 	}
 
 	public String getPasswordHash() {
-		return properties.getProperty(PASSWORDHASH_KEY);
+		return properties.getProperty(PASSWORD_HASH_KEY);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public final class UserProperties {
 	 *            the given password hash to save
 	 */
 	public void setPasswordHash(String passwordHash) {
-		properties.setProperty(PASSWORDHASH_KEY, passwordHash);
+		properties.setProperty(PASSWORD_HASH_KEY, passwordHash);
 		saveProperties();
 	}
 
@@ -184,7 +184,7 @@ public final class UserProperties {
 	 * @return host port, if empty turn 0
 	 */
 	public int getHostPort() {
-		String hostPort = properties.getProperty(HOSTPORT_KEY);
+		String hostPort = properties.getProperty(HOST_PORT_KEY);
 		if (StringUtils.isNotBlank(hostPort) && StringUtils.isNumeric(hostPort)) {
 			return Integer.parseInt(hostPort);
 		}
@@ -211,7 +211,7 @@ public final class UserProperties {
 	 */
 	public void setServerAddress(InetSocketAddress serverAddress) {
 		properties.setProperty(HOST_KEY, serverAddress.getHostString());
-		properties.setProperty(HOSTPORT_KEY, Integer.toString(serverAddress.getPort()));
+		properties.setProperty(HOST_PORT_KEY, Integer.toString(serverAddress.getPort()));
 		saveProperties();
 	}
 
@@ -221,7 +221,7 @@ public final class UserProperties {
 	 * @return certificate id
 	 */
 	public String getCertificateId() {
-		return properties.getProperty(CERTIFICATEID_KEY);
+		return properties.getProperty(CERTIFICATE_ID_KEY);
 	}
 
 	/**
@@ -230,7 +230,7 @@ public final class UserProperties {
 	 * @return certificate issuer
 	 */
 	public String getCertificateIssuer() {
-		return properties.getProperty(CERTIFICATEISSUER_KEY);
+		return properties.getProperty(CERTIFICATE_ISSUER_KEY);
 	}
 
 	/**
@@ -240,8 +240,8 @@ public final class UserProperties {
 	 *            certificate to save
 	 */
 	public void setCertificate(X509Certificate certificate) {
-		properties.setProperty(CERTIFICATEID_KEY, certificate.getSerialNumber().toString());
-		properties.setProperty(CERTIFICATEISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		properties.setProperty(CERTIFICATE_ID_KEY, certificate.getSerialNumber().toString());
+		properties.setProperty(CERTIFICATE_ISSUER_KEY, certificate.getIssuerX500Principal().getName());
 		saveProperties();
 	}
 
