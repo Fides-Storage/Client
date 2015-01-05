@@ -2,7 +2,6 @@ package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -30,8 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests for the {@link FileSyncManager}
- * 
- * @author Koen
  *
  */
 @RunWith(PowerMockRunner.class)

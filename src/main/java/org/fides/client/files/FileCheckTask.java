@@ -16,7 +16,7 @@ public final class FileCheckTask extends TimerTask {
 	private FileSyncManager syncManager;
 
 	/**
-	 * Constructor
+	 * Constructor for FileCheckTask
 	 * 
 	 * @param syncManager
 	 *            The {@link FileSyncManager} used for checking

@@ -7,9 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * Ui utilities
- * 
- * @author jesse
+ * UI utilities to modify the UI
  *
  */
 public class UiUtils {

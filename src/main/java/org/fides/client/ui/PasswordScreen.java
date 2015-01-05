@@ -86,6 +86,8 @@ public class PasswordScreen {
 		while (option == 0) {
 			option = JOptionPane.showOptionDialog(frame, panel, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
+			messages.clear();
+
 			// If OK was pressed
 			if (option == 0) {
 
@@ -99,16 +101,22 @@ public class PasswordScreen {
 						frame.dispose();
 						return new String(passwordString);
 					} else {
-						messages.clear();
 						messages.add(new UserMessage("Confirm password is incorrect", true));
-						UiUtils.setMessageLabels(messagePanel, messages);
 					}
 
 				} else {
-					frame.dispose();
-					return new String(passwordString);
+
+					if (StringUtils.isNotBlank(passwordString)) {
+						frame.dispose();
+						return new String(passwordString);
+					} else {
+						messages.add(new UserMessage("Please fill out a password", true));
+					}
 				}
 			}
+
+			// Show error messages
+			UiUtils.setMessageLabels(messagePanel, messages);
 		}
 
 		frame.dispose();

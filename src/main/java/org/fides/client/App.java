@@ -1,7 +1,5 @@
 package org.fides.client;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -11,7 +9,6 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,11 +27,10 @@ import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UserMessage;
-import org.fides.client.ui.settings.SettingsFrame;
 import org.fides.tools.HashUtils;
 
 /**
- * Client application
+ * Main class for the client application
  * 
  */
 public class App {
@@ -80,23 +76,7 @@ public class App {
 				 */
 
 				// Check if the user already has a keyfile.
-				boolean hasKeyFile = false;
-				InputStream keyFileStream = serverConnector.requestKeyFile();
-
-				if (keyFileStream != null) {
-					try {
-						if (keyFileStream.read() == -1) {
-							hasKeyFile = false;
-						} else {
-							log.debug("A keyfile is available on the server");
-							hasKeyFile = true;
-						}
-					} catch (IOException e) {
-						log.error(e);
-					} finally {
-						IOUtils.closeQuietly(keyFileStream);
-					}
-				}
+				boolean hasKeyFile = serverConnector.checkIfKeyFileExists();
 
 				String passwordString = PasswordScreen.getPassword(messages, !hasKeyFile);
 				if (StringUtils.isNotBlank(passwordString)) {
@@ -132,8 +112,7 @@ public class App {
 			checker.start();
 
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
-			trayIcon.addSystemTray();
-			new SettingsFrame(syncManager);
+			trayIcon.addToSystemTray();
 
 			FileCheckTask.startCheckTimer(syncManager);
 		}
@@ -172,7 +151,6 @@ public class App {
 			Certificate[] certificates = serverConnector.getServerCertificates();
 			serverConnector.disconnect();
 
-			// TODO: validate all certificates
 			if (certificates.length > 0) {
 				certificate = (X509Certificate) certificates[0];
 

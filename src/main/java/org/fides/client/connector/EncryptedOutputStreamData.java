@@ -12,7 +12,7 @@ public class EncryptedOutputStreamData extends OutputStreamData {
 	private Key key;
 
 	/**
-	 * Constructor
+	 * Constructor for EncryptedOutputStreamData
 	 * 
 	 * @param outputStream
 	 *            The encrypted outputstream writing to the server location

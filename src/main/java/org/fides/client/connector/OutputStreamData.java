@@ -12,10 +12,10 @@ public class OutputStreamData {
 	private final String location;
 
 	/**
-	 * Constructor
+	 * Constructor for OutputStreamData
 	 * 
 	 * @param outputStream
-	 *            The outputstream writing to the server location
+	 *            The output stream writing to the server location
 	 * @param location
 	 *            The location on the server
 	 */

@@ -8,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Contains the information of the user's files on the servers
  * 
- * @author Koen
- * 
  */
 public class ClientFile implements Serializable {
 
@@ -24,7 +22,7 @@ public class ClientFile implements Serializable {
 	private String hash;
 
 	/**
-	 * Constructor
+	 * Constructor for ClientFile
 	 * 
 	 * @param name
 	 *            Name of the file

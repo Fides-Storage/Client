@@ -14,8 +14,6 @@ import org.fides.tools.HashUtils;
 /**
  * Some utilities which have to do with files
  * 
- * @author Koen
- * 
  */
 public final class FileUtil {
 	/**
