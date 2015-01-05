@@ -75,7 +75,7 @@ public class ServerConnectorTest {
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
 		try {
-			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATEUSER + "\",\"" + Actions.Properties.PASSWORD_HASH + "" +
+			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATE_USER + "\",\"" + Actions.Properties.PASSWORD_HASH + "" +
 				"\":\"passwordTest\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\"}", readByteArrayAsData.readUTF());
 		} catch (IOException e) {
 			fail(e.getMessage());
