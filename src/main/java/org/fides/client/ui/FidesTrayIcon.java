@@ -2,6 +2,7 @@ package org.fides.client.ui;
 
 import java.awt.AWTException;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -90,6 +91,8 @@ public class FidesTrayIcon {
 
 		trayIcon.setPopupMenu(popup);
 		trayIcon.setImageAutoSize(true);
+		Dimension iconDimension = trayIcon.getSize();
+		log.debug("Tray Icon Size: " + iconDimension.width + "x" + iconDimension.height);
 
 		try {
 			tray.add(trayIcon);
