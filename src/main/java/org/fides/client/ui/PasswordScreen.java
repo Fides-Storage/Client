@@ -6,6 +6,7 @@ import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -25,7 +26,7 @@ public class PasswordScreen {
 	 * 
 	 * @return the entered password, returns null if nothing was entered
 	 */
-	public static String getPassword() {
+	public static String getPassword(ArrayList<UserMessage> messages) {
 		JFrame frame = new JFrame();
 		frame.setUndecorated(true);
 		frame.setVisible(true);
@@ -34,6 +35,14 @@ public class PasswordScreen {
 		// Create a Panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+		// Add a panel where errors can be shown later
+		JPanel messagePanel = new JPanel();
+		messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+		messagePanel.setVisible(false);
+		panel.add(messagePanel);
+
+		UiUtils.setMessageLabels(messagePanel, messages);
 
 		// Add a label to the panel
 		JLabel label = new JLabel("Password:");
@@ -69,5 +78,4 @@ public class PasswordScreen {
 		}
 		return null;
 	}
-
 }

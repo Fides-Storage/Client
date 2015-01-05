@@ -9,6 +9,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,7 @@ import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
+import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
 
 /**
@@ -67,38 +69,59 @@ public class App {
 
 		if (isAuthenticated && serverConnector.isConnected()) {
 
-			/**
-			 * Do normal work, we are going to loop here
-			 */
-			String passwordString = PasswordScreen.getPassword();
-			if (StringUtils.isNotBlank(passwordString)) {
-				passwordString = HashUtils.hash(passwordString);
-			} else {
-				System.exit(0);
+			EncryptionManager encManager = null;
+
+			boolean isAccepted = false;
+			ArrayList<UserMessage> messages = new ArrayList<>();
+			while (!isAccepted) {
+
+				/**
+				 * Do normal work, we are going to loop here
+				 */
+				String passwordString = PasswordScreen.getPassword(messages);
+				if (StringUtils.isNotBlank(passwordString)) {
+					passwordString = HashUtils.hash(passwordString);
+				} else {
+					System.exit(0);
+				}
+
+				encManager = new EncryptionManager(serverConnector, passwordString);
+
+				// Check if the user already has a keyfile.
+				InputStream keyFileStream = serverConnector.requestKeyFile();
+
+				if (keyFileStream != null) {
+					try {
+						if (keyFileStream.read() == -1) {
+							keyFileStream.close();
+							encManager.updateKeyFile(new KeyFile());
+						} else {
+							log.debug("A keyfile is available on the server");
+						}
+					} catch (IOException e) {
+						log.error(e);
+					} finally {
+						IOUtils.closeQuietly(keyFileStream);
+					}
+				}
+
+				// check if key file can be decrypted
+				KeyFile keyFile = encManager.requestKeyFile();
+
+				if (keyFile != null) {
+					isAccepted = true;
+				} else {
+					log.error("Password is incorrect");
+					messages.clear();
+					messages.add(new UserMessage("Password is incorrect", true));
+				}
+
 			}
+
+			// Disconnect after login
+			serverConnector.disconnect();
 
 			FileManager fileManager = new FileManager();
-			EncryptionManager encManager = new EncryptionManager(serverConnector, passwordString);
-
-			// Check if the user already has a keyfile.
-			InputStream keyFileStream = serverConnector.requestKeyFile();
-
-			if (keyFileStream != null) {
-				try {
-					if (keyFileStream.read() == -1) {
-						keyFileStream.close();
-						encManager.updateKeyFile(new KeyFile());
-					} else {
-						log.debug("A keyfile is available on the server");
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block, what to do when this fails?
-					e.printStackTrace();
-				} finally {
-					IOUtils.closeQuietly(keyFileStream);
-				}
-			}
-			serverConnector.disconnect();
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
