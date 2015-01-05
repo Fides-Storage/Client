@@ -1,11 +1,11 @@
-package org.fides.client.ui;
+package org.fides.client.ui.settings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.data.KeyFile;
-import org.fides.client.ui.settings.SettingsJPanel;
+import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
 
 import java.awt.*;
