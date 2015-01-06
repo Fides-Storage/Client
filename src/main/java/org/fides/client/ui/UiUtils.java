@@ -1,8 +1,10 @@
 package org.fides.client.ui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.util.ArrayList;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -35,5 +37,15 @@ public class UiUtils {
 			}
 			messagePanel.add(messageLabel);
 		}
+	}
+
+	/**
+	 * Sets the maximum size of a {@link JComponent} to the perverted size
+	 * 
+	 * @param component
+	 *            The component to set the size of
+	 */
+	public static void setMaxHeightToPreferred(JComponent component) {
+		component.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
 	}
 }

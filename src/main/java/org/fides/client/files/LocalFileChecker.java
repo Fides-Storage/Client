@@ -238,8 +238,8 @@ public class LocalFileChecker extends Thread {
 
 	@Override
 	public void interrupt() {
-		super.interrupt();
 		handleThread.interrupt();
+		super.interrupt();
 	}
 
 	/**

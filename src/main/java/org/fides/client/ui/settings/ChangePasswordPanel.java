@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
 
@@ -48,6 +49,10 @@ public class ChangePasswordPanel extends SettingsJPanel {
 
 		// Set layout on panel
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+		UiUtils.setMaxHeightToPreferred(passOld);
+		UiUtils.setMaxHeightToPreferred(passNew1);
+		UiUtils.setMaxHeightToPreferred(passNew2);
 
 		// Add a labels to the panel
 		JLabel labelOld = new JLabel("Old password:");

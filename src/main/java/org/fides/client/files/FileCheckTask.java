@@ -39,6 +39,7 @@ public final class FileCheckTask extends TimerTask {
 	public static void startCheckTimer(FileSyncManager syncManager) {
 		if (timer != null) {
 			timer.cancel();
+			timer.purge();
 		}
 		timer = new Timer("CheckTimer");
 
@@ -52,6 +53,7 @@ public final class FileCheckTask extends TimerTask {
 	public static void stopCheckTimer() {
 		if (timer != null) {
 			timer.cancel();
+			timer.purge();
 		}
 	}
 
