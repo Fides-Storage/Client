@@ -12,16 +12,17 @@ import org.apache.logging.log4j.Logger;
 import org.fides.client.files.FileCheckTask;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.tools.UserProperties;
+import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 
 /**
- * UI where the check time can be changed by a user
+ * UI where the check interval can be changed by a user
  */
-public class CheckTimePanel extends SettingsJPanel {
+public class CheckIntervalPanel extends SettingsJPanel {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(CheckTimePanel.class);
+	private static Logger log = LogManager.getLogger(CheckIntervalPanel.class);
 
 	private final JTextField checkTimeField = new JTextField();
 
@@ -30,18 +31,21 @@ public class CheckTimePanel extends SettingsJPanel {
 	/**
 	 * Constructor, creates the panel
 	 */
-	public CheckTimePanel(FileSyncManager syncManager) {
-		super("Check time");
+	public CheckIntervalPanel(FileSyncManager syncManager) {
+		super("Check interval");
 		this.syncManager = syncManager;
 
 		// Set layout on panel
-		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 		checkTimeField.setText("" + UserProperties.getInstance().getCheckTimeInSeconds());
 
 		// Add a labels to the panel
-		this.add(new JLabel("Check time (seconds):"));
+		this.add(new JLabel("Check interval (seconds):"));
 		this.add(checkTimeField);
+
+		// To prevent stretching
+		UiUtils.setMaxHeightToPreferred(checkTimeField);
 	}
 
 	@Override

@@ -210,8 +210,13 @@ public final class UserProperties {
 	 *            address of the server
 	 */
 	public void setServerAddress(InetSocketAddress serverAddress) {
-		properties.setProperty(HOST_KEY, serverAddress.getHostString());
-		properties.setProperty(HOST_PORT_KEY, Integer.toString(serverAddress.getPort()));
+		if (serverAddress == null) {
+			properties.remove(HOST_KEY);
+			properties.remove(HOST_PORT_KEY);
+		} else {
+			properties.setProperty(HOST_KEY, serverAddress.getHostString());
+			properties.setProperty(HOST_PORT_KEY, Integer.toString(serverAddress.getPort()));
+		}
 		saveProperties();
 	}
 
@@ -240,8 +245,13 @@ public final class UserProperties {
 	 *            certificate to save
 	 */
 	public void setCertificate(X509Certificate certificate) {
-		properties.setProperty(CERTIFICATE_ID_KEY, certificate.getSerialNumber().toString());
-		properties.setProperty(CERTIFICATE_ISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		if (certificate == null) {
+			properties.remove(CERTIFICATE_ID_KEY);
+			properties.remove(CERTIFICATE_ISSUER_KEY);
+		} else {
+			properties.setProperty(CERTIFICATE_ID_KEY, certificate.getSerialNumber().toString());
+			properties.setProperty(CERTIFICATE_ISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		}
 		saveProperties();
 	}
 

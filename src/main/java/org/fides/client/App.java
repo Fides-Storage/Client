@@ -4,8 +4,6 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
@@ -19,6 +17,7 @@ import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.CertificateUtil;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
@@ -27,6 +26,7 @@ import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UserMessage;
+import org.fides.client.ui.settings.SettingsFrame;
 import org.fides.tools.HashUtils;
 
 /**
@@ -111,6 +111,8 @@ public class App {
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
 
+			new SettingsFrame(syncManager);
+
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
 			trayIcon.addToSystemTray();
 
@@ -154,7 +156,7 @@ public class App {
 			if (certificates.length > 0) {
 				certificate = (X509Certificate) certificates[0];
 
-				if (!checkValidCertificate(certificate)) {
+				if (!CertificateUtil.checkValidCertificate(certificate)) {
 					ErrorMessageScreen.showErrorMessage("Server certificate not valid!!!!");
 					System.exit(1);
 				}
@@ -187,9 +189,9 @@ public class App {
 	 * 
 	 * @param certificate
 	 *            the given certificate
-	 * @return if certificate is the same
+	 * @return true if certificate is the same
 	 */
-	private static boolean checkCertificateAccepted(X509Certificate certificate) {
+	public static boolean checkCertificateAccepted(X509Certificate certificate) {
 		// Check saved certificate with current one
 		String certificateId = UserProperties.getInstance().getCertificateId();
 		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
@@ -200,17 +202,4 @@ public class App {
 		return CertificateValidationScreen.validateCertificate(certificate);
 	}
 
-	private static boolean checkValidCertificate(X509Certificate certificate) {
-		try {
-			certificate.checkValidity();
-			// The rest of the checks are done by SSLSocket, if failed the socket is closed
-			return true;
-		} catch (CertificateExpiredException e) {
-			log.error(e);
-		} catch (CertificateNotYetValidException e) {
-			log.error(e);
-		}
-
-		return false;
-	}
 }
