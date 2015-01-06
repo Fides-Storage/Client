@@ -52,9 +52,9 @@ public class FidesTrayIcon {
 		}
 
 		Image icon16 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
-		Image icon24 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
-		Image icon32 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
-		Image icon64 = (new ImageIcon(getClass().getResource("/icon16.png"), "tray icon")).getImage();
+		Image icon24 = (new ImageIcon(getClass().getResource("/icon24.png"), "tray icon")).getImage();
+		Image icon32 = (new ImageIcon(getClass().getResource("/icon32.png"), "tray icon")).getImage();
+		Image icon64 = (new ImageIcon(getClass().getResource("/icon64.png"), "tray icon")).getImage();
 
 		final PopupMenu popup = new PopupMenu();
 
