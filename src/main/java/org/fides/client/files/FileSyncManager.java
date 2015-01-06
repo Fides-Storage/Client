@@ -42,8 +42,6 @@ public class FileSyncManager {
 
 	private final AtomicBoolean stopBoolean = new AtomicBoolean(false);
 
-	private final Object criticalLock = new Object();
-
 	private final AtomicBoolean criticalBoolean = new AtomicBoolean(false);
 
 	/**
@@ -144,7 +142,7 @@ public class FileSyncManager {
 			stopBoolean.set(true);
 
 			while (criticalBoolean.get()) {
-				criticalLock.wait();
+				stopLock.wait();
 			}
 		}
 	}
@@ -164,31 +162,30 @@ public class FileSyncManager {
 	 * 
 	 * @return true if the critical action is allowed to be started.
 	 */
-	private boolean startCritical() {
-		System.out.println("Start Critical");
-		if (!stopBoolean.get()) {
-			if (criticalBoolean.compareAndSet(false, true)) {
-				System.out.println("Start Critical true");
-				return true;
-			} else {
-				log.error("A critical action tried to start while a critical action was already running.");
+	protected boolean startCritical() {
+		synchronized (stopLock) {
+			if (!stopBoolean.get()) {
+				if (criticalBoolean.compareAndSet(false, true)) {
+					return true;
+				} else {
+					log.error("A critical action tried to start while a critical action was already running.");
+				}
 			}
 		}
-		System.out.println("Start Critical false");
 		return false;
 	}
 
 	/**
 	 * Finishes a critical action. If a thread is waiting for the critical action to finish, it will notify this thread.
 	 */
-	private void stopCritical() {
-		System.out.println("Stop Critical");
-		criticalBoolean.set(false);
+	protected void stopCritical() {
+		synchronized (stopLock) {
+			criticalBoolean.set(false);
 
-		if (stopBoolean.get()) {
-			criticalLock.notifyAll();
+			if (stopBoolean.get()) {
+				stopLock.notifyAll();
+			}
 		}
-		System.out.println("Stop Critical true");
 	}
 
 	/**
@@ -212,7 +209,6 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleCompareResult(FileCompareResult result, KeyFile keyFile) {
-		System.out.println("Handle Event: " + result);
 		boolean successful = false;
 		switch (result.getResultType()) {
 		case LOCAL_ADDED:
