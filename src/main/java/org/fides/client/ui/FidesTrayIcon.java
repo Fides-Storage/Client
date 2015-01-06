@@ -2,7 +2,7 @@ package org.fides.client.ui;
 
 import java.awt.AWTException;
 import java.awt.Desktop;
-import java.awt.Dimension;
+import java.awt.Desktop.Action;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -47,7 +47,7 @@ public class FidesTrayIcon {
 	public void addToSystemTray() {
 		// Check if the SystemTray is supported
 		if (!SystemTray.isSupported()) {
-			System.out.println("SystemTray is not supported");
+			log.debug("SystemTray is not supported");
 			return;
 		}
 
@@ -79,6 +79,7 @@ public class FidesTrayIcon {
 			trayIcon.setImageAutoSize(true);
 		}
 
+		// Open the Fides folder when the icon is double clicked.
 		trayIcon.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -86,7 +87,7 @@ public class FidesTrayIcon {
 			}
 		});
 
-		// Create a pop-up menu components
+		// Open the Fides folder when Open Folder is selected
 		MenuItem openFolderItem = new MenuItem("Open Folder");
 		openFolderItem.addActionListener(new ActionListener() {
 			@Override
@@ -95,6 +96,7 @@ public class FidesTrayIcon {
 			}
 		});
 
+		// Open settings when Settings is selected
 		MenuItem settingsItem = new MenuItem("Settings");
 		settingsItem.addActionListener(new ActionListener() {
 			@Override
@@ -103,6 +105,7 @@ public class FidesTrayIcon {
 			}
 		});
 
+		// Exits the application when Exit is selected
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.addActionListener(new ActionListener() {
 			@Override
@@ -118,13 +121,11 @@ public class FidesTrayIcon {
 		popup.add(exitItem);
 
 		trayIcon.setPopupMenu(popup);
-		Dimension iconDimension = trayIcon.getSize();
-		log.debug("Tray Icon Size: " + iconDimension.width + "x" + iconDimension.height);
 
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
-			System.out.println("TrayIcon could not be added.");
+			log.error("TrayIcon could not be added.");
 		}
 	}
 
@@ -145,11 +146,12 @@ public class FidesTrayIcon {
 	 * Opens the Fides folder
 	 */
 	private void openFolder() {
-		// TODO: Check if supported
-		try {
-			Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
-		} catch (IOException e) {
-			log.error("Couldn't open the folder");
+		if (Desktop.getDesktop().isSupported(Action.OPEN)) {
+			try {
+				Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
+			} catch (IOException e) {
+				log.error("Couldn't open the folder");
+			}
 		}
 	}
 

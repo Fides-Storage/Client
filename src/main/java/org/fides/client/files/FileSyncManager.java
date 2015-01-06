@@ -42,8 +42,6 @@ public class FileSyncManager {
 
 	private final AtomicBoolean stopBoolean = new AtomicBoolean(false);
 
-	private final Object criticalLock = new Object();
-
 	private final AtomicBoolean criticalBoolean = new AtomicBoolean(false);
 
 	/**
@@ -144,7 +142,7 @@ public class FileSyncManager {
 			stopBoolean.set(true);
 
 			while (criticalBoolean.get()) {
-				criticalLock.wait();
+				stopLock.wait();
 			}
 		}
 	}
@@ -164,31 +162,30 @@ public class FileSyncManager {
 	 * 
 	 * @return true if the critical action is allowed to be started.
 	 */
-	private boolean startCritical() {
-		System.out.println("Start Critical");
-		if (!stopBoolean.get()) {
-			if (criticalBoolean.compareAndSet(false, true)) {
-				System.out.println("Start Critical true");
-				return true;
-			} else {
-				log.error("A critical action tried to start while a critical action was already running.");
+	protected boolean startCritical() {
+		synchronized (stopLock) {
+			if (!stopBoolean.get()) {
+				if (criticalBoolean.compareAndSet(false, true)) {
+					return true;
+				} else {
+					log.error("A critical action tried to start while a critical action was already running.");
+				}
 			}
 		}
-		System.out.println("Start Critical false");
 		return false;
 	}
 
 	/**
 	 * Finishes a critical action. If a thread is waiting for the critical action to finish, it will notify this thread.
 	 */
-	private void stopCritical() {
-		System.out.println("Stop Critical");
-		criticalBoolean.set(false);
+	protected void stopCritical() {
+		synchronized (stopLock) {
+			criticalBoolean.set(false);
 
-		if (stopBoolean.get()) {
-			criticalLock.notifyAll();
+			if (stopBoolean.get()) {
+				stopLock.notifyAll();
+			}
 		}
-		System.out.println("Stop Critical true");
 	}
 
 	/**
@@ -212,7 +209,6 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleCompareResult(FileCompareResult result, KeyFile keyFile) {
-		System.out.println("Handle Event: " + result);
 		boolean successful = false;
 		switch (result.getResultType()) {
 		case LOCAL_ADDED:
@@ -290,12 +286,15 @@ public class FileSyncManager {
 		}
 		// If successful update the administration
 		if (successful && startCritical()) {
-			String hash = HashUtils.toHex(messageDigest.digest());
-			LocalHashes.getInstance().setHash(fileName, hash);
-			keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
-			// Update the keyfile TODO: what if it fails
-			encManager.updateKeyFile(keyFile);
-			stopCritical();
+			try {
+				String hash = HashUtils.toHex(messageDigest.digest());
+				LocalHashes.getInstance().setHash(fileName, hash);
+				keyFile.addClientFile(new ClientFile(fileName, outData.getLocation(), outData.getKey(), hash));
+				// Update the keyfile TODO: what if it fails
+				encManager.updateKeyFile(keyFile);
+			} finally {
+				stopCritical();
+			}
 		} else {
 			successful = false;
 		}
@@ -384,13 +383,16 @@ public class FileSyncManager {
 			successful = encManager.getConnector().checkUploadSuccessful();
 
 			if (successful && startCritical()) {
-				// Create a hash and save it
-				String hash = HashUtils.toHex(messageDigest.digest());
-				LocalHashes.getInstance().setHash(fileName, hash);
-				clientFile.setHash(hash);
-				// Update the keyfile TODO: what if it fails
-				encManager.updateKeyFile(keyFile);
-				stopCritical();
+				try {
+					// Create a hash and save it
+					String hash = HashUtils.toHex(messageDigest.digest());
+					LocalHashes.getInstance().setHash(fileName, hash);
+					clientFile.setHash(hash);
+					// Update the keyfile TODO: what if it fails
+					encManager.updateKeyFile(keyFile);
+				} finally {
+					stopCritical();
+				}
 			} else {
 				successful = false;
 			}
@@ -404,7 +406,6 @@ public class FileSyncManager {
 		} finally {
 			IOUtils.closeQuietly(in);
 			IOUtils.closeQuietly(out);
-			stopCritical();
 		}
 		return successful;
 
@@ -456,9 +457,12 @@ public class FileSyncManager {
 			IOUtils.closeQuietly(outFile);
 		}
 		if (successful && startCritical()) {
-			String hexHash = HashUtils.toHex(messageDigest.digest());
-			LocalHashes.getInstance().setHash(fileName, hexHash);
-			stopCritical();
+			try {
+				String hexHash = HashUtils.toHex(messageDigest.digest());
+				LocalHashes.getInstance().setHash(fileName, hexHash);
+			} finally {
+				stopCritical();
+			}
 		} else {
 			successful = false;
 		}
@@ -476,16 +480,19 @@ public class FileSyncManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.canWrite() && startCritical()) {
-			boolean result = fileManager.removeFile(fileName);
+			try {
+				boolean result = fileManager.removeFile(fileName);
 
-			deleteFolder(file.getParentFile());
+				deleteFolder(file.getParentFile());
 
-			if (result) {
-				// Remove the local hash
-				LocalHashes.getInstance().removeHash(fileName);
+				if (result) {
+					// Remove the local hash
+					LocalHashes.getInstance().removeHash(fileName);
+				}
+				return result;
+			} finally {
+				stopCritical();
 			}
-			stopCritical();
-			return result;
 		}
 		return false;
 	}
