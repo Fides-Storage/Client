@@ -63,14 +63,9 @@ public class ChangePasswordPanel extends SettingsJPanel {
 		this.add(passNew2);
 	}
 
-	private ArrayList<UserMessage> validateSettings() {
+	private ArrayList<UserMessage> validateSettings(String oldPassword, String newPassword1, String newPassword2) {
 		// ArrayList of UserMessages that will be returned.
 		ArrayList<UserMessage> messages = new ArrayList<>();
-
-		// Get passwords from fields
-		String oldPassword = new String(passOld.getPassword());
-		String newPassword1 = new String(passNew1.getPassword());
-		String newPassword2 = new String(passNew2.getPassword());
 
 		// Check for empty passwords
 		if (StringUtils.isBlank(oldPassword)) {
@@ -114,7 +109,18 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	 */
 	@Override
 	public ArrayList<UserMessage> applySettings() {
-		ArrayList<UserMessage> messages = validateSettings();
+
+		// Get passwords from fields
+		String oldPassword = new String(passOld.getPassword());
+		String newPassword1 = new String(passNew1.getPassword());
+		String newPassword2 = new String(passNew2.getPassword());
+
+		// When nothing was filled in, do nothing
+		if (StringUtils.isBlank(oldPassword) && StringUtils.isBlank(newPassword1) && StringUtils.isBlank(newPassword2)) {
+			return null;
+		}
+
+		ArrayList<UserMessage> messages = validateSettings(oldPassword, newPassword1, newPassword2);
 		if (messages.isEmpty() && newValidatedPassword != null && encryptionManager != null) {
 			// Retrieve current KeyFile
 			KeyFile keyFile = null;
