@@ -29,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests for the {@link FileSyncManager}
- *
+ * 
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ LocalHashes.class })
@@ -192,7 +192,7 @@ public class FileSyncManagerTest {
 	 */
 	@Test
 	public void testHandleConflict() {
-		// TODO inplement when needed
+		// TODO: implement when needed
 	}
 
 }

@@ -44,6 +44,8 @@ public class FileSyncManager {
 
 	private final AtomicBoolean stopBoolean = new AtomicBoolean(false);
 
+	private final AtomicBoolean busyBoolean = new AtomicBoolean(false);
+
 	/**
 	 * Constructor for FileSyncManager
 	 * 
@@ -64,7 +66,14 @@ public class FileSyncManager {
 	 */
 	public synchronized boolean fileManagerCheck() {
 		boolean successful = false;
-		if (!stopBoolean.get()) {
+		synchronized (stopLock) {
+			if (stopBoolean.get()) {
+				return false;
+			}
+			busyBoolean.set(true);
+		}
+
+		try {
 			try {
 				encManager.getConnector().connect();
 			} catch (ConnectException | UnknownHostException e) {
@@ -77,19 +86,24 @@ public class FileSyncManager {
 
 			if (keyFile == null || stopBoolean.get()) {
 				encManager.getConnector().disconnect();
-				return false;
-			}
-
-			Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
-			successful = true;
-			for (FileCompareResult result : results) {
-				if (stopBoolean.get()) {
-					successful = false;
-					break;
+				successful = false;
+			} else {
+				Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+				successful = true;
+				for (FileCompareResult result : results) {
+					if (stopBoolean.get()) {
+						successful = false;
+						break;
+					}
+					handleCompareResult(result, keyFile);
 				}
-				handleCompareResult(result, keyFile);
+				encManager.getConnector().disconnect();
 			}
-			encManager.getConnector().disconnect();
+		} finally {
+			synchronized (stopLock) {
+				busyBoolean.set(false);
+				stopLock.notifyAll();
+			}
 		}
 		return successful;
 	}
@@ -102,32 +116,43 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean checkClientSideFile(String fileName) {
-		if (!validClientSideFile(fileName) || stopBoolean.get()) {
-			return false;
+		synchronized (stopLock) {
+			if (!validClientSideFile(fileName) || stopBoolean.get()) {
+				return false;
+			}
+			busyBoolean.set(true);
 		}
 
-		KeyFile keyFile = null;
+		boolean successful = false;
 		try {
-			encManager.getConnector().connect();
-			keyFile = encManager.requestKeyFile();
-		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
-		}
 
-		if (keyFile == null || stopBoolean.get()) {
+			KeyFile keyFile = null;
+			try {
+				encManager.getConnector().connect();
+				keyFile = encManager.requestKeyFile();
+			} catch (ConnectException | UnknownHostException e) {
+				log.error(e);
+			}
+
+			if (keyFile == null || stopBoolean.get()) {
+				encManager.getConnector().disconnect();
+				return false;
+			}
+
+			FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
+			log.debug(result);
+			if (result != null && !stopBoolean.get()) {
+				successful = handleCompareResult(result, keyFile);
+			}
+
 			encManager.getConnector().disconnect();
-			return false;
+		} finally {
+			synchronized (stopLock) {
+				busyBoolean.set(false);
+				stopLock.notifyAll();
+			}
 		}
-
-		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
-		log.debug(result);
-		boolean completed = false;
-		if (result != null && !stopBoolean.get()) {
-			completed = handleCompareResult(result, keyFile);
-		}
-
-		encManager.getConnector().disconnect();
-		return completed;
+		return successful;
 	}
 
 	/**
