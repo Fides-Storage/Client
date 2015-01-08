@@ -1,8 +1,6 @@
 package org.fides.client.ui;
 
 import java.awt.AWTException;
-import java.awt.Desktop;
-import java.awt.Desktop.Action;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -10,14 +8,13 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.ImageIcon;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.ApplicationHandler;
 import org.fides.client.files.FileSyncManager;
-import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.settings.SettingsFrame;
 
 /**
@@ -32,6 +29,8 @@ public class FidesTrayIcon {
 
 	private final FileSyncManager syncManager;
 
+	private final ApplicationHandler appTool;
+
 	/**
 	 * The constructor. It needs a FileSyncManager to prevent critical actions from being interrupted.
 	 * 
@@ -39,6 +38,7 @@ public class FidesTrayIcon {
 	 */
 	public FidesTrayIcon(FileSyncManager syncManager) {
 		this.syncManager = syncManager;
+		appTool = new ApplicationHandler(syncManager);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class FidesTrayIcon {
 		trayIcon.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				openFolder();
+				appTool.openFolder();
 			}
 		});
 
@@ -92,7 +92,7 @@ public class FidesTrayIcon {
 		openFolderItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				openFolder();
+				appTool.openFolder();
 			}
 		});
 
@@ -101,7 +101,7 @@ public class FidesTrayIcon {
 		settingsItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				openSettings();
+				new SettingsFrame(syncManager);
 			}
 		});
 
@@ -110,7 +110,7 @@ public class FidesTrayIcon {
 		exitItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				exit();
+				appTool.exit();
 			}
 		});
 
@@ -129,33 +129,4 @@ public class FidesTrayIcon {
 		}
 	}
 
-	/**
-	 * Exits the Fides application
-	 */
-	private void exit() {
-		try {
-			syncManager.waitForStop();
-			System.exit(0);
-		} catch (InterruptedException e) {
-			log.error("Interrupted Exception while trying to safely stop the FileSyncManager");
-			System.exit(-1);
-		}
-	}
-
-	/**
-	 * Opens the Fides folder
-	 */
-	private void openFolder() {
-		if (Desktop.getDesktop().isSupported(Action.OPEN)) {
-			try {
-				Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
-			} catch (IOException e) {
-				log.error("Couldn't open the folder");
-			}
-		}
-	}
-
-	private void openSettings() {
-		new SettingsFrame(syncManager);
-	}
 }

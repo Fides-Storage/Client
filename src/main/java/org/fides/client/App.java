@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.client.files.FileCheckTask;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
@@ -116,7 +115,7 @@ public class App {
 			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
 			trayIcon.addToSystemTray();
 
-			FileCheckTask.startCheckTimer(syncManager);
+			// TODO: Start application
 		}
 
 	}
