@@ -160,8 +160,6 @@ public class LocalFileCheckTest {
 		// Give it some time to process
 		Thread.sleep(1000);
 
-		System.out.println(calledFiles);
-
 		assertEquals(10, calledFiles.size());
 		assertTrue(calledFiles.contains("File1.txt"));
 		assertTrue(calledFiles.contains("File1b.txt"));
