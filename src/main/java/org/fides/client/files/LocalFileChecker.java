@@ -136,9 +136,9 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * Handles a {@link WatchEvent}
 	 * 
-	 * @param event
-	 *            The event to handle
-	 * @param dir
+	 * @param kind
+	 *            The ind of event to handle
+	 * @param child
 	 *            The location of the event
 	 */
 	private void handleEvent(WatchEvent.Kind<?> kind, Path child) {
