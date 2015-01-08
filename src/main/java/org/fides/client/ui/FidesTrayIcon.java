@@ -101,7 +101,6 @@ public class FidesTrayIcon {
 		pauseItem.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				System.out.println("pauseItem click");
 				if (pauseItem.getState()) {
 					appHandler.stopApplication();
 				} else {
