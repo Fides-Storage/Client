@@ -9,8 +9,6 @@ import javax.swing.JTextField;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fides.client.files.FileCheckTask;
-import org.fides.client.files.FileSyncManager;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -26,14 +24,11 @@ public class CheckIntervalPanel extends SettingsJPanel {
 
 	private final JTextField checkTimeField = new JTextField();
 
-	private final FileSyncManager syncManager;
-
 	/**
 	 * Constructor, creates the panel
 	 */
-	public CheckIntervalPanel(FileSyncManager syncManager) {
+	public CheckIntervalPanel() {
 		super("Check interval");
-		this.syncManager = syncManager;
 
 		// Set layout on panel
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -63,8 +58,6 @@ public class CheckIntervalPanel extends SettingsJPanel {
 			int value = Integer.parseInt(checkTimeField.getText());
 			// Update it
 			UserProperties.getInstance().setCheckTimeInSeconds(value);
-			// Restart the timer
-			FileCheckTask.startCheckTimer(syncManager);
 		} catch (NumberFormatException e) {
 			// Add an error message, we cannot parse it!
 			messages.add(new UserMessage("Check time is no number", true));

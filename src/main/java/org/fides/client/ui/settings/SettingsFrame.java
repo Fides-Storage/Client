@@ -19,6 +19,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fides.client.ApplicationHandler;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -32,7 +33,7 @@ public class SettingsFrame extends JFrame {
 	 */
 	private static Logger log = LogManager.getLogger(SettingsFrame.class);
 
-	private final FileSyncManager syncManager;
+	private final ApplicationHandler appHandler;
 
 	private final List<SettingsJPanel> settingsPanels = new ArrayList<>();
 
@@ -42,9 +43,9 @@ public class SettingsFrame extends JFrame {
 	 * @param syncManager
 	 *            The {@link FileSyncManager} to use
 	 */
-	public SettingsFrame(FileSyncManager syncManager) {
+	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");
-		this.syncManager = syncManager;
+		this.appHandler = appHandler;
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -55,15 +56,15 @@ public class SettingsFrame extends JFrame {
 		JPanel generalTabPanel = new JPanel();
 		tabbedPane.addTab("General", generalTabPanel);
 		generalTabPanel.setLayout(new BoxLayout(generalTabPanel, BoxLayout.PAGE_AXIS));
-		generalTabPanel.add(createBorder(new ChangeServerPanel(syncManager.getEncManager().getConnector())));
-		generalTabPanel.add(createBorder(new CheckIntervalPanel(syncManager)));
+		generalTabPanel.add(createBorder(new ChangeServerPanel(appHandler.getSyncManager().getEncManager().getConnector())));
+		generalTabPanel.add(createBorder(new CheckIntervalPanel()));
 		generalTabPanel.add(Box.createVerticalGlue());
 
 		// Create the individual setting screens
 		JPanel userTabPanel = new JPanel();
 		tabbedPane.addTab("User", userTabPanel);
 		userTabPanel.setLayout(new BoxLayout(userTabPanel, BoxLayout.PAGE_AXIS));
-		userTabPanel.add(createBorder(new ChangePasswordPanel(syncManager.getEncManager())));
+		userTabPanel.add(createBorder(new ChangePasswordPanel(appHandler.getSyncManager().getEncManager())));
 		userTabPanel.add(Box.createVerticalGlue());
 
 		// Apply button
@@ -74,12 +75,8 @@ public class SettingsFrame extends JFrame {
 		applyButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					SettingsFrame.this.syncManager.waitForStop();
-				} catch (InterruptedException e1) {
-					log.error("waitForStop was interrupted", e);
-					return;
-				}
+				appHandler.stopApplication();
+
 				ArrayList<UserMessage> messages = new ArrayList<>();
 				for (SettingsJPanel settingsJPanel : settingsPanels) {
 					List<UserMessage> panelMessages = settingsJPanel.applySettings();
@@ -96,7 +93,7 @@ public class SettingsFrame extends JFrame {
 					errorFrame.setLocationRelativeTo(null);
 					errorFrame.setVisible(true);
 				}
-				SettingsFrame.this.syncManager.reenable();
+				appHandler.startApplication();
 			}
 		});
 

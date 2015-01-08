@@ -65,15 +65,14 @@ public class FileSyncManager {
 	 * @return true is successful
 	 */
 	public synchronized boolean fileManagerCheck() {
-		boolean successful = false;
 		synchronized (stopLock) {
 			if (stopBoolean.get()) {
 				return false;
 			}
 			busyBoolean.set(true);
 		}
-
 		try {
+			boolean successful = false;
 			try {
 				encManager.getConnector().connect();
 			} catch (ConnectException | UnknownHostException e) {
@@ -99,13 +98,13 @@ public class FileSyncManager {
 				}
 				encManager.getConnector().disconnect();
 			}
+			return successful;
 		} finally {
 			synchronized (stopLock) {
 				busyBoolean.set(false);
 				stopLock.notifyAll();
 			}
 		}
-		return successful;
 	}
 
 	/**
@@ -117,14 +116,13 @@ public class FileSyncManager {
 	 */
 	public synchronized boolean checkClientSideFile(String fileName) {
 		synchronized (stopLock) {
-			if (!validClientSideFile(fileName) || stopBoolean.get()) {
+			if (stopBoolean.get() || !validClientSideFile(fileName)) {
 				return false;
 			}
 			busyBoolean.set(true);
 		}
-
-		boolean successful = false;
 		try {
+			boolean successful = false;
 
 			KeyFile keyFile = null;
 			try {
@@ -146,13 +144,13 @@ public class FileSyncManager {
 			}
 
 			encManager.getConnector().disconnect();
+			return successful;
 		} finally {
 			synchronized (stopLock) {
 				busyBoolean.set(false);
 				stopLock.notifyAll();
 			}
 		}
-		return successful;
 	}
 
 	/**
@@ -165,7 +163,9 @@ public class FileSyncManager {
 		synchronized (stopLock) {
 			// Prevent new critical actions from starting.
 			stopBoolean.set(true);
-			stopLock.wait();
+			if (busyBoolean.get()) {
+				stopLock.wait();
+			}
 		}
 	}
 
@@ -486,7 +486,7 @@ public class FileSyncManager {
 	}
 
 	private boolean handleConflict(final String fileName) {
-		// TODO handle conflict
+		// TODO: handle conflict
 		return false;
 	}
 

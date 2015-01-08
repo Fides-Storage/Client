@@ -1,6 +1,7 @@
 package org.fides.client.ui;
 
 import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -8,6 +9,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.ImageIcon;
 
@@ -27,18 +30,15 @@ public class FidesTrayIcon {
 	 */
 	private static Logger log = LogManager.getLogger(FileSyncManager.class);
 
-	private final FileSyncManager syncManager;
-
-	private final ApplicationHandler appTool;
+	private final ApplicationHandler appHandler;
 
 	/**
 	 * The constructor. It needs a FileSyncManager to prevent critical actions from being interrupted.
 	 * 
 	 * @param syncManager
 	 */
-	public FidesTrayIcon(FileSyncManager syncManager) {
-		this.syncManager = syncManager;
-		appTool = new ApplicationHandler(syncManager);
+	public FidesTrayIcon(ApplicationHandler appHandler) {
+		this.appHandler = appHandler;
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class FidesTrayIcon {
 		trayIcon.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				appTool.openFolder();
+				appHandler.openFolder();
 			}
 		});
 
@@ -92,7 +92,21 @@ public class FidesTrayIcon {
 		openFolderItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				appTool.openFolder();
+				appHandler.openFolder();
+			}
+		});
+
+		// Open the Fides folder when Open Folder is selected\
+		final CheckboxMenuItem pauseItem = new CheckboxMenuItem("Pause syncing");
+		pauseItem.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				System.out.println("pauseItem click");
+				if (pauseItem.getState()) {
+					appHandler.stopApplication();
+				} else {
+					appHandler.startApplication();
+				}
 			}
 		});
 
@@ -101,7 +115,7 @@ public class FidesTrayIcon {
 		settingsItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new SettingsFrame(syncManager);
+				new SettingsFrame(appHandler);
 			}
 		});
 
@@ -110,12 +124,13 @@ public class FidesTrayIcon {
 		exitItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				appTool.exit();
+				appHandler.exit();
 			}
 		});
 
 		// Add components to pop-up menu
 		popup.add(openFolderItem);
+		popup.add(pauseItem);
 		popup.add(settingsItem);
 		popup.addSeparator();
 		popup.add(exitItem);
@@ -128,5 +143,4 @@ public class FidesTrayIcon {
 			log.error("TrayIcon could not be added.");
 		}
 	}
-
 }

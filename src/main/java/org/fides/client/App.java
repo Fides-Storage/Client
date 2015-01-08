@@ -14,7 +14,6 @@ import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
-import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.CertificateUtil;
 import org.fides.client.tools.UserProperties;
@@ -25,7 +24,6 @@ import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UserMessage;
-import org.fides.client.ui.settings.SettingsFrame;
 import org.fides.tools.HashUtils;
 
 /**
@@ -107,12 +105,10 @@ public class App {
 
 			FileManager fileManager = new FileManager();
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
-			LocalFileChecker checker = new LocalFileChecker(syncManager);
-			checker.start();
+			ApplicationHandler appHandler = new ApplicationHandler(syncManager);
+			appHandler.startApplication();
 
-			new SettingsFrame(syncManager);
-
-			FidesTrayIcon trayIcon = new FidesTrayIcon(syncManager);
+			FidesTrayIcon trayIcon = new FidesTrayIcon(appHandler);
 			trayIcon.addToSystemTray();
 
 			// TODO: Start application

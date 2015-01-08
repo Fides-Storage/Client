@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +49,8 @@ public class LocalFileChecker extends Thread {
 
 	private Path basePath;
 
+	private final AtomicBoolean continueBoolean = new AtomicBoolean(true);
+
 	/**
 	 * Constructor for LocalFileChecker. Creates an extra thread to handle the events.
 	 * 
@@ -60,7 +63,7 @@ public class LocalFileChecker extends Thread {
 			@Override
 			public void run() {
 				try {
-					for (;;) {
+					while (continueBoolean.get()) {
 						EventPair pair = eventsQueue.take();
 						handleEvent(pair.kind, pair.child);
 					}
@@ -81,13 +84,13 @@ public class LocalFileChecker extends Thread {
 			log.error(e);
 			return;
 		}
-		for (;;) {
+		while (continueBoolean.get()) {
 			// wait for key to be signaled
 			WatchKey key;
 			try {
 				key = watcher.take();
 			} catch (InterruptedException e) {
-				log.error(e);
+				log.debug(e);
 				return;
 			}
 
@@ -107,6 +110,14 @@ public class LocalFileChecker extends Thread {
 			}
 		} // End for(;;) loop
 	} // End run
+
+	/**
+	 * Stop the watching and handling of local file changes. This does interrupt the watching thread
+	 */
+	public void stopHandling() {
+		continueBoolean.set(false);
+		this.interrupt();
+	}
 
 	/**
 	 * Handles the even in a {@link WatchKey}
@@ -234,12 +245,6 @@ public class LocalFileChecker extends Thread {
 				return FileVisitResult.CONTINUE;
 			}
 		});
-	}
-
-	@Override
-	public void interrupt() {
-		handleThread.interrupt();
-		super.interrupt();
 	}
 
 	/**

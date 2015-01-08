@@ -33,6 +33,10 @@ public class ApplicationHandler {
 		this.syncManager = syncManager;
 	}
 
+	public FileSyncManager getSyncManager() {
+		return syncManager;
+	}
+
 	/**
 	 * Exits the Fides application
 	 */
@@ -43,6 +47,9 @@ public class ApplicationHandler {
 
 	public void startApplication() {
 		if (!running) {
+			System.out.println("Start Application");
+			syncManager.reenable();
+
 			// File Changed Listener opstarten
 			fileChecker = new LocalFileChecker(syncManager);
 			fileChecker.start();
@@ -58,17 +65,23 @@ public class ApplicationHandler {
 
 	public void stopApplication() {
 		if (running) {
+			System.out.println("Stop Application");
 			try {
 				syncManager.waitForStop();
 			} catch (InterruptedException e) {
 				log.error("Interrupted Exception while trying to safely stop the FileSyncManager");
 			}
-			// TODO: File Changed Listener stoppen
+			// File Changed Listener stoppen
+			fileChecker.stopHandling();
+			fileChecker = null;
 
 			// Periodieke Checker stoppen
 			checkTimer.cancel();
 			checkTimer.purge();
 			fileCheckTask.cancel();
+
+			checkTimer = null;
+			fileCheckTask = null;
 		}
 		running = false;
 	}
