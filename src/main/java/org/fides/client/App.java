@@ -45,6 +45,7 @@ public class App {
 	 * Main
 	 * 
 	 * @param args
+	 *            The arguments passed on to the application
 	 */
 	public static void main(String[] args) {
 		ServerConnector serverConnector = new ServerConnector();

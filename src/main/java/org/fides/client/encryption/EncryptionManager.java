@@ -65,7 +65,6 @@ public class EncryptionManager {
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
 	 * 
 	 * @return The decrypted {@link KeyFile}
-	 * @throws IOException
 	 */
 	public KeyFile requestKeyFile() {
 		InputStream in = connector.requestKeyFile();
@@ -104,7 +103,6 @@ public class EncryptionManager {
 	 * 
 	 * @param keyFile
 	 *            The {@link KeyFile} to encrypt and send
-	 * @throws IOException
 	 */
 	public boolean updateKeyFile(final KeyFile keyFile) {
 		if (keyFile == null) {
@@ -171,8 +169,6 @@ public class EncryptionManager {
 	 * Encrypts a file and sends it to the {@link ServerConnector}
 	 * 
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
 	 */
 	public EncryptedOutputStreamData uploadFile() {
 		Key key = null;
@@ -216,9 +212,8 @@ public class EncryptionManager {
 		if (out == null) {
 			throw new NullPointerException();
 		}
-		OutputStream encryptedOut = EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
 
-		return encryptedOut;
+		return EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
 	}
 
 	/**

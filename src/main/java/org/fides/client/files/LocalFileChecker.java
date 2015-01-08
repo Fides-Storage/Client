@@ -46,12 +46,11 @@ public class LocalFileChecker extends Thread {
 
 	private WatchService watcher;
 
-	private Path basePath;
-
 	/**
 	 * Constructor for LocalFileChecker. Creates an extra thread to handle the events.
 	 * 
 	 * @param syncManager
+	 *            The FileSyncManager to use
 	 */
 	public LocalFileChecker(FileSyncManager syncManager) {
 		super("LocalFileChecker Thread");
@@ -171,8 +170,11 @@ public class LocalFileChecker extends Thread {
 				}
 				// It is still possible that is some way files are added before it being added, this will check the
 				// change directory
-				for (File subFile : child.toFile().listFiles()) {
-					checkSubPath(subFile.toPath());
+				File childFile = child.toFile();
+				if (childFile != null) {
+					for (File subFile : childFile.listFiles()) {
+						checkSubPath(subFile.toPath());
+					}
 				}
 			}
 		} else if (kind == ENTRY_DELETE) {
@@ -207,8 +209,11 @@ public class LocalFileChecker extends Thread {
 			} catch (IOException e) {
 				log.error(e);
 			}
-			for (File subFile : subPath.toFile().listFiles()) {
-				checkSubPath(subFile.toPath());
+			File subPathFile = subPath.toFile();
+			if (subPathFile != null) {
+				for (File subFile : subPathFile.listFiles()) {
+					checkSubPath(subFile.toPath());
+				}
 			}
 		}
 	}
@@ -220,7 +225,7 @@ public class LocalFileChecker extends Thread {
 	 */
 	private void setup() throws IOException {
 		// Create a watchter and watch the file directory
-		basePath = UserProperties.getInstance().getFileDirectory().toPath();
+		Path basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 		keys.put(key, basePath);

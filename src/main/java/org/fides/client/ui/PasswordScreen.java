@@ -106,7 +106,7 @@ public class PasswordScreen {
 
 					if (!StringUtils.isBlank(passwordString) && !StringUtils.isBlank(passwordConfirmString) && passwordString.equals(passwordConfirmString)) {
 						frame.dispose();
-						return new String(passwordString);
+						return passwordString;
 					} else {
 						messages.add(new UserMessage("Confirm password is incorrect", true));
 					}
@@ -115,7 +115,7 @@ public class PasswordScreen {
 
 					if (StringUtils.isNotBlank(passwordString)) {
 						frame.dispose();
-						return new String(passwordString);
+						return passwordString;
 					} else {
 						messages.add(new UserMessage("Please fill out a password", true));
 					}

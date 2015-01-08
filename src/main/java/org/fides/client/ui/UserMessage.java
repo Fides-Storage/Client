@@ -14,7 +14,9 @@ public class UserMessage {
 	 * Constructor for user message
 	 * 
 	 * @param message
+	 *            The message to set
 	 * @param error
+	 *            If the message is a error or not
 	 */
 	public UserMessage(String message, boolean error) {
 		this.message = message;

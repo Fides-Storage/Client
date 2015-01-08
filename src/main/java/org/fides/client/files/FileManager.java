@@ -143,7 +143,7 @@ public class FileManager {
 	 *
 	 * @param clientName
 	 *            The name of the local file
-	 * @param clientFileNames
+	 * @param serverFileNames
 	 *            The list with files on the client
 	 * @param keyFile
 	 *            The {@link KeyFile} with the server files
@@ -325,9 +325,9 @@ public class FileManager {
 	 *
 	 * @param files
 	 *            The file to turn to local space
-	 * @param directory
+	 * @param basedir
 	 *            The directory to relativize to
-	 * @return
+	 * @return A set of String with local filenames
 	 */
 	private static Set<String> filesToLocalNames(List<File> files, File basedir) {
 		Set<String> fileNames = new HashSet<>();
