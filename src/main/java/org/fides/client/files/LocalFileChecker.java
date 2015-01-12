@@ -168,20 +168,31 @@ public class LocalFileChecker extends Thread {
 					e.printStackTrace();
 					log.error(e);
 				}
-				// It is still possible that is some way files are added before it being added, this will check the
-				// change directory
-				File childFile = child.toFile();
-				if (childFile != null) {
-					for (File subFile : childFile.listFiles()) {
-						checkSubPath(subFile.toPath());
-					}
-				}
+				checkDirectory(child);
 			}
 		} else if (kind == ENTRY_DELETE) {
 			// Transform string to local space and remove
 			String localName = FileManager.fileToLocalName(child.toFile());
 			if (!StringUtils.isBlank(localName)) {
 				syncManager.checkClientSideFile(localName);
+			}
+		}
+	}
+
+	/**
+	 * Check the files in the directory.
+	 * 
+	 * @param child
+	 *            The folder to check
+	 */
+	private void checkDirectory(Path child) {
+		// It is still possible that is some way files are added before it being added, this will check the
+		// change directory
+		File subPathFile = child.toFile();
+		File[] fileList = subPathFile.listFiles();
+		if (fileList != null) {
+			for (File subFile : fileList) {
+				checkSubPath(subFile.toPath());
 			}
 		}
 	}
@@ -209,12 +220,7 @@ public class LocalFileChecker extends Thread {
 			} catch (IOException e) {
 				log.error(e);
 			}
-			File subPathFile = subPath.toFile();
-			if (subPathFile != null) {
-				for (File subFile : subPathFile.listFiles()) {
-					checkSubPath(subFile.toPath());
-				}
-			}
+			checkDirectory(subPath);
 		}
 	}
 
