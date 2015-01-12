@@ -20,7 +20,6 @@ import javax.swing.border.TitledBorder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.ApplicationHandler;
-import org.fides.client.files.FileSyncManager;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 
@@ -40,12 +39,13 @@ public class SettingsFrame extends JFrame {
 	/**
 	 * Constructor, creates and shows the settings window
 	 * 
-	 * @param syncManager
-	 *            The {@link FileSyncManager} to use
+	 * @param appHandler
+	 *            The {@link ApplicationHandler} to use
 	 */
 	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");
 		this.appHandler = appHandler;
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -56,15 +56,15 @@ public class SettingsFrame extends JFrame {
 		JPanel generalTabPanel = new JPanel();
 		tabbedPane.addTab("General", generalTabPanel);
 		generalTabPanel.setLayout(new BoxLayout(generalTabPanel, BoxLayout.PAGE_AXIS));
-		generalTabPanel.add(createBorder(new ChangeServerPanel(appHandler.getSyncManager().getEncManager().getConnector())));
-		generalTabPanel.add(createBorder(new CheckIntervalPanel()));
+		generalTabPanel.add(preparePanel(new ChangeServerPanel(appHandler.getSyncManager().getEncManager())));
+		generalTabPanel.add(preparePanel(new CheckIntervalPanel()));
 		generalTabPanel.add(Box.createVerticalGlue());
 
 		// Create the individual setting screens
 		JPanel userTabPanel = new JPanel();
 		tabbedPane.addTab("User", userTabPanel);
 		userTabPanel.setLayout(new BoxLayout(userTabPanel, BoxLayout.PAGE_AXIS));
-		userTabPanel.add(createBorder(new ChangePasswordPanel(appHandler.getSyncManager().getEncManager())));
+		userTabPanel.add(preparePanel(new ChangePasswordPanel(appHandler.getSyncManager().getEncManager())));
 		userTabPanel.add(Box.createVerticalGlue());
 
 		// Apply button
@@ -108,7 +108,15 @@ public class SettingsFrame extends JFrame {
 		setVisible(true);
 	}
 
-	private JPanel createBorder(SettingsJPanel settingsPanel) {
+	/**
+	 * Prepares a {@link SettingsJPanel} for usage. this adds a border to the panel and add its to the list for settings
+	 * to apply.
+	 * 
+	 * @param settingsPanel
+	 *            The panel to prepare
+	 * @return The prepared panel
+	 */
+	private JPanel preparePanel(SettingsJPanel settingsPanel) {
 		settingsPanels.add(settingsPanel);
 
 		Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);

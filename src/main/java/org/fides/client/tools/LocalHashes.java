@@ -96,6 +96,14 @@ public final class LocalHashes {
 	}
 
 	/**
+	 * Removes all hashes from the local hashes
+	 */
+	public void removeAllHashes() {
+		localHashes.clear();
+		saveHashes();
+	}
+
+	/**
 	 * Checks if a hash for a file exists
 	 * 
 	 * @param fileName

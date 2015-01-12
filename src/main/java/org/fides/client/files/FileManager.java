@@ -185,6 +185,7 @@ public class FileManager {
 		FileCompareResult result = null;
 		String fileHash = FileUtil.generateFileHash(new File(UserProperties.getInstance().getFileDirectory(), fileName));
 		String savedHash = LocalHashes.getInstance().getHash(fileName);
+		System.out.println(savedHash + " : " + keyFile.getClientFileByName(fileName).getHash());
 		boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
 		boolean localChanged = !savedHash.equals(fileHash);
 
