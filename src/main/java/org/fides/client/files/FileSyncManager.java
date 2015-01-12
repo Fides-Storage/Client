@@ -439,9 +439,7 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			CopyTool.copyUntil(in, out, stopBoolean);
 			successful = true;
-		} catch (IOException e) {
-			log.error(e);
-		} catch (InvalidClientFileException e) {
+		} catch (IOException | InvalidClientFileException e) {
 			log.error(e);
 		} catch (CopyInterruptedException e) {
 			log.debug(e);

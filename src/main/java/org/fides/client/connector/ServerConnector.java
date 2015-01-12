@@ -39,7 +39,7 @@ public class ServerConnector {
 	/**
 	 * Log for this class
 	 */
-	private static final Logger log = LogManager.getLogger(ServerConnector.class);
+	private static final Logger LOG = LogManager.getLogger(ServerConnector.class);
 
 	/**
 	 * The collection to store the error messages received from the server
@@ -172,7 +172,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				log.error("IOException connection failed: ", e);
+				LOG.error("IOException connection failed: ", e);
 				loggedIn = false;
 			}
 		}
@@ -211,7 +211,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				log.error("IOException connection failed: ", e);
+				LOG.error("IOException connection failed: ", e);
 			}
 		}
 		return false;
@@ -236,7 +236,7 @@ public class ServerConnector {
 			CommunicationUtil.requestAction(out, Actions.DISCONNECT);
 			out.flush();
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		} finally {
 			loggedIn = false;
 			errorMessages = new HashMap<>();
@@ -277,11 +277,11 @@ public class ServerConnector {
 				if (keyFileStream.read() == -1) {
 					return false;
 				} else {
-					log.debug("A KeyFile is available on the server");
+					LOG.debug("A KeyFile is available on the server");
 					return true;
 				}
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				IOUtils.closeQuietly(keyFileStream);
 			}
@@ -310,10 +310,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 
@@ -339,10 +339,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -371,10 +371,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -401,10 +401,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -433,10 +433,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -465,10 +465,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return false;
 	}
@@ -494,7 +494,7 @@ public class ServerConnector {
 				JsonObject response = new Gson().fromJson(message, JsonObject.class);
 				if (response.has(Responses.SUCCESSFUL)) {
 					if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
-						log.debug("Upload was successful");
+						LOG.debug("Upload was successful");
 						return true;
 					} else {
 						errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
@@ -502,9 +502,9 @@ public class ServerConnector {
 				}
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
-		log.debug("The last upload was not successful");
+		LOG.debug("The last upload was not successful");
 		return false;
 	}
 }

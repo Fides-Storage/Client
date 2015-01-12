@@ -17,10 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fides.client.ApplicationHandler;
-import org.fides.client.files.FileSyncManager;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 

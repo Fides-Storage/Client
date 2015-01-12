@@ -34,9 +34,7 @@ public final class CertificateUtil {
 			certificate.checkValidity();
 			// The rest of the checks are done by SSLSocket, if failed the socket is closed
 			return true;
-		} catch (CertificateExpiredException e) {
-			log.error(e);
-		} catch (CertificateNotYetValidException e) {
+		} catch (CertificateExpiredException | CertificateNotYetValidException e) {
 			log.error(e);
 		}
 

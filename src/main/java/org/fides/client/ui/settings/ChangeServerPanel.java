@@ -65,7 +65,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 			return null;
 		}
 
-		ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
+		ArrayList<UserMessage> errorMessages = new ArrayList<>();
 
 		InetSocketAddress serverAddress;
 
