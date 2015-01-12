@@ -44,9 +44,11 @@ public class KeyGeneratorTest {
 
 	/**
 	 * Test the generation of a randomly generated Key
+	 * 
+	 * @throws InvalidKeySpecException
 	 */
 	@Test
-	public void generateRandomKey() {
+	public void generateRandomKey() throws InvalidKeySpecException {
 
 		byte[] generatedHash = new byte[0];
 		try {
