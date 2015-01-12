@@ -318,7 +318,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
+	 * Changes a {@link List} of {@link File} to a {@link List} of relative {@link String}. The strings are paths relative to
 	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
 	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
 	 * different PCs
@@ -340,7 +340,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a file to a local file name
+	 * Changes a file to a local file name
 	 *
 	 * @param file
 	 *            The file to turn to local space
@@ -352,7 +352,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a file to a local file name
+	 * Changes a file to a local file name
 	 *
 	 * @param file
 	 *            The file to turn to local space

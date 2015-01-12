@@ -17,8 +17,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fides.client.ApplicationHandler;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -27,12 +25,6 @@ import org.fides.client.ui.UserMessage;
  * A frame containing the settings of the program
  */
 public class SettingsFrame extends JFrame {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(SettingsFrame.class);
-
-	private final ApplicationHandler appHandler;
 
 	private final List<SettingsJPanel> settingsPanels = new ArrayList<>();
 
@@ -40,11 +32,11 @@ public class SettingsFrame extends JFrame {
 	 * Constructor, creates and shows the settings window
 	 * 
 	 * @param appHandler
-	 *            The {@link ApplicationHandler} to use
+	 *            The {@link ApplicationHandler} which is responsible for starting up and killing the application's
+	 *            threads
 	 */
 	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");
-		this.appHandler = appHandler;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JTabbedPane tabbedPane = new JTabbedPane();
@@ -119,8 +111,8 @@ public class SettingsFrame extends JFrame {
 	private JPanel preparePanel(SettingsJPanel settingsPanel) {
 		settingsPanels.add(settingsPanel);
 
-		Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
-		TitledBorder tileBorder = BorderFactory.createTitledBorder(loweredetched, settingsPanel.getName());
+		Border etchedBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+		TitledBorder tileBorder = BorderFactory.createTitledBorder(etchedBorder, settingsPanel.getName());
 
 		JPanel container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));

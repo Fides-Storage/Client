@@ -34,7 +34,7 @@ public class FileSyncManager {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileSyncManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileSyncManager.class);
 
 	private final FileManager fileManager;
 
@@ -72,11 +72,11 @@ public class FileSyncManager {
 			busyBoolean.set(true);
 		}
 		try {
-			boolean successful = false;
+			boolean successful;
 			try {
 				encManager.getConnector().connect();
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 				return false;
 			}
 			KeyFile keyFile;
@@ -129,7 +129,7 @@ public class FileSyncManager {
 				encManager.getConnector().connect();
 				keyFile = encManager.requestKeyFile();
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 
 			if (keyFile == null || stopBoolean.get()) {
@@ -138,7 +138,7 @@ public class FileSyncManager {
 			}
 
 			FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
-			log.debug(result);
+			LOG.debug(result);
 			if (result != null && !stopBoolean.get()) {
 				successful = handleCompareResult(result, keyFile);
 			}
@@ -170,7 +170,7 @@ public class FileSyncManager {
 	}
 
 	/**
-	 * Resets all locks on the FileSyncManager, reenabling it for normal use.
+	 * Resets all locks on the FileSyncManager, re-enabling it for normal use.
 	 */
 	public void reenable() {
 		synchronized (stopLock) {
@@ -225,7 +225,7 @@ public class FileSyncManager {
 			successful = handleConflict(result.getName());
 			break;
 		default:
-			log.error("Invalid CompareResult");
+			LOG.error("Invalid CompareResult");
 			break;
 		}
 		return successful;
@@ -255,7 +255,7 @@ public class FileSyncManager {
 			InputStream in = fileManager.readFile(fileName);
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest);
 
-			if (in == null || out == null) {
+			if (in == null) {
 				return false;
 			}
 
@@ -265,9 +265,9 @@ public class FileSyncManager {
 				out.flush();
 				successful = true;
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			} catch (CopyInterruptedException e) {
-				log.debug(e);
+				LOG.debug(e);
 			} finally {
 				IOUtils.closeQuietly(in);
 				IOUtils.closeQuietly(out);
@@ -325,7 +325,7 @@ public class FileSyncManager {
 				}
 			}
 		} catch (InvalidClientFileException e) {
-			log.debug(e);
+			LOG.debug(e);
 		}
 		return successful;
 	}
@@ -339,14 +339,14 @@ public class FileSyncManager {
 	 */
 	private boolean handleLocalUpdated(final String fileName, final KeyFile keyFile) {
 		if (keyFile == null) {
-			log.debug("Keyfile was null while trying to handle a local updated file.");
+			LOG.debug("Keyfile was null while trying to handle a local updated file.");
 			return false;
 		}
 
 		boolean successful = false;
 
 		// Get a stream to write to
-		OutputStream outEnc = null;
+		OutputStream outEnc;
 		InputStream in = null;
 		OutputStream out = null;
 
@@ -368,13 +368,13 @@ public class FileSyncManager {
 				successful = true;
 			}
 		} catch (InvalidClientFileException e) {
-			log.error(e);
+			LOG.error(e);
 			return false;
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 			successful = false;
 		} catch (CopyInterruptedException e) {
-			log.debug(e);
+			LOG.debug(e);
 			successful = false;
 		} finally {
 			IOUtils.closeQuietly(in);
@@ -421,7 +421,7 @@ public class FileSyncManager {
 		// Create a message digest for creating a file hash/checksum
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
-		// Get the right outputstream for update or creation
+		// Get the right OutputStream for update or creation
 		OutputStream outFile;
 		try {
 			if (update) {
@@ -430,7 +430,7 @@ public class FileSyncManager {
 				outFile = fileManager.addFile(fileName);
 			}
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 			return false;
 		}
 		boolean successful = false;
@@ -439,12 +439,10 @@ public class FileSyncManager {
 			OutputStream out = new DigestOutputStream(outFile, messageDigest)) {
 			CopyTool.copyUntil(in, out, stopBoolean);
 			successful = true;
-		} catch (IOException e) {
-			log.error(e);
-		} catch (InvalidClientFileException e) {
-			log.error(e);
+		} catch (IOException | InvalidClientFileException e) {
+			LOG.error(e);
 		} catch (CopyInterruptedException e) {
-			log.debug(e);
+			LOG.debug(e);
 		} finally {
 			IOUtils.closeQuietly(outFile);
 		}

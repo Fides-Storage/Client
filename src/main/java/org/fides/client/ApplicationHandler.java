@@ -13,13 +13,16 @@ import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.LocalFileChecker;
 import org.fides.client.tools.UserProperties;
 
+/**
+ * The class responsible for running and stopping all threads in the application.
+ */
 public class ApplicationHandler {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileSyncManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileSyncManager.class);
 
-	private FileSyncManager syncManager;
+	private final FileSyncManager syncManager;
 
 	private Timer checkTimer;
 
@@ -29,6 +32,12 @@ public class ApplicationHandler {
 
 	private FileCheckTask fileCheckTask;
 
+	/**
+	 * The constructor for the {@link ApplicationHandler}
+	 * 
+	 * @param syncManager
+	 *            The {@link FileSyncManager} used by the application
+	 */
 	public ApplicationHandler(FileSyncManager syncManager) {
 		this.syncManager = syncManager;
 	}
@@ -45,16 +54,19 @@ public class ApplicationHandler {
 		System.exit(0);
 	}
 
+	/**
+	 * Starts the {@link LocalFileChecker} thread and the {@link FileCheckTask} thread.
+	 */
 	public void startApplication() {
 		if (!running) {
-			System.out.println("Start Application");
+			LOG.debug("Starting the application");
 			syncManager.reenable();
 
-			// File Changed Listener opstarten
+			// Starting the File Changed Listener
 			fileChecker = new LocalFileChecker(syncManager);
 			fileChecker.start();
 
-			// Periodieke Checker opstarten
+			// Starting the Periodical Checker
 			fileCheckTask = new FileCheckTask(syncManager);
 			checkTimer = new Timer("CheckTimer");
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
@@ -63,19 +75,22 @@ public class ApplicationHandler {
 		running = true;
 	}
 
+	/**
+	 * Stops the {@link LocalFileChecker} thread and the {@link FileCheckTask} thread.
+	 */
 	public void stopApplication() {
 		if (running) {
-			System.out.println("Stop Application");
+			LOG.debug("Stopping the application");
 			try {
 				syncManager.waitForStop();
 			} catch (InterruptedException e) {
-				log.error("Interrupted Exception while trying to safely stop the FileSyncManager");
+				LOG.error("Interrupted Exception while trying to safely stop the FileSyncManager");
 			}
-			// File Changed Listener stoppen
+			// Stopping the File Changed Listener
 			fileChecker.stopHandling();
 			fileChecker = null;
 
-			// Periodieke Checker stoppen
+			// Stopping the Periodical Checker
 			checkTimer.cancel();
 			checkTimer.purge();
 			fileCheckTask.cancel();
@@ -94,7 +109,7 @@ public class ApplicationHandler {
 			try {
 				Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
 			} catch (IOException e) {
-				log.error("Couldn't open the folder");
+				LOG.error("Couldn't open the folder");
 			}
 		}
 	}

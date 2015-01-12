@@ -20,7 +20,7 @@ public class CopyToolTest {
 
 	private AtomicBoolean stopBoolean;
 
-	private AtomicBoolean emergencyBreakBoolean = new AtomicBoolean(false);
+	private final AtomicBoolean emergencyBreakBoolean = new AtomicBoolean(false);
 
 	/**
 	 * Sets up the test by resetting the stopBoolean.

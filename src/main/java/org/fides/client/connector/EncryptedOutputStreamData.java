@@ -9,7 +9,7 @@ import java.security.Key;
  */
 public class EncryptedOutputStreamData extends OutputStreamData {
 
-	private Key key;
+	private final Key key;
 
 	/**
 	 * Constructor for EncryptedOutputStreamData

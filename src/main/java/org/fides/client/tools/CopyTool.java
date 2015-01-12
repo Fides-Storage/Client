@@ -36,7 +36,7 @@ public class CopyTool {
 	public static long copyUntil(InputStream input, OutputStream output, AtomicBoolean stopBoolean) throws IOException, CopyInterruptedException {
 		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 		long count = 0;
-		int n = 0;
+		int n;
 		while (EOF != (n = input.read(buffer)) && !stopBoolean.get()) {
 			output.write(buffer, 0, n);
 			count += n;

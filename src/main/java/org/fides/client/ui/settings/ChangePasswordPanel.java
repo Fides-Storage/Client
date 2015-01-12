@@ -24,24 +24,24 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(ChangePasswordPanel.class);
+	private static final Logger LOG = LogManager.getLogger(ChangePasswordPanel.class);
 
 	private EncryptionManager encryptionManager = null;
 
 	private String newValidatedPassword = null;
 
-	private JPasswordField passOld = new JPasswordField(10);
+	private final JPasswordField passOld = new JPasswordField(10);
 
-	private JPasswordField passNew1 = new JPasswordField(10);
+	private final JPasswordField passNew1 = new JPasswordField(10);
 
-	private JPasswordField passNew2 = new JPasswordField(10);
+	private final JPasswordField passNew2 = new JPasswordField(10);
 
 	/**
 	 * Constructor for ChangePasswordScreen, this screen extends a JPanel and can be used to show a password change
 	 * screen.
 	 * 
 	 * @param encryptionManager
-	 *            the encryptionmanager that is used for requesting and updating keyfiles
+	 *            the EncryptionManager that is used for requesting and updating KeyFiles
 	 */
 	public ChangePasswordPanel(EncryptionManager encryptionManager) {
 		super("Change password");
@@ -83,12 +83,12 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				// check if key file can be decrypted with the old password
 				keyFile = encryptionManager.requestKeyFile(HashUtils.hash(oldPassword));
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				encryptionManager.getConnector().disconnect();
 			}
 
-			// Decryption of keyfile failed, add errormessage.
+			// Decryption of keyfile failed, add error message.
 			if (keyFile == null) {
 				messages.add(new UserMessage("Old password is incorrect", true));
 			}
@@ -107,10 +107,10 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	}
 
 	/**
-	 * Apply the passwordchange. This will (1) request the keyfile, (2) change the password in the encryptionmanager and
+	 * Apply the password change. This will (1) request the keyfile, (2) change the password in the EncryptionManager and
 	 * (3) upload the keyfile
 	 * 
-	 * @return whether the passwordchange was successful or not
+	 * @return whether the password change was successful or not
 	 */
 	@Override
 	public ArrayList<UserMessage> applySettings() {
@@ -133,7 +133,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				encryptionManager.getConnector().connect();
 				keyFile = encryptionManager.requestKeyFile();
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 
 			// Change the password in the EncryptionManager
