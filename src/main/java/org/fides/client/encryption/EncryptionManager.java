@@ -179,10 +179,6 @@ public class EncryptionManager {
 			// Should not happen
 			LOG.error(e);
 			return null;
-		} catch (InvalidKeySpecException e) {
-			// Should not happen, we close if it does
-			LOG.error(e);
-			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
