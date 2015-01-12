@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,13 +76,12 @@ public class EncryptionManager {
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
 	 * 
-	 * @param password
+	 * @param decryptionPassword
 	 *            for the decryption of the keyfile
 	 * 
 	 * @return The decrypted {@link KeyFile}
-	 * @throws IOException
 	 */
-	public KeyFile requestKeyFile(String password) {
+	public KeyFile requestKeyFile(String decryptionPassword) {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			log.error("Server connector does not give an InputStream for a keyfile");
@@ -99,7 +97,7 @@ public class EncryptionManager {
 			int pbkdf2Rounds = din.readInt();
 			din.read(saltBytes, 0, SALT_SIZE);
 
-			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
+			Key key = KeyGenerator.generateKey(decryptionPassword, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
 			inDecrypted = new ObjectInputStream(EncryptionUtils.getDecryptionStream(din, key));
 			KeyFile keyFile;
@@ -187,10 +185,10 @@ public class EncryptionManager {
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 */
 	public EncryptedOutputStreamData uploadFile() {
-		Key key = null;
+		Key key;
 		try {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
 			log.error(e);
 			return null;
