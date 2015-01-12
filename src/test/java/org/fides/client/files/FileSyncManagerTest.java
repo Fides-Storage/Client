@@ -187,12 +187,4 @@ public class FileSyncManagerTest {
 		assertEquals("This is the updated file", new String(outUpdate.toByteArray()));
 	}
 
-	/**
-	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#CONFLICTED}
-	 */
-	@Test
-	public void testHandleConflict() {
-		// TODO: implement when needed
-	}
-
 }
