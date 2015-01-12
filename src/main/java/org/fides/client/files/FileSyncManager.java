@@ -130,7 +130,7 @@ public class FileSyncManager {
 	 *            The local space name of the file
 	 * @return true if valid, else false
 	 */
-	protected boolean validClientSideFile(String fileName) {
+	private boolean validClientSideFile(String fileName) {
 		File file = new File(UserProperties.getInstance().getFileDirectory(), fileName);
 		return (file.exists() && file.isFile()) || LocalHashes.getInstance().containsHash(fileName);
 	}

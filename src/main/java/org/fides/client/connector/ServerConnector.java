@@ -183,7 +183,7 @@ public class ServerConnector {
 		return loggedIn;
 	}
 
-	public boolean isLoggedIn() {
+	private boolean isLoggedIn() {
 		return loggedIn;
 	}
 

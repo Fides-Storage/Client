@@ -32,7 +32,7 @@ import org.fides.encryption.KeyGenerator;
  */
 public class EncryptionManager {
 	/** Size of the salt used in generating the master key, it should NEVER change */
-	public static final int SALT_SIZE = 16; // 128 bit
+	private static final int SALT_SIZE = 16; // 128 bit
 
 	/**
 	 * Log for this class
