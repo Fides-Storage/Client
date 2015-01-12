@@ -222,7 +222,7 @@ public class AuthenticateUser {
 
 	private static ArrayList<UserMessage> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
 
-		ArrayList<UserMessage> messages = new ArrayList<UserMessage>();
+		ArrayList<UserMessage> messages = new ArrayList<>();
 
 		// Check for empty username
 		if (StringUtils.isBlank(usernameString)) {

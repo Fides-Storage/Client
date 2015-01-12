@@ -69,7 +69,6 @@ public class EncryptionManager {
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
 	 * 
 	 * @return The decrypted {@link KeyFile}
-	 * @throws IOException
 	 */
 	public KeyFile requestKeyFile() {
 		return requestKeyFile(password);
@@ -225,6 +224,7 @@ public class EncryptionManager {
 		if (out == null) {
 			return null;
 		}
+
 		return EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
 	}
 

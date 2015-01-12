@@ -29,7 +29,7 @@ import org.fides.client.tools.UserProperties;
 
 /**
  * Checks the local file system for changes
- *
+ * 
  */
 public class LocalFileChecker extends Thread {
 	/**
@@ -47,14 +47,13 @@ public class LocalFileChecker extends Thread {
 
 	private WatchService watcher;
 
-	private Path basePath;
-
 	private final AtomicBoolean continueBoolean = new AtomicBoolean(true);
 
 	/**
 	 * Constructor for LocalFileChecker. Creates an extra thread to handle the events.
 	 * 
 	 * @param syncManager
+	 *            The FileSyncManager to use
 	 */
 	public LocalFileChecker(FileSyncManager syncManager) {
 		super("LocalFileChecker Thread");
@@ -147,9 +146,9 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * Handles a {@link WatchEvent}
 	 * 
-	 * @param event
-	 *            The event to handle
-	 * @param dir
+	 * @param kind
+	 *            The ind of event to handle
+	 * @param child
 	 *            The location of the event
 	 */
 	private void handleEvent(WatchEvent.Kind<?> kind, Path child) {
@@ -180,17 +179,31 @@ public class LocalFileChecker extends Thread {
 					e.printStackTrace();
 					log.error(e);
 				}
-				// It is still possible that is some way files are added before it being added, this will check the
-				// change directory
-				for (File subFile : child.toFile().listFiles()) {
-					checkSubPath(subFile.toPath());
-				}
+				checkDirectory(child);
 			}
 		} else if (kind == ENTRY_DELETE) {
 			// Transform string to local space and remove
 			String localName = FileManager.fileToLocalName(child.toFile());
 			if (!StringUtils.isBlank(localName)) {
 				syncManager.checkClientSideFile(localName);
+			}
+		}
+	}
+
+	/**
+	 * Check the files in the directory.
+	 * 
+	 * @param child
+	 *            The folder to check
+	 */
+	private void checkDirectory(Path child) {
+		// It is still possible that is some way files are added before it being added, this will check the
+		// change directory
+		File subPathFile = child.toFile();
+		File[] fileList = subPathFile.listFiles();
+		if (fileList != null) {
+			for (File subFile : fileList) {
+				checkSubPath(subFile.toPath());
 			}
 		}
 	}
@@ -218,9 +231,7 @@ public class LocalFileChecker extends Thread {
 			} catch (IOException e) {
 				log.error(e);
 			}
-			for (File subFile : subPath.toFile().listFiles()) {
-				checkSubPath(subFile.toPath());
-			}
+			checkDirectory(subPath);
 		}
 	}
 
@@ -231,7 +242,7 @@ public class LocalFileChecker extends Thread {
 	 */
 	private void setup() throws IOException {
 		// Create a watchter and watch the file directory
-		basePath = UserProperties.getInstance().getFileDirectory().toPath();
+		Path basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 		keys.put(key, basePath);

@@ -89,7 +89,7 @@ public class ServerAddressScreen {
 		while (option == 0) {
 			option = JOptionPane.showOptionDialog(frame, mainPanel, "Choose Fides Server", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
-			ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
+			ArrayList<UserMessage> errorMessages = new ArrayList<>();
 			// Check for empty hostname
 			if (StringUtils.isBlank(hostName.getText())) {
 				errorMessages.add(new UserMessage("Hostname can not be blank", true));

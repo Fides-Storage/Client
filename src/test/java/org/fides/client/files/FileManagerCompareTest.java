@@ -39,8 +39,6 @@ public class FileManagerCompareTest {
 
 	private UserProperties settingsMock;
 
-	private LocalHashes localHashesMock;
-
 	private KeyFile keyFile;
 
 	private Properties localHashes;
@@ -72,7 +70,7 @@ public class FileManagerCompareTest {
 		Mockito.when(UserProperties.getInstance()).thenReturn(settingsMock);
 
 		// Mock the LocalHashes so it uses our own hashes
-		localHashesMock = mock(LocalHashes.class);
+		LocalHashes localHashesMock = mock(LocalHashes.class);
 		PowerMockito.mockStatic(LocalHashes.class);
 		Mockito.when(LocalHashes.getInstance()).thenReturn(localHashesMock);
 		when(localHashesMock.containsHash(Matchers.anyString())).then(new Answer<Boolean>() {

@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,6 +38,12 @@ public class PasswordScreen {
 		// Create a Panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+		// Create panel with advice for password creation of the user file
+		JEditorPane passwordInfo = new JEditorPane("text/html", readablePasswordInfo());
+		passwordInfo.setVisible(confirmPassword);
+		passwordInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel.add(passwordInfo);
 
 		// Add a panel where errors can be shown later
 		JPanel messagePanel = new JPanel();
@@ -84,7 +91,7 @@ public class PasswordScreen {
 		int option = 0;
 
 		while (option == 0) {
-			option = JOptionPane.showOptionDialog(frame, panel, "Enter password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+			option = JOptionPane.showOptionDialog(frame, panel, "Enter password for user file", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
 			messages.clear();
 
@@ -99,7 +106,7 @@ public class PasswordScreen {
 
 					if (!StringUtils.isBlank(passwordString) && !StringUtils.isBlank(passwordConfirmString) && passwordString.equals(passwordConfirmString)) {
 						frame.dispose();
-						return new String(passwordString);
+						return passwordString;
 					} else {
 						messages.add(new UserMessage("Confirm password is incorrect", true));
 					}
@@ -108,7 +115,7 @@ public class PasswordScreen {
 
 					if (StringUtils.isNotBlank(passwordString)) {
 						frame.dispose();
-						return new String(passwordString);
+						return passwordString;
 					} else {
 						messages.add(new UserMessage("Please fill out a password", true));
 					}
@@ -121,5 +128,34 @@ public class PasswordScreen {
 
 		frame.dispose();
 		return null;
+	}
+
+	/**
+	 * Creates text containing advice about the user file password
+	 * 
+	 * @return the build String
+	 */
+	private static String readablePasswordInfo() {
+		StringBuilder builder = new StringBuilder();
+
+		// Title
+		builder.append("<h2>Password for user file<br></h2>");
+
+		// Info why this password is used
+		builder.append("The user file contains all the encryption keys for each file.<br>");
+
+		// Advice for strong password
+		builder.append("We advice the following: ");
+		builder.append("<ul>");
+		builder.append("<li>Use at least 8 characters</li>");
+		builder.append("<li>Use lower case characters (i.e. a-z)</li>");
+		builder.append("<li>Use upper case characters (i.e. A-Z)</li>");
+		builder.append("<li>Use numbers (i.e. 0-9)</li>");
+		builder.append("<li>Use special characters (e.g. !@#$%^&*()_-)</li>");
+		builder.append("<li>Do not use (parts of) words used in a dictionary</li>");
+		builder.append("<li>Do not use the same password as your login password</li>");
+		builder.append("</ul>");
+
+		return builder.toString();
 	}
 }
