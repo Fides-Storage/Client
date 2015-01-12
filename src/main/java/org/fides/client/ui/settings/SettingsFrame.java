@@ -28,12 +28,6 @@ import org.fides.client.ui.UserMessage;
  * A frame containing the settings of the program
  */
 public class SettingsFrame extends JFrame {
-	/**
-	 * Log for this class
-	 */
-	private static Logger log = LogManager.getLogger(SettingsFrame.class);
-
-	private final ApplicationHandler appHandler;
 
 	private final List<SettingsJPanel> settingsPanels = new ArrayList<>();
 
@@ -45,7 +39,6 @@ public class SettingsFrame extends JFrame {
 	 */
 	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");
-		this.appHandler = appHandler;
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 
