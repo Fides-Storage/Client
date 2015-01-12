@@ -8,7 +8,7 @@ import java.util.TimerTask;
  */
 public class FileCheckTask extends TimerTask {
 
-	private FileSyncManager syncManager;
+	private final FileSyncManager syncManager;
 
 	/**
 	 * Constructor for FileCheckTask

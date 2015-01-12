@@ -44,7 +44,7 @@ public class EncryptionManager {
 	private final String password;
 
 	/**
-	 * Constructor for EncryptionManager. Adds an encryption library to ensure these encryptions are supported.
+	 * Constructor for EncryptionManager. Adds an encryption library to ensure these encryption methods are supported.
 	 * 
 	 * @param connector
 	 *            The {@link ServerConnector} to use
@@ -67,9 +67,10 @@ public class EncryptionManager {
 	 * @return The decrypted {@link KeyFile}
 	 */
 	public KeyFile requestKeyFile() {
+		KeyFile keyFile = null;
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			LOG.error("Server connector does not give an InputStream for a keyfile");
+			LOG.error("Server connector does not give an InputStream for a KeyFile");
 			return null;
 		}
 
@@ -80,14 +81,12 @@ public class EncryptionManager {
 
 			byte[] saltBytes = new byte[SALT_SIZE];
 			int pbkdf2Rounds = din.readInt();
-			din.read(saltBytes, 0, SALT_SIZE);
+			if (din.read(saltBytes, 0, SALT_SIZE) == SALT_SIZE) {
+				Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
 
-			Key key = KeyGenerator.generateKey(password, saltBytes, pbkdf2Rounds, EncryptionUtils.KEY_SIZE);
-
-			inDecrypted = new ObjectInputStream(EncryptionUtils.getDecryptionStream(din, key));
-			KeyFile keyFile;
-			keyFile = (KeyFile) inDecrypted.readObject();
-			return keyFile;
+				inDecrypted = new ObjectInputStream(EncryptionUtils.getDecryptionStream(din, key));
+				keyFile = (KeyFile) inDecrypted.readObject();
+			}
 		} catch (IOException | ClassNotFoundException e) {
 			LOG.error(e);
 			return null;
@@ -96,6 +95,7 @@ public class EncryptionManager {
 			IOUtils.closeQuietly(din);
 			IOUtils.closeQuietly(in);
 		}
+		return keyFile;
 	}
 
 	/**
@@ -103,6 +103,7 @@ public class EncryptionManager {
 	 * 
 	 * @param keyFile
 	 *            The {@link KeyFile} to encrypt and send
+	 * @return was the updateKeyFile successful
 	 */
 	public boolean updateKeyFile(final KeyFile keyFile) {
 		if (keyFile == null) {
@@ -111,7 +112,7 @@ public class EncryptionManager {
 
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			LOG.error("ServerConnector does not profide an OutputStream for updating keyfile");
+			LOG.error("ServerConnector does not provide an OutputStream for updating KeyFile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
@@ -171,7 +172,7 @@ public class EncryptionManager {
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
 	 */
 	public EncryptedOutputStreamData uploadFile() {
-		Key key = null;
+		Key key;
 		try {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {

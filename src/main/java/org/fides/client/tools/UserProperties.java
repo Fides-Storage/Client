@@ -28,7 +28,7 @@ public final class UserProperties {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(UserProperties.class);
+	private static final Logger LOG = LogManager.getLogger(UserProperties.class);
 
 	/**
 	 * The default directory to store files
@@ -88,7 +88,7 @@ public final class UserProperties {
 	/**
 	 * The properties used for storing the settings
 	 */
-	private Properties properties;
+	private final Properties properties;
 
 	/**
 	 * Constructor, reads the {@link UserProperties}
@@ -98,7 +98,7 @@ public final class UserProperties {
 
 		if (!SETTINGS_DIRECTORY.exists()) {
 			if (!SETTINGS_DIRECTORY.mkdirs()) {
-				log.error("Could not create settings directory");
+				LOG.error("Could not create settings directory");
 				ErrorMessageScreen.showErrorMessage("Could not create settings directory.", "Make sure you have the rights to create files.");
 				System.exit(1);
 			}
@@ -110,7 +110,7 @@ public final class UserProperties {
 				properties.load(new FileInputStream(file));
 			}
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 
 		createFileDirectory();
@@ -132,7 +132,7 @@ public final class UserProperties {
 		File fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
 			if (!fileDirectory.mkdirs()) {
-				log.error("File directory can not be created");
+				LOG.error("File directory can not be created");
 				ErrorMessageScreen.showErrorMessage("File directory can not be created.", "Make sure you have the rights to create files");
 				System.exit(1);
 			}
@@ -248,12 +248,12 @@ public final class UserProperties {
 	/**
 	 * Sets the check time
 	 * 
-	 * @param secondes
+	 * @param seconds
 	 *            between checks
 	 */
-	private void setCheckTimeInSeconds(int secondes) {
-		if (secondes >= 1) {
-			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
+	private void setCheckTimeInSeconds(int seconds) {
+		if (seconds >= 1) {
+			properties.setProperty(CHECK_TIME_KEY, Integer.toString(seconds));
 			saveProperties();
 		}
 	}
@@ -271,7 +271,7 @@ public final class UserProperties {
 		}
 
 		/**
-		 * Failback to 5 min if not set or incorrect
+		 * Fallback to 5 min if not set or incorrect
 		 */
 		if (parsedCheckTime <= 0) {
 			parsedCheckTime = 300;
@@ -289,7 +289,7 @@ public final class UserProperties {
 		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY, USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 	}
 

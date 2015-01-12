@@ -15,7 +15,7 @@ public class EncryptedOutputStreamData extends OutputStreamData {
 	 * Constructor for EncryptedOutputStreamData
 	 * 
 	 * @param outputStream
-	 *            The encrypted outputstream writing to the server location
+	 *            The encrypted OutputStream writing to the server location
 	 * @param location
 	 *            The location on the server
 	 * @param key

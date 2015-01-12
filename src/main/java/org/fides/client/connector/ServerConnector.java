@@ -39,7 +39,7 @@ public class ServerConnector {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(ServerConnector.class);
+	private static final Logger log = LogManager.getLogger(ServerConnector.class);
 
 	/**
 	 * The collection to store the error messages received from the server
@@ -52,12 +52,12 @@ public class ServerConnector {
 	private SSLSocket sslsocket;
 
 	/**
-	 * The retreived server certificates
+	 * The retrieved server certificates
 	 */
 	private Certificate[] serverCertificates;
 
 	/**
-	 * The data ouput stream to the server
+	 * The data output stream to the server
 	 */
 	private DataOutputStream out;
 
@@ -87,7 +87,7 @@ public class ServerConnector {
 	 * 
 	 * @param address
 	 *            The {@link InetSocketAddress} with the server's address
-	 * @return true if the connection was successfull
+	 * @return true if the connection was successful
 	 */
 	public boolean init(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
@@ -103,9 +103,7 @@ public class ServerConnector {
 			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
-		} catch (ConnectException e) {
-			throw e;
-		} catch (UnknownHostException e) {
+		} catch (ConnectException | UnknownHostException e) {
 			throw e;
 		} catch (IOException e) {
 			throw new ConnectException(e.getLocalizedMessage());
@@ -130,9 +128,7 @@ public class ServerConnector {
 
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
-		} catch (ConnectException e) {
-			throw e;
-		} catch (UnknownHostException e) {
+		} catch (ConnectException | UnknownHostException e) {
 			throw e;
 		} catch (IOException e) {
 			throw new ConnectException(e.getLocalizedMessage());
@@ -281,7 +277,7 @@ public class ServerConnector {
 				if (keyFileStream.read() == -1) {
 					return false;
 				} else {
-					log.debug("A keyfile is available on the server");
+					log.debug("A KeyFile is available on the server");
 					return true;
 				}
 			} catch (IOException e) {
@@ -295,9 +291,9 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Requests a keyfile from the server
+	 * Requests a KeyFile from the server
 	 * 
-	 * @return An inputstream with the keyfile. If something went wrong, this will be <code>null</code>
+	 * @return An InputStream with the KeyFile. If something went wrong, this will be <code>null</code>
 	 */
 	public InputStream requestKeyFile() {
 		try {
@@ -324,9 +320,9 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Requests a stream from the server for updating the keyfile
+	 * Requests a stream from the server for updating the KeyFile
 	 * 
-	 * @return An outputstream to write the keyfile to. If something went wrong, this will be <code>null</code>
+	 * @return An OutputStream to write the KeyFile to. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStream updateKeyFile() {
 		try {
@@ -356,7 +352,7 @@ public class ServerConnector {
 	 * 
 	 * @param location
 	 *            The location of the requested file
-	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
+	 * @return An InputStream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
 		try {
@@ -386,7 +382,7 @@ public class ServerConnector {
 	/**
 	 * Requests a stream from the server for uploading a file
 	 * 
-	 * @return An outputdatastream containing a stream to write the file to and the location of the new file on the
+	 * @return An OutputStreamData containing a stream to write the file to and the location of the new file on the
 	 *         server. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStreamData uploadFile() {
@@ -418,7 +414,7 @@ public class ServerConnector {
 	 * 
 	 * @param location
 	 *            The location of the file you want to update
-	 * @return An outputstream to write the file to. If something went wrong, this will be <code>null</code>
+	 * @return An OutputStream to write the file to. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStream updateFile(String location) {
 		try {
@@ -480,7 +476,7 @@ public class ServerConnector {
 	/**
 	 * After an upload or update this function has to be called to check if the action was successful
 	 * 
-	 * @return true if the last upload or update was successful, othwise false
+	 * @return true if the last upload or update was successful, otherwise false
 	 */
 	public boolean checkUploadSuccessful() {
 		try {

@@ -57,16 +57,16 @@ public class PasswordScreen {
 		JLabel passwordLabel = new JLabel("Password:");
 		panel.add(passwordLabel);
 
-		// Add a passwordfield to the panel with a coloumn with of 10
+		// Add a JPasswordField to the panel with a column with of 10
 		JPasswordField pass = new JPasswordField(10);
 		panel.add(pass);
 
 		// Add a label to the panel
-		JLabel passwordConfrimlabel = new JLabel("Confirm password:");
-		passwordConfrimlabel.setVisible(confirmPassword);
-		panel.add(passwordConfrimlabel);
+		JLabel passwordConfirmLabel = new JLabel("Confirm password:");
+		passwordConfirmLabel.setVisible(confirmPassword);
+		panel.add(passwordConfirmLabel);
 
-		// Add a passwordfield to the panel with a coloumn with of 10
+		// Add a JPasswordField to the panel with a column with of 10
 		JPasswordField passConfirm = new JPasswordField(10);
 		passConfirm.setVisible(confirmPassword);
 		panel.add(passConfirm);

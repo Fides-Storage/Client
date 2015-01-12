@@ -34,13 +34,13 @@ public class LocalFileChecker extends Thread {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(LocalFileChecker.class);
+	private static final Logger LOG = LogManager.getLogger(LocalFileChecker.class);
 
 	private final FileSyncManager syncManager;
 
 	private final Map<WatchKey, Path> keys = new HashMap<>();
 
-	private BlockingQueue<EventPair> eventsQueue = new LinkedBlockingQueue<>();
+	private final BlockingQueue<EventPair> eventsQueue = new LinkedBlockingQueue<>();
 
 	private final Thread handleThread;
 
@@ -64,7 +64,7 @@ public class LocalFileChecker extends Thread {
 						handleEvent(pair.kind, pair.child);
 					}
 				} catch (InterruptedException e) {
-					log.error("LocalFileChecker handle interrupted: " + e);
+					LOG.error("LocalFileChecker handle interrupted: " + e);
 				}
 			}
 		}, "Handle Thread");
@@ -77,7 +77,7 @@ public class LocalFileChecker extends Thread {
 		try {
 			setup();
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 			return;
 		}
 		for (;;) {
@@ -86,7 +86,7 @@ public class LocalFileChecker extends Thread {
 			try {
 				key = watcher.take();
 			} catch (InterruptedException e) {
-				log.error(e);
+				LOG.error(e);
 				return;
 			}
 
@@ -116,7 +116,7 @@ public class LocalFileChecker extends Thread {
 	private void handleKey(WatchKey key) {
 		Path dir = keys.get(key);
 		if (dir == null) {
-			log.error("WatchKey not recognized!!");
+			LOG.error("WatchKey not recognized!!");
 			return;
 		}
 
@@ -146,7 +146,7 @@ public class LocalFileChecker extends Thread {
 			return;
 		}
 
-		log.debug(kind + " : " + child);
+		LOG.debug(kind + " : " + child);
 
 		if (Files.isRegularFile(child)) {
 			// Transform string to local space and upload (or remove)
@@ -166,7 +166,7 @@ public class LocalFileChecker extends Thread {
 					keys.put(newKey, child);
 				} catch (IOException e) {
 					e.printStackTrace();
-					log.error(e);
+					LOG.error(e);
 				}
 				checkDirectory(child);
 			}
@@ -218,7 +218,7 @@ public class LocalFileChecker extends Thread {
 					ENTRY_MODIFY);
 				keys.put(newKey, subPath);
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 			checkDirectory(subPath);
 		}
@@ -230,7 +230,7 @@ public class LocalFileChecker extends Thread {
 	 * @throws IOException
 	 */
 	private void setup() throws IOException {
-		// Create a watchter and watch the file directory
+		// Create a watcher and watch the file directory
 		Path basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
@@ -258,9 +258,9 @@ public class LocalFileChecker extends Thread {
 	 * 
 	 */
 	private static final class EventPair {
-		private WatchEvent.Kind<?> kind;
+		private final WatchEvent.Kind<?> kind;
 
-		private Path child;
+		private final Path child;
 
 		public EventPair(WatchEvent.Kind<?> kind, Path child) {
 			this.kind = kind;

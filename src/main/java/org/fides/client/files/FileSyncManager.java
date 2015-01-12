@@ -31,7 +31,7 @@ public class FileSyncManager {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileSyncManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileSyncManager.class);
 
 	private final FileManager fileManager;
 
@@ -59,7 +59,7 @@ public class FileSyncManager {
 		try {
 			encManager.getConnector().connect();
 		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
+			LOG.error(e);
 			return false;
 		}
 		KeyFile keyFile;
@@ -76,7 +76,7 @@ public class FileSyncManager {
 			handleCompareResult(result, keyFile);
 		}
 
-		// Update the keyfile TODO: what if it fails
+		// Update the KeyFile TODO: what if it fails
 		encManager.updateKeyFile(keyFile);
 
 		encManager.getConnector().disconnect();
@@ -100,7 +100,7 @@ public class FileSyncManager {
 			encManager.getConnector().connect();
 			keyFile = encManager.requestKeyFile();
 		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 
 		if (keyFile == null) {
@@ -109,13 +109,13 @@ public class FileSyncManager {
 		}
 
 		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
-		log.debug(result);
+		LOG.debug(result);
 		boolean completed = false;
 		if (result != null) {
 			completed = handleCompareResult(result, keyFile);
 		}
 
-		// Update the keyfile TODO: what if it fails
+		// Update the KeyFile TODO: what if it fails
 		encManager.updateKeyFile(keyFile);
 
 		encManager.getConnector().disconnect();
@@ -169,7 +169,7 @@ public class FileSyncManager {
 			successful = handleConflict(result.getName());
 			break;
 		default:
-			log.error("Invalid CompareResult");
+			LOG.error("Invalid CompareResult");
 			break;
 		}
 		return successful;
@@ -183,9 +183,6 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalAdded(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
 			return false;
 		}
@@ -200,7 +197,7 @@ public class FileSyncManager {
 		InputStream in = fileManager.readFile(fileName);
 		OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest);
 
-		if (in == null || out == null) {
+		if (in == null) {
 			return false;
 		}
 
@@ -210,7 +207,7 @@ public class FileSyncManager {
 			out.flush();
 			successful = true;
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		} finally {
 			IOUtils.closeQuietly(in);
 			IOUtils.closeQuietly(out);
@@ -238,28 +235,25 @@ public class FileSyncManager {
 	 *
 	 */
 	private boolean handleLocalRemoved(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
 			return false;
 		}
 
-		// Get ClientFile from keyfile
+		// Get ClientFile from KeyFile
 		ClientFile file = keyFile.getClientFileByName(fileName);
 		try {
 			// Remove the file on the server
 			boolean result = encManager.removeFile(file);
 
 			if (result) {
-				// Remove file from keyfile
+				// Remove file from KeyFile
 				keyFile.removeClientFileByName(fileName);
 
 				// Remove the local hash
-				LocalHashes.getInstance().removeHash(fileName);
+				return LocalHashes.getInstance().removeHash(fileName);
 			}
 		} catch (InvalidClientFileException e) {
-			log.debug(e);
+			LOG.debug(e);
 			return false;
 		}
 
@@ -274,17 +268,14 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleLocalUpdated(final String fileName, final KeyFile keyFile) {
-		// Get the keyfile
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
 			return false;
 		}
 
-		boolean succesful = false;
+		boolean successful = false;
 
 		// Get a stream to write to
-		OutputStream outEnc = null;
+		OutputStream outEnc;
 		InputStream in = null;
 		OutputStream out = null;
 		try {
@@ -303,26 +294,23 @@ public class FileSyncManager {
 			out.close();
 
 			// Check if the upload was successful
-			succesful = encManager.getConnector().checkUploadSuccessful();
+			successful = encManager.getConnector().checkUploadSuccessful();
 
-			if (succesful) {
+			if (successful) {
 				// Create a hash and save it
 				String hash = HashUtils.toHex(messageDigest.digest());
 				LocalHashes.getInstance().setHash(fileName, hash);
 				clientFile.setHash(hash);
 			}
-		} catch (InvalidClientFileException e) {
-			log.error(e);
-			succesful = false;
-		} catch (IOException e) {
-			log.error(e);
-			succesful = false;
+		} catch (InvalidClientFileException | IOException e) {
+			LOG.error(e);
+			successful = false;
 		} finally {
 			IOUtils.closeQuietly(in);
 			IOUtils.closeQuietly(out);
 		}
 
-		return succesful;
+		return successful;
 
 	}
 
@@ -336,9 +324,6 @@ public class FileSyncManager {
 	 * @return true if successfully handled, otherwise false
 	 */
 	private boolean handleServerAddedOrUpdated(final String fileName, final KeyFile keyFile, boolean update) {
-		// Almost the same as handleServerUpdated
-		// KeyFile keyFile = encManager.requestKeyFile();
-
 		if (keyFile == null) {
 			return false;
 		}
@@ -346,7 +331,7 @@ public class FileSyncManager {
 		// Create a message digest for creating a file hash/checksum
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
-		// Get the right outputstream for update or creation
+		// Get the right OutputStream for update or creation
 		OutputStream outFile;
 		try {
 			if (update) {
@@ -355,7 +340,7 @@ public class FileSyncManager {
 				outFile = fileManager.addFile(fileName);
 			}
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 			return false;
 		}
 
@@ -366,10 +351,8 @@ public class FileSyncManager {
 
 			String hexHash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
-		} catch (IOException e) {
-			log.error(e);
-		} catch (InvalidClientFileException e) {
-			log.error(e);
+		} catch (IOException | InvalidClientFileException e) {
+			LOG.error(e);
 		} finally {
 			IOUtils.closeQuietly(outFile);
 		}
@@ -394,10 +377,8 @@ public class FileSyncManager {
 
 			if (result) {
 				// Remove the local hash
-				LocalHashes.getInstance().removeHash(fileName);
+				return LocalHashes.getInstance().removeHash(fileName);
 			}
-			// Remove the File
-			return result;
 		}
 		return false;
 	}
@@ -419,16 +400,8 @@ public class FileSyncManager {
 	}
 
 	private boolean handleConflict(final String fileName) {
-		// TODO handle conflict
+		// TODO: handle conflict
 		return false;
-	}
-
-	public FileManager getFileManager() {
-		return fileManager;
-	}
-
-	public EncryptionManager getEncManager() {
-		return encManager;
 	}
 
 }

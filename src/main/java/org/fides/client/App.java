@@ -77,7 +77,7 @@ public class App {
 				 * Do normal work, we are going to loop here
 				 */
 
-				// Check if the user already has a keyfile.
+				// Check if the user already has a KeyFile.
 				boolean hasKeyFile = serverConnector.checkIfKeyFileExists();
 
 				String passwordString = PasswordScreen.getPassword(messages, !hasKeyFile);
@@ -208,9 +208,7 @@ public class App {
 			certificate.checkValidity();
 			// The rest of the checks are done by SSLSocket, if failed the socket is closed
 			return true;
-		} catch (CertificateExpiredException e) {
-			LOG.error(e);
-		} catch (CertificateNotYetValidException e) {
+		} catch (CertificateExpiredException | CertificateNotYetValidException e) {
 			LOG.error(e);
 		}
 

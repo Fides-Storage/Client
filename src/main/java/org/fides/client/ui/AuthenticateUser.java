@@ -69,7 +69,7 @@ public class AuthenticateUser {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		// Add a panel where the inputfields can be added
+		// Add a panel where the input fields can be added
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new GridLayout(3, 1, 0, 5));
 
@@ -84,7 +84,7 @@ public class AuthenticateUser {
 		JLabel labelUsername = new JLabel("Username:");
 		inputPanel.add(labelUsername);
 
-		// Add a usernamefield to the panel with a coloumn with of 10
+		// Add a username JTextField to the panel with a column with of 10
 		JTextField username = new JTextField(10);
 		inputPanel.add(username);
 
@@ -92,7 +92,7 @@ public class AuthenticateUser {
 		JLabel labelPassword = new JLabel("Password:");
 		inputPanel.add(labelPassword);
 
-		// Add a passwordfield to the panel with a coloumn with of 10
+		// Add a JPasswordField to the panel with a column with of 10
 		JPasswordField password = new JPasswordField(10);
 		inputPanel.add(password);
 
@@ -101,12 +101,12 @@ public class AuthenticateUser {
 		labelPasswordConfirmation.setVisible(false);
 		inputPanel.add(labelPasswordConfirmation);
 
-		// Add a passwordfield to the panel with a coloumn with of 10
+		// Add a JPasswordField to the panel with a column with of 10
 		JPasswordField passwordConfirmation = new JPasswordField(10);
 		passwordConfirmation.setVisible(false);
 		inputPanel.add(passwordConfirmation);
 
-		// Combines the inputpanel with the mainpanel
+		// Combines the inputPanel with the main panel
 		mainPanel.add(inputPanel);
 
 		// Make sure that the username field is selected while it is still possible to press enter for OK
@@ -154,7 +154,7 @@ public class AuthenticateUser {
 				passwordConfirmation.setVisible(true);
 			}
 
-			ArrayList<UserMessage> messages = validate(option, serverConnector, usernameString, passwordString, confirmPassword);
+			ArrayList<UserMessage> messages = validate(option, usernameString, passwordString, confirmPassword);
 
 			String passwordHashString = HashUtils.hash(passwordString);
 			// Make a usernameHash based on the passwordHash and the username
@@ -220,7 +220,7 @@ public class AuthenticateUser {
 		return false;
 	}
 
-	private static ArrayList<UserMessage> validate(int option, ServerConnector serverConnector, String usernameString, String passwordString, String confirmPassword) {
+	private static ArrayList<UserMessage> validate(int option, String usernameString, String passwordString, String confirmPassword) {
 
 		ArrayList<UserMessage> messages = new ArrayList<>();
 
