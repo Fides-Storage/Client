@@ -241,7 +241,7 @@ public class LocalFileChecker extends Thread {
 	 * @throws IOException
 	 */
 	private void setup() throws IOException {
-		// Create a watchter and watch the file directory
+		// Create a watcher and watch the file directory
 		Path basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);

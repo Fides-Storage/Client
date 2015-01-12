@@ -258,12 +258,12 @@ public final class UserProperties {
 	/**
 	 * Sets the check time
 	 * 
-	 * @param secondes
+	 * @param seconds
 	 *            between checks
 	 */
-	public void setCheckTimeInSeconds(int secondes) {
-		if (secondes >= 1) {
-			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
+	public void setCheckTimeInSeconds(int seconds) {
+		if (seconds >= 1) {
+			properties.setProperty(CHECK_TIME_KEY, Integer.toString(seconds));
 			saveProperties();
 		}
 	}
@@ -281,7 +281,7 @@ public final class UserProperties {
 		}
 
 		/**
-		 * Failback to 5 min if not set or incorrect
+		 * Fallback to 5 min if not set or incorrect
 		 */
 		if (parsedCheckTime <= 0) {
 			parsedCheckTime = 300;

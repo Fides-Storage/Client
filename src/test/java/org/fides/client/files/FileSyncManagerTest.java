@@ -139,10 +139,10 @@ public class FileSyncManagerTest {
 		compareResults.add(new FileCompareResult("UpdatedLocalFile", CompareResultType.LOCAL_UPDATED));
 		when(fileManagerMock.readFile("UpdatedLocalFile")).thenReturn(new ByteArrayInputStream("This is an in update file".getBytes()));
 
-		// The clientfile of the existing file on the server
+		// The ClientFile of the existing file on the server
 		ClientFile updatedFile = new ClientFile("UpdatedLocalFile", "ulf", null, "");
 		keyFile.addClientFile(updatedFile);
-		// Set an outputstream we can read
+		// Set an OutputStream we can read
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		when(encManagerMock.updateFile(updatedFile)).thenReturn(out);
 

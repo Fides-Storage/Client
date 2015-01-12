@@ -170,7 +170,7 @@ public class FileSyncManager {
 	}
 
 	/**
-	 * Resets all locks on the FileSyncManager, reenabling it for normal use.
+	 * Resets all locks on the FileSyncManager, re-enabling it for normal use.
 	 */
 	public void reenable() {
 		synchronized (stopLock) {
@@ -421,7 +421,7 @@ public class FileSyncManager {
 		// Create a message digest for creating a file hash/checksum
 		MessageDigest messageDigest = FileUtil.createFileDigest();
 
-		// Get the right outputstream for update or creation
+		// Get the right OutputStream for update or creation
 		OutputStream outFile;
 		try {
 			if (update) {
