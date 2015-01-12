@@ -40,8 +40,8 @@ public class SettingsFrame extends JFrame {
 	/**
 	 * Constructor, creates and shows the settings window
 	 * 
-	 * @param syncManager
-	 *            The {@link FileSyncManager} to use
+	 * @param appHandler
+	 *            The handler which is responsible for starting up and killing the application's threads
 	 */
 	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");

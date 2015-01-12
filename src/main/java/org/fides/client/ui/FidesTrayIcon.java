@@ -35,7 +35,8 @@ public class FidesTrayIcon {
 	/**
 	 * The constructor. It needs a FileSyncManager to prevent critical actions from being interrupted.
 	 * 
-	 * @param syncManager
+	 * @param appHandler
+	 * The handler which is responsible for starting up and killing the application's threads.
 	 */
 	public FidesTrayIcon(ApplicationHandler appHandler) {
 		this.appHandler = appHandler;

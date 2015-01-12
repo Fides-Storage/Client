@@ -67,12 +67,12 @@ public class ChangeServerPanel extends SettingsJPanel {
 
 		ArrayList<UserMessage> errorMessages = new ArrayList<UserMessage>();
 
-		InetSocketAddress serverAddress = null;
+		InetSocketAddress serverAddress;
 
 		// Get the server address
 		serverAddress = getServerAddress(errorMessages);
 
-		// COntinue if we don't have errors
+		// Continue if we don't have errors
 		if (serverAddress != null && errorMessages.isEmpty()) {
 			serverAddress = new InetSocketAddress(hostAddresField.getText(), Integer.parseInt(hostPortField.getText()));
 			// Check if we don't have error and if we can connect

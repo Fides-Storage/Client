@@ -72,7 +72,7 @@ public class FileSyncManager {
 			busyBoolean.set(true);
 		}
 		try {
-			boolean successful = false;
+			boolean successful;
 			try {
 				encManager.getConnector().connect();
 			} catch (ConnectException | UnknownHostException e) {
@@ -255,7 +255,7 @@ public class FileSyncManager {
 			InputStream in = fileManager.readFile(fileName);
 			OutputStream out = new DigestOutputStream(outData.getOutputStream(), messageDigest);
 
-			if (in == null || out == null) {
+			if (in == null) {
 				return false;
 			}
 
@@ -346,7 +346,7 @@ public class FileSyncManager {
 		boolean successful = false;
 
 		// Get a stream to write to
-		OutputStream outEnc = null;
+		OutputStream outEnc;
 		InputStream in = null;
 		OutputStream out = null;
 
