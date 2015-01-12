@@ -29,7 +29,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(ChangeServerPanel.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeServerPanel.class);
 
 	private final JTextField hostAddresField = new JTextField();
 

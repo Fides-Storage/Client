@@ -20,7 +20,7 @@ public class CheckIntervalPanel extends SettingsJPanel {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(CheckIntervalPanel.class);
+	private static final Logger LOG = LogManager.getLogger(CheckIntervalPanel.class);
 
 	private final JTextField checkTimeField = new JTextField();
 
