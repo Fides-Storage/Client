@@ -60,7 +60,7 @@ public class FileManagerCompareTest {
 
 		// Create a directory for test files
 		testDir = new File("./testDir");
-		testDir.mkdir();
+		assertTrue(testDir.mkdir());
 		testDir.deleteOnExit();
 
 		// Mock the UserProperties so it returns the test directory
@@ -138,7 +138,7 @@ public class FileManagerCompareTest {
 	@Test
 	public void testCompareClientAdded() throws IOException {
 		// Setup
-		new File(testDir, "File2.txt").createNewFile();
+		assertTrue(new File(testDir, "File2.txt").createNewFile());
 
 		FileCompareResult expected = new FileCompareResult("File2.txt", CompareResultType.LOCAL_ADDED);
 
@@ -159,7 +159,7 @@ public class FileManagerCompareTest {
 	public void testCompareServerRemoved() throws IOException {
 		// Setup
 		localHashes.setProperty("File3.txt", "File3.txt");
-		new File(testDir, "File3.txt").createNewFile();
+		assertTrue(new File(testDir, "File3.txt").createNewFile());
 
 		FileCompareResult expected = new FileCompareResult("File3.txt", CompareResultType.SERVER_REMOVED);
 
@@ -200,7 +200,7 @@ public class FileManagerCompareTest {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File5.txt", "", null, "File5C.txt"));
 		localHashes.setProperty("File5.txt", "File5.txt");
-		new File(testDir, "File5.txt").createNewFile();
+		assertTrue(new File(testDir, "File5.txt").createNewFile());
 
 		FileCompareResult expected = new FileCompareResult("File5.txt", CompareResultType.SERVER_UPDATED);
 
@@ -225,7 +225,7 @@ public class FileManagerCompareTest {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File6.txt", "", null, "File6D.txt"));
 		localHashes.setProperty("File6.txt", "File6D.txt");
-		new File(testDir, "File6.txt").createNewFile();
+		assertTrue(new File(testDir, "File6.txt").createNewFile());
 
 		FileCompareResult expected = new FileCompareResult("File6.txt", CompareResultType.LOCAL_UPDATED);
 
@@ -250,7 +250,7 @@ public class FileManagerCompareTest {
 		// Setup
 		keyFile.addClientFile(new ClientFile("File7.txt", "", null, "File7C.txt"));
 		localHashes.setProperty("File7.txt", "File7O.txt");
-		new File(testDir, "File7.txt").createNewFile();
+		assertTrue(new File(testDir, "File7.txt").createNewFile());
 
 		FileCompareResult expected = new FileCompareResult("File7.txt", CompareResultType.CONFLICTED);
 

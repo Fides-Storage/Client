@@ -29,7 +29,7 @@ public class FileManager {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileManager.class);
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
@@ -49,7 +49,6 @@ public class FileManager {
 
 		// We don't the files need it anymore, only the names
 		files.clear();
-		files = null;
 
 		// Get all the name of the server stored files
 		Set<String> serverFileNames = new HashSet<>();
@@ -204,7 +203,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
+	 * Creates a new file at the correct location of the given name and returns it as an OutputStream.
 	 *
 	 * @param fileName
 	 *            The name of the file
@@ -215,43 +214,43 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.exists()) {
-			log.error("File does already exist: " + file);
+			LOG.error("File does already exist: " + file);
 			throw new IOException("File does already exist: " + file);
 		}
 		File parent = file.getParentFile();
 		if (!parent.exists()) {
 			boolean created = parent.mkdirs();
 			if (!created) {
-				log.error("File parent can not be created: " + parent);
+				LOG.error("File parent can not be created: " + parent);
 				throw new IOException("File parent can not be created: " + parent);
 			}
 		}
 
-		file.createNewFile();
-		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+		boolean fileCreated = file.createNewFile();
+		if (!file.canWrite() || !fileCreated) {
+			LOG.error("File can not be written: " + file);
 			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
 	}
 
 	/**
-	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
+	 * Returns an OutputStream to update the file.
 	 *
 	 * @param fileName
 	 *            The name of the file to create, in local space
 	 * @return The {@link OutputStream} to write to the file
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
 	public OutputStream updateFile(String fileName) throws IOException {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.exists()) {
-			log.error("File does not exist: " + file);
+			LOG.error("File does not exist: " + file);
 			throw new IOException("File does not exist: " + file);
 		}
 		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+			LOG.error("File can not be written: " + file);
 			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
@@ -268,7 +267,7 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+			LOG.error("File can not be written: " + file);
 			return false;
 		}
 		return file.delete();
@@ -285,13 +284,13 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canRead()) {
-			log.error("File can not be read: " + file);
+			LOG.error("File can not be read: " + file);
 			return null;
 		}
 		try {
 			return new FileInputStream(file);
 		} catch (FileNotFoundException e) {
-			log.debug(e);
+			LOG.debug(e);
 			return null;
 		}
 	}
@@ -356,14 +355,13 @@ public class FileManager {
 	 *
 	 * @param file
 	 *            The file to turn to local space
-	 * @param basedir
+	 * @param baseDir
 	 *            The directory to relativize to
 	 * @return The local file name
 	 */
-	private static String fileToLocalName(File file, File basedir) {
-		File baseDir = UserProperties.getInstance().getFileDirectory();
+	private static String fileToLocalName(File file, File baseDir) {
 		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
-		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use thesame
+		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use the same
 		return relativeFile.getPath().replace('\\', '/');
 	}
 }

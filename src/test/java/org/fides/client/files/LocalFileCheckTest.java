@@ -64,7 +64,7 @@ public class LocalFileCheckTest {
 		if (testDir.exists()) {
 			FileUtils.deleteDirectory(testDir);
 		}
-		testDir.mkdirs();
+		assertTrue(testDir.mkdirs());
 
 		UserProperties userPropMock = Mockito.mock(UserProperties.class);
 		Mockito.when(userPropMock.getFileDirectory()).thenReturn(testDir);
@@ -99,11 +99,11 @@ public class LocalFileCheckTest {
 	@Test
 	public void test() throws IOException, InterruptedException {
 		File fileChange = new File(testDir, "fileChange.txt");
-		fileChange.createNewFile();
+		assertTrue(fileChange.createNewFile());
 		File preSubDir = new File(testDir, "preSubDir");
-		preSubDir.mkdir();
+		assertTrue(preSubDir.mkdir());
 		File fileRemoveSub = new File(preSubDir, "FileRemoveSub.txt");
-		fileRemoveSub.createNewFile();
+		assertTrue(fileRemoveSub.createNewFile());
 
 		thread = new LocalFileChecker(syncManagerMock);
 		thread.start();
@@ -113,11 +113,11 @@ public class LocalFileCheckTest {
 
 		// Create some files
 		File file1 = new File(testDir, "File1.txt");
-		file1.createNewFile();
+		assertTrue(file1.createNewFile());
 		File file1b = new File(testDir, "File1b.txt");
-		file1b.createNewFile();
+		assertTrue(file1b.createNewFile());
 		File file1c = new File(testDir, "File1c.txt");
-		file1c.createNewFile();
+		assertTrue(file1c.createNewFile());
 
 		// Create and remove
 		File fileCreateRemove = new File(testDir, "FileCR.txt");
@@ -134,23 +134,23 @@ public class LocalFileCheckTest {
 
 		// Create a sub directory
 		File subDir = new File(testDir, "subDir");
-		subDir.mkdir();
+		assertTrue(subDir.mkdir());
 
 		// Create a sub directory file
 		File file2 = new File(subDir, "File2.txt");
-		file2.createNewFile();
+		assertTrue(file2.createNewFile());
 
 		// Create a sub sub directory
 		File subDir2 = new File(subDir, "subDir2");
-		subDir2.mkdirs();
+		assertTrue(subDir2.mkdirs());
 
 		// Create a sub sub directory file
 		File file3 = new File(subDir2, "File3.txt");
-		file3.createNewFile();
+		assertTrue(file3.createNewFile());
 
 		// Create a existing sub directory file
 		File file4 = new File(preSubDir, "File4.txt");
-		file4.createNewFile();
+		assertTrue(file4.createNewFile());
 
 		// Change existing file
 		try (OutputStream out = new FileOutputStream(fileChange)) {

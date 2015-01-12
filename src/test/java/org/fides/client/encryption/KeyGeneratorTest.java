@@ -51,9 +51,7 @@ public class KeyGeneratorTest {
 		byte[] generatedHash = new byte[0];
 		try {
 			generatedHash = KeyGenerator.generateRandomKey("AES", keySize).getEncoded();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			e.printStackTrace();
 		}
 

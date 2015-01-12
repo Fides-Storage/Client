@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 /**
- * An util that can be used to send action requests to an outputstream.
+ * An util that can be used to send action requests to an OutputStream.
  */
 public final class CommunicationUtil {
 
@@ -18,7 +18,7 @@ public final class CommunicationUtil {
 	}
 
 	/**
-	 * Copies an action request to the outputstream
+	 * Copies an action request to the OutputStream
 	 * 
 	 * @param outputStream
 	 *            The stream to use
@@ -33,7 +33,7 @@ public final class CommunicationUtil {
 	}
 
 	/**
-	 * Copies an action request with properties to the outputstream
+	 * Copies an action request with properties to the OutputStream
 	 * 
 	 * @param outputStream
 	 *            The stream to use
@@ -44,23 +44,23 @@ public final class CommunicationUtil {
 	 * @throws IOException
 	 */
 	public static void requestActionWithProperties(DataOutputStream outputStream, String action, Map<String, Object> properties) throws IOException {
-		JsonObject returnJobj = new JsonObject();
-		returnJobj.addProperty(Actions.ACTION, action);
+		JsonObject returnJsonObject = new JsonObject();
+		returnJsonObject.addProperty(Actions.ACTION, action);
 		for (Map.Entry<String, Object> property : properties.entrySet()) {
 			Object value = property.getValue();
 			if (value instanceof String) {
-				returnJobj.addProperty(property.getKey(), (String) value);
+				returnJsonObject.addProperty(property.getKey(), (String) value);
 			} else if (value instanceof Number) {
-				returnJobj.addProperty(property.getKey(), (Number) value);
+				returnJsonObject.addProperty(property.getKey(), (Number) value);
 			} else if (value instanceof Boolean) {
-				returnJobj.addProperty(property.getKey(), (Boolean) value);
+				returnJsonObject.addProperty(property.getKey(), (Boolean) value);
 			} else if (value instanceof Character) {
-				returnJobj.addProperty(property.getKey(), (Character) value);
+				returnJsonObject.addProperty(property.getKey(), (Character) value);
 			} else {
 				throw new IllegalArgumentException("Object may only be of type: String, Number, Boolean or Character");
 			}
 		}
-		outputStream.writeUTF(new Gson().toJson(returnJobj));
+		outputStream.writeUTF(new Gson().toJson(returnJsonObject));
 	}
 
 }

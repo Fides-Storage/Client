@@ -17,14 +17,4 @@ public class InvalidClientFileException extends Exception {
 		super();
 	}
 
-	/**
-	 * Constructor for InvalidClientFileException with a message.
-	 * 
-	 * @param message
-	 *            The message
-	 */
-	public InvalidClientFileException(String message) {
-		super(message);
-	}
-
 }

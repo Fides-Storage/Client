@@ -66,7 +66,7 @@ public class EncryptionManagerTest {
 			assertTrue(mockOut.size() > 0);
 			assertEquals(KeyGenerator.getRounds(), mockDin.readInt());
 		} catch (Exception e) {
-			fail("An unexpected exception has occured: " + e.getMessage());
+			fail("An unexpected exception has occurred: " + e.getMessage());
 		}
 	}
 
@@ -99,7 +99,7 @@ public class EncryptionManagerTest {
 			assertNotNull(requestedKeyFile);
 			assertEquals(clientFile, requestedKeyFile.getClientFileByName(clientFile.getName()));
 		} catch (Exception e) {
-			fail("An unexpected exception has occured: " + e.getMessage());
+			fail("An unexpected exception has occurred: " + e.getMessage());
 		}
 	}
 
@@ -122,7 +122,7 @@ public class EncryptionManagerTest {
 			assertEquals(fileLocation, outputStreamData.getLocation());
 			assertNotNull(outputStreamData.getKey());
 
-			// Test if the outputstream gets written.
+			// Test if the outputStreamData gets written.
 			outputStreamData.getOutputStream().write(MESSAGE);
 			outputStreamData.getOutputStream().close();
 			assertTrue(mockOut.size() > 0);
@@ -137,7 +137,7 @@ public class EncryptionManagerTest {
 			assertTrue(mockOut.size() > 0);
 			assertNotEquals(result1, result2);
 		} catch (Exception e) {
-			fail("An unexpected exception has occured: " + e.getMessage());
+			fail("An unexpected exception has occurred: " + e.getMessage());
 		}
 	}
 
@@ -171,7 +171,7 @@ public class EncryptionManagerTest {
 			IOUtils.copy(inStream, readBytes);
 			assertArrayEquals(MESSAGE, readBytes.toByteArray());
 		} catch (Exception e) {
-			fail("An unexpected exception has occured: " + e.getMessage());
+			fail("An unexpected exception has occurred: " + e.getMessage());
 		}
 	}
 
@@ -203,7 +203,7 @@ public class EncryptionManagerTest {
 			outStream.write("A different message than the default message".getBytes());
 			outStream.close();
 
-			// Check if the updated outputstream is different from the uploaded outputstream
+			// Check if the updated OutputStream is different from the uploaded OutputStream
 			assertTrue(mockUpdateOut.size() > 0);
 			assertFalse(Arrays.equals(uploadedBytes, mockUpdateOut.toByteArray()));
 
@@ -213,12 +213,12 @@ public class EncryptionManagerTest {
 			outStream.write(MESSAGE);
 			outStream.close();
 
-			// Check if the updated outputstream is the same as the original uploaded outputstream
+			// Check if the updated OutputStream is the same as the original uploaded OutputStream
 			assertTrue(mockUpdateOut.size() > 0);
 			assertArrayEquals(uploadedBytes, mockUpdateOut.toByteArray());
 
 		} catch (Exception e) {
-			fail("An unexpected exception has occured: " + e.getMessage());
+			fail("An unexpected exception has occurred: " + e.getMessage());
 		}
 	}
 
@@ -233,7 +233,7 @@ public class EncryptionManagerTest {
 		// Creates an EncryptionManager with the mock ServerConnector and uploads a file.
 		EncryptionManager manager = new EncryptionManager(mockConnector, PASS);
 
-		// Validate a nullpointerexception
+		// Validate a NullPointerException
 		try {
 			assertFalse(manager.removeFile(null));
 		} catch (Exception e) {

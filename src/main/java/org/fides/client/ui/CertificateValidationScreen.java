@@ -64,11 +64,11 @@ public class CertificateValidationScreen {
 	}
 
 	/**
-	 * Creates a userfriendly string with the certificate's information
+	 * Creates a user friendly string with the certificate's information
 	 *
 	 * @param certificate
 	 *            The certificate to convert to a pretty string.
-	 * @return The userfriendly string
+	 * @return The user friendly string
 	 */
 	private static String readableCertificate(X509Certificate certificate) {
 		StringBuilder builder = new StringBuilder();
@@ -114,11 +114,11 @@ public class CertificateValidationScreen {
 	}
 
 	/**
-	 * Creates a userfriendly string with the certificate's information
+	 * Creates a user friendly string with the certificate's information
 	 *
 	 * @param principal
 	 *            The principal to convert to a pretty string.
-	 * @return The userfriendly string
+	 * @return The user friendly string
 	 */
 	private static String readablePrincipal(X500Principal principal) {
 		String readable = principal.getName();

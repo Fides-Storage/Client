@@ -14,7 +14,7 @@ public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = -3100793225474334464L;
 
-	private Map<String, ClientFile> clientFiles = new HashMap<>();
+	private final Map<String, ClientFile> clientFiles = new HashMap<>();
 
 	/**
 	 * Return a {@link ClientFile} with the given name

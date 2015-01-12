@@ -19,7 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 
 /**
- * The serverconnector unit test
+ * The ServerConnector unit test
  */
 public class ServerConnectorTest {
 
