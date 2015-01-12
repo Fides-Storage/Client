@@ -67,7 +67,7 @@ public class EncryptionManager {
 
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
-	 *
+	 * 
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
@@ -77,10 +77,10 @@ public class EncryptionManager {
 
 	/**
 	 * Requests the {@link KeyFile} from the {@link ServerConnector} and decrypts it
-	 *
+	 * 
 	 * @param password
 	 *            for the decryption of the keyfile
-	 *
+	 * 
 	 * @return The decrypted {@link KeyFile}
 	 * @throws IOException
 	 */
@@ -120,13 +120,12 @@ public class EncryptionManager {
 	 * 
 	 * @param keyFile
 	 *            The {@link KeyFile} to encrypt and send
-	 * @throws IOException
 	 */
 	public boolean updateKeyFile(final KeyFile keyFile) {
 		if (keyFile == null) {
 			throw new NullPointerException("No KeyFile");
 		}
-
+		boolean successful = false;
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
 			log.error("ServerConnector does not profide an OutputStream for updating keyfile");
@@ -134,7 +133,6 @@ public class EncryptionManager {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
 			try {
-
 				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 				int pbkdf2Rounds = KeyGenerator.getRounds();
 
@@ -150,16 +148,17 @@ public class EncryptionManager {
 				dout.flush();
 				out.flush();
 				outEncrypted.close();
-				return connector.checkUploadSuccessful();
+				successful = true;
 			} catch (IOException e) {
 				log.error(e);
 			} finally {
 				IOUtils.closeQuietly(outEncrypted);
 				IOUtils.closeQuietly(dout);
 				IOUtils.closeQuietly(out);
+				successful = connector.confirmUpload(successful);
 			}
 		}
-		return false;
+		return successful;
 	}
 
 	/**
@@ -187,25 +186,19 @@ public class EncryptionManager {
 	 * Encrypts a file and sends it to the {@link ServerConnector}
 	 * 
 	 * @return a pair of a location and an {@link OutputStream} that writes to the location the server
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
 	 */
 	public EncryptedOutputStreamData uploadFile() {
 		Key key = null;
 		try {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			// Should not happen
-			log.error(e);
-			return null;
-		} catch (InvalidKeySpecException e) {
-			// Should not happen, we close if it does
 			log.error(e);
 			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();
 		if (outStreamData == null || outStreamData.getOutputStream() == null || StringUtils.isBlank(outStreamData.getLocation())) {
-			throw new NullPointerException();
+			return null;
 		}
 
 		OutputStream encryptOut = EncryptionUtils.getEncryptionStream(outStreamData.getOutputStream(), key);
@@ -230,11 +223,9 @@ public class EncryptionManager {
 
 		OutputStream out = connector.updateFile(clientFile.getLocation());
 		if (out == null) {
-			throw new NullPointerException();
+			return null;
 		}
-		OutputStream encryptedOut = EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
-
-		return encryptedOut;
+		return EncryptionUtils.getEncryptionStream(out, clientFile.getKey());
 	}
 
 	/**

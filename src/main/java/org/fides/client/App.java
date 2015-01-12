@@ -110,8 +110,6 @@ public class App {
 
 			FidesTrayIcon trayIcon = new FidesTrayIcon(appHandler);
 			trayIcon.addToSystemTray();
-
-			// TODO: Start application
 		}
 
 	}

@@ -478,26 +478,37 @@ public class ServerConnector {
 	}
 
 	/**
-	 * After an upload or update this function has to be called to check if the action was successful
+	 * After an upload or update, this function has to be called. This function tells the server whether the upload was
+	 * successful on the client side, and if it was successful it wil check if the upload was successful on the server
+	 * side.
+	 * 
+	 * @param uploadSuccessful
+	 *            true if the upload was successful on the client side
 	 * 
 	 * @return true if the last upload or update was successful, othwise false
 	 */
-	public boolean checkUploadSuccessful() {
+	public boolean confirmUpload(boolean uploadSuccessful) {
 		try {
-			String message = in.readUTF();
-			JsonObject response = new Gson().fromJson(message, JsonObject.class);
-			if (response.has(Responses.SUCCESSFUL)) {
-				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					log.debug("Upload was successful");
-					return true;
-				} else {
-					errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
+			JsonObject returnJobj = new JsonObject();
+			returnJobj.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
+			out.writeUTF(new Gson().toJson(returnJobj));
+
+			if (uploadSuccessful) {
+				String message = in.readUTF();
+				JsonObject response = new Gson().fromJson(message, JsonObject.class);
+				if (response.has(Responses.SUCCESSFUL)) {
+					if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						log.debug("Upload was successful");
+						return true;
+					} else {
+						errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
+					}
 				}
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
-		log.error("The last upload was not successful");
+		log.debug("The last upload was not successful");
 		return false;
 	}
 }
