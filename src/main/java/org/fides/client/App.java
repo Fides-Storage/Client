@@ -39,7 +39,7 @@ public class App {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(App.class);
+	private static final Logger LOG = LogManager.getLogger(App.class);
 
 	/**
 	 * Main
@@ -59,7 +59,7 @@ public class App {
 		try {
 			serverConnector.init(serverAddress);
 		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
+			LOG.error(e);
 			System.exit(1);
 		}
 
@@ -209,9 +209,9 @@ public class App {
 			// The rest of the checks are done by SSLSocket, if failed the socket is closed
 			return true;
 		} catch (CertificateExpiredException e) {
-			log.error(e);
+			LOG.error(e);
 		} catch (CertificateNotYetValidException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 
 		return false;

@@ -37,7 +37,7 @@ public class EncryptionManager {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(EncryptionManager.class);
+	private static final Logger LOG = LogManager.getLogger(EncryptionManager.class);
 
 	private final ServerConnector connector;
 
@@ -69,7 +69,7 @@ public class EncryptionManager {
 	public KeyFile requestKeyFile() {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			log.error("Server connector does not give an InputStream for a keyfile");
+			LOG.error("Server connector does not give an InputStream for a keyfile");
 			return null;
 		}
 
@@ -89,7 +89,7 @@ public class EncryptionManager {
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
 		} catch (IOException | ClassNotFoundException e) {
-			log.error(e);
+			LOG.error(e);
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);
@@ -111,7 +111,7 @@ public class EncryptionManager {
 
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			log.error("ServerConnector does not profide an OutputStream for updating keyfile");
+			LOG.error("ServerConnector does not profide an OutputStream for updating keyfile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
@@ -134,7 +134,7 @@ public class EncryptionManager {
 				outEncrypted.close();
 				return connector.checkUploadSuccessful();
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				IOUtils.closeQuietly(outEncrypted);
 				IOUtils.closeQuietly(dout);
@@ -176,11 +176,11 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			log.error(e);
+			LOG.error(e);
 			return null;
 		} catch (InvalidKeySpecException e) {
 			// Should not happen, we close if it does
-			log.error(e);
+			LOG.error(e);
 			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();

@@ -251,7 +251,7 @@ public final class UserProperties {
 	 * @param secondes
 	 *            between checks
 	 */
-	public void setCheckTimeInSeconds(int secondes) {
+	private void setCheckTimeInSeconds(int secondes) {
 		if (secondes >= 1) {
 			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
 			saveProperties();
