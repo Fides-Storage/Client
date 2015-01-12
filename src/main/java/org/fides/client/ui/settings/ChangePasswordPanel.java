@@ -24,17 +24,17 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(ChangePasswordPanel.class);
+	private static final Logger LOG = LogManager.getLogger(ChangePasswordPanel.class);
 
 	private EncryptionManager encryptionManager = null;
 
 	private String newValidatedPassword = null;
 
-	private JPasswordField passOld = new JPasswordField(10);
+	private final JPasswordField passOld = new JPasswordField(10);
 
-	private JPasswordField passNew1 = new JPasswordField(10);
+	private final JPasswordField passNew1 = new JPasswordField(10);
 
-	private JPasswordField passNew2 = new JPasswordField(10);
+	private final JPasswordField passNew2 = new JPasswordField(10);
 
 	/**
 	 * Constructor for ChangePasswordScreen, this screen extends a JPanel and can be used to show a password change
@@ -83,7 +83,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				// check if key file can be decrypted with the old password
 				keyFile = encryptionManager.requestKeyFile(HashUtils.hash(oldPassword));
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				encryptionManager.getConnector().disconnect();
 			}
@@ -133,7 +133,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				encryptionManager.getConnector().connect();
 				keyFile = encryptionManager.requestKeyFile();
 			} catch (ConnectException | UnknownHostException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 
 			// Change the password in the EncryptionManager

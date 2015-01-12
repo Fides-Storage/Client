@@ -17,9 +17,9 @@ public class ApplicationHandler {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileSyncManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileSyncManager.class);
 
-	private FileSyncManager syncManager;
+	private final FileSyncManager syncManager;
 
 	private Timer checkTimer;
 
@@ -69,7 +69,7 @@ public class ApplicationHandler {
 			try {
 				syncManager.waitForStop();
 			} catch (InterruptedException e) {
-				log.error("Interrupted Exception while trying to safely stop the FileSyncManager");
+				LOG.error("Interrupted Exception while trying to safely stop the FileSyncManager");
 			}
 			// File Changed Listener stoppen
 			fileChecker.stopHandling();
@@ -94,7 +94,7 @@ public class ApplicationHandler {
 			try {
 				Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
 			} catch (IOException e) {
-				log.error("Couldn't open the folder");
+				LOG.error("Couldn't open the folder");
 			}
 		}
 	}

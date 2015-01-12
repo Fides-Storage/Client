@@ -34,7 +34,7 @@ public class AuthenticateUser {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(AuthenticateUser.class);
+	private static final Logger LOG = LogManager.getLogger(AuthenticateUser.class);
 
 	private static final int LOGIN = 0;
 
@@ -197,22 +197,22 @@ public class AuthenticateUser {
 		if (messages.isEmpty()) {
 			if (option == LOGIN) {
 				if (serverConnector.login(usernameHashString, passwordHashString)) {
-					log.debug("login successful");
+					LOG.debug("login successful");
 					UserProperties.getInstance().setPasswordHash(passwordHashString);
 					UserProperties.getInstance().setUsernameHash(usernameHashString);
 					return true;
 				} else {
-					log.debug(serverConnector.getErrorMessage(Actions.LOGIN));
+					LOG.debug(serverConnector.getErrorMessage(Actions.LOGIN));
 					messages.add(new UserMessage("Login failed: " + serverConnector.getErrorMessage(Actions.LOGIN), true));
 				}
 			}
 			if (option == REGISTER) {
 				if (serverConnector.register(usernameHashString, passwordHashString)) {
-					log.debug("Register successful");
+					LOG.debug("Register successful");
 					messages.add(new UserMessage("Register successful", false));
 					return true;
 				} else {
-					log.debug(serverConnector.getErrorMessage(Actions.CREATE_USER));
+					LOG.debug(serverConnector.getErrorMessage(Actions.CREATE_USER));
 					messages.add(new UserMessage("Register failed: " + serverConnector.getErrorMessage(Actions.CREATE_USER), true));
 				}
 			}

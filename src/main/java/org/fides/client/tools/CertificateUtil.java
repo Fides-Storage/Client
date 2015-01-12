@@ -17,7 +17,7 @@ public final class CertificateUtil {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(CertificateUtil.class);
+	private static final Logger LOG = LogManager.getLogger(CertificateUtil.class);
 
 	private CertificateUtil() {
 	}
@@ -35,7 +35,7 @@ public final class CertificateUtil {
 			// The rest of the checks are done by SSLSocket, if failed the socket is closed
 			return true;
 		} catch (CertificateExpiredException | CertificateNotYetValidException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 
 		return false;

@@ -28,7 +28,7 @@ public class FidesTrayIcon {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileSyncManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileSyncManager.class);
 
 	private final ApplicationHandler appHandler;
 
@@ -48,7 +48,7 @@ public class FidesTrayIcon {
 	public void addToSystemTray() {
 		// Check if the SystemTray is supported
 		if (!SystemTray.isSupported()) {
-			log.debug("SystemTray is not supported");
+			LOG.debug("SystemTray is not supported");
 			return;
 		}
 
@@ -140,7 +140,7 @@ public class FidesTrayIcon {
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
-			log.error("TrayIcon could not be added.");
+			LOG.error("TrayIcon could not be added.");
 		}
 	}
 }

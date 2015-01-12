@@ -31,12 +31,12 @@ import org.fides.encryption.KeyGenerator;
  */
 public class EncryptionManager {
 	/** Size of the salt used in generating the master key, it should NEVER change */
-	public static final int SALT_SIZE = 16; // 128 bit
+	private static final int SALT_SIZE = 16; // 128 bit
 
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(EncryptionManager.class);
+	private static final Logger LOG = LogManager.getLogger(EncryptionManager.class);
 
 	private final ServerConnector connector;
 
@@ -84,7 +84,7 @@ public class EncryptionManager {
 	public KeyFile requestKeyFile(String decryptionPassword) {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
-			log.error("Server connector does not give an InputStream for a keyfile");
+			LOG.error("Server connector does not give an InputStream for a keyfile");
 			return null;
 		}
 
@@ -125,7 +125,7 @@ public class EncryptionManager {
 		boolean successful = false;
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			log.error("ServerConnector does not profide an OutputStream for updating keyfile");
+			LOG.error("ServerConnector does not profide an OutputStream for updating keyfile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
@@ -147,7 +147,7 @@ public class EncryptionManager {
 				outEncrypted.close();
 				successful = true;
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				IOUtils.closeQuietly(outEncrypted);
 				IOUtils.closeQuietly(dout);
@@ -190,7 +190,7 @@ public class EncryptionManager {
 			key = KeyGenerator.generateRandomKey(EncryptionUtils.ALGORITHM, EncryptionUtils.KEY_SIZE);
 		} catch (NoSuchAlgorithmException e) {
 			// Should not happen
-			log.error(e);
+			LOG.error(e);
 			return null;
 		}
 		OutputStreamData outStreamData = connector.uploadFile();

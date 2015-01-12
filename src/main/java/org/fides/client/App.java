@@ -35,7 +35,7 @@ public class App {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(App.class);
+	private static final Logger LOG = LogManager.getLogger(App.class);
 
 	/**
 	 * Main
@@ -55,7 +55,7 @@ public class App {
 		try {
 			serverConnector.init(serverAddress);
 		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
+			LOG.error(e);
 			System.exit(1);
 		}
 
@@ -185,7 +185,7 @@ public class App {
 	 *            the given certificate
 	 * @return true if certificate is the same
 	 */
-	public static boolean checkCertificateAccepted(X509Certificate certificate) {
+	private static boolean checkCertificateAccepted(X509Certificate certificate) {
 		// Check saved certificate with current one
 		String certificateId = UserProperties.getInstance().getCertificateId();
 		String certificateIssuer = UserProperties.getInstance().getCertificateIssuer();
