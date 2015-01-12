@@ -43,7 +43,7 @@ public class EncryptionManager {
 	private String password;
 
 	/**
-	 * Constructor for EncryptionManager. Adds an encryption library to ensure these encryptions are supported.
+	 * Constructor for EncryptionManager. Adds an encryption library to ensure these encryption methods are supported.
 	 * 
 	 * @param connector
 	 *            The {@link ServerConnector} to use
@@ -125,7 +125,7 @@ public class EncryptionManager {
 		boolean successful = false;
 		OutputStream out = connector.updateKeyFile();
 		if (out == null) {
-			LOG.error("ServerConnector does not profide an OutputStream for updating keyfile");
+			LOG.error("ServerConnector does not provide an OutputStream for updating keyfile");
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;

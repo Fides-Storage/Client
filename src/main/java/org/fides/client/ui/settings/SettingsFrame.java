@@ -101,8 +101,8 @@ public class SettingsFrame extends JFrame {
 	private JPanel createBorder(SettingsJPanel settingsPanel) {
 		settingsPanels.add(settingsPanel);
 
-		Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
-		TitledBorder tileBorder = BorderFactory.createTitledBorder(loweredetched, settingsPanel.getName());
+		Border etchedBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+		TitledBorder tileBorder = BorderFactory.createTitledBorder(etchedBorder, settingsPanel.getName());
 
 		JPanel container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));

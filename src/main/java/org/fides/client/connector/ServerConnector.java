@@ -485,9 +485,9 @@ public class ServerConnector {
 	 */
 	public boolean confirmUpload(boolean uploadSuccessful) {
 		try {
-			JsonObject returnJobj = new JsonObject();
-			returnJobj.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
-			out.writeUTF(new Gson().toJson(returnJobj));
+			JsonObject returnJsonObject = new JsonObject();
+			returnJsonObject.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
+			out.writeUTF(new Gson().toJson(returnJsonObject));
 
 			if (uploadSuccessful) {
 				String message = in.readUTF();

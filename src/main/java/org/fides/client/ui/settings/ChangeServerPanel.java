@@ -31,7 +31,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 	 */
 	private static final Logger LOG = LogManager.getLogger(ChangeServerPanel.class);
 
-	private final JTextField hostAddresField = new JTextField();
+	private final JTextField hostAddressField = new JTextField();
 
 	private final JTextField hostPortField = new JTextField();
 
@@ -46,21 +46,21 @@ public class ChangeServerPanel extends SettingsJPanel {
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 		this.add(new JLabel("Hostname:"));
-		this.add(hostAddresField);
+		this.add(hostAddressField);
 		this.add(new JLabel("Port:"));
 		this.add(hostPortField);
 
-		hostAddresField.setText(UserProperties.getInstance().getHost());
+		hostAddressField.setText(UserProperties.getInstance().getHost());
 		hostPortField.setText("" + UserProperties.getInstance().getHostPort());
 
-		UiUtils.setMaxHeightToPreferred(hostAddresField);
+		UiUtils.setMaxHeightToPreferred(hostAddressField);
 		UiUtils.setMaxHeightToPreferred(hostPortField);
 	}
 
 	@Override
 	public List<UserMessage> applySettings() {
 		// Return if we did not change
-		if (hostAddresField.getText().equals(UserProperties.getInstance().getHost()) &&
+		if (hostAddressField.getText().equals(UserProperties.getInstance().getHost()) &&
 			hostPortField.getText().equals("" + UserProperties.getInstance().getHostPort())) {
 			return null;
 		}
@@ -74,11 +74,11 @@ public class ChangeServerPanel extends SettingsJPanel {
 
 		// Continue if we don't have errors
 		if (serverAddress != null && errorMessages.isEmpty()) {
-			serverAddress = new InetSocketAddress(hostAddresField.getText(), Integer.parseInt(hostPortField.getText()));
+			serverAddress = new InetSocketAddress(hostAddressField.getText(), Integer.parseInt(hostPortField.getText()));
 			// Check if we don't have error and if we can connect
 			if (errorMessages.isEmpty() && connectCheck(serverAddress, errorMessages)) {
 				// Check the certificate
-				X509Certificate certificate = certivicateCheck(connector, errorMessages);
+				X509Certificate certificate = certificateCheck(connector, errorMessages);
 				connector.disconnect();
 				// No errors? then save it
 				if (certificate != null && errorMessages.isEmpty()) {
@@ -101,7 +101,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 	 */
 	private InetSocketAddress getServerAddress(List<UserMessage> errorMessages) {
 		// Check for empty hostname
-		if (StringUtils.isBlank(hostAddresField.getText())) {
+		if (StringUtils.isBlank(hostAddressField.getText())) {
 			errorMessages.add(new UserMessage("Hostname can not be blank", true));
 		}
 		// Check for empty port and if the port is an integer
@@ -114,7 +114,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 				if (portInt < 0 || portInt > 65535) {
 					errorMessages.add(new UserMessage("Port has to be a valid port", true));
 				}
-				return new InetSocketAddress(hostAddresField.getText(), Integer.parseInt(hostPortField.getText()));
+				return new InetSocketAddress(hostAddressField.getText(), Integer.parseInt(hostPortField.getText()));
 			} catch (NumberFormatException e) {
 				// We cannot parse it
 				errorMessages.add(new UserMessage("Port has to be a valid number", true));
@@ -153,7 +153,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 	 *            The list to add error messages to
 	 * @return The certificate if validated
 	 */
-	private X509Certificate certivicateCheck(ServerConnector serverConnector, List<UserMessage> errorMessages) {
+	private X509Certificate certificateCheck(ServerConnector serverConnector, List<UserMessage> errorMessages) {
 		Certificate[] certificates = serverConnector.getServerCertificates();
 
 		if (certificates.length > 0) {

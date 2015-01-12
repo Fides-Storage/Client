@@ -21,7 +21,7 @@ import org.fides.client.files.FileSyncManager;
 import org.fides.client.ui.settings.SettingsFrame;
 
 /**
- * This class is responsible for adding an icon to the systemtray. This icon has a context menu with the options to open
+ * This class is responsible for adding an icon to the system tray. This icon has a context menu with the options to open
  * the Fides folder, open the settings and close the application.
  */
 public class FidesTrayIcon {

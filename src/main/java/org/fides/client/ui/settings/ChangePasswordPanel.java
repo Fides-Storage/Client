@@ -41,7 +41,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	 * screen.
 	 * 
 	 * @param encryptionManager
-	 *            the encryptionmanager that is used for requesting and updating keyfiles
+	 *            the EncryptionManager that is used for requesting and updating KeyFiles
 	 */
 	public ChangePasswordPanel(EncryptionManager encryptionManager) {
 		super("Change password");
@@ -88,7 +88,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				encryptionManager.getConnector().disconnect();
 			}
 
-			// Decryption of keyfile failed, add errormessage.
+			// Decryption of keyfile failed, add error message.
 			if (keyFile == null) {
 				messages.add(new UserMessage("Old password is incorrect", true));
 			}
@@ -107,10 +107,10 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	}
 
 	/**
-	 * Apply the passwordchange. This will (1) request the keyfile, (2) change the password in the encryptionmanager and
+	 * Apply the password change. This will (1) request the keyfile, (2) change the password in the EncryptionManager and
 	 * (3) upload the keyfile
 	 * 
-	 * @return whether the passwordchange was successful or not
+	 * @return whether the password change was successful or not
 	 */
 	@Override
 	public ArrayList<UserMessage> applySettings() {
