@@ -78,12 +78,28 @@ public class SettingsFrame extends JFrame {
 				}
 				if (!messages.isEmpty()) {
 					JPanel errorPanel = new JPanel();
+					errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.PAGE_AXIS));
 					UiUtils.setMessageLabels(errorPanel, messages);
-					JFrame errorFrame = new JFrame();
+
+					final JFrame errorFrame = new JFrame();
+
+					final JButton confirmButton = new JButton("OK");
+					confirmButton.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							errorFrame.dispose();
+						}
+					});
+					errorPanel.add(confirmButton);
+
 					errorFrame.setContentPane(errorPanel);
+					errorFrame.setResizable(false);
+					errorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 					errorFrame.pack();
-					errorFrame.setLocationRelativeTo(null);
 					errorFrame.setVisible(true);
+					errorFrame.setLocationRelativeTo(null);
+				} else {
+					SettingsFrame.this.dispose();
 				}
 				appHandler.startApplication();
 			}

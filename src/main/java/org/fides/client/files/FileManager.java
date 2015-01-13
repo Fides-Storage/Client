@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.files.data.ClientFile;
@@ -40,7 +41,7 @@ public class FileManager {
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
 		UserProperties settings = UserProperties.getInstance();
-		List<FileCompareResult> results = new ArrayList<>();
+		Collection<FileCompareResult> results = new HashSet<>();
 		// Get all the names of the local stored files
 		List<File> files = new ArrayList<>();
 		File directory = settings.getFileDirectory();
@@ -185,19 +186,28 @@ public class FileManager {
 		FileCompareResult result = null;
 		String fileHash = FileUtil.generateFileHash(new File(UserProperties.getInstance().getFileDirectory(), fileName));
 		String savedHash = LocalHashes.getInstance().getHash(fileName);
-		System.out.println(savedHash + " : " + keyFile.getClientFileByName(fileName).getHash());
-		boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
-		boolean localChanged = !savedHash.equals(fileHash);
 
-		if (localChanged && serverChanged) {
-			// Both server and client are changed
-			result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
-		} else if (localChanged) {
-			// Client are changed
-			result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
-		} else if (serverChanged) {
-			// Server are changed
-			result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+		if (StringUtils.isBlank(savedHash)) {
+			// Client has the file, server has the file, but it is not stored
+			if (!fileHash.equals(keyFile.getClientFileByName(fileName).getHash())) {
+				// The local and server file are different, but it did not exist before
+				result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+			}
+			// Else it is local and on the server and in the keyFile, do nothing
+		} else {
+			boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
+			boolean localChanged = !savedHash.equals(fileHash);
+
+			if (localChanged && serverChanged) {
+				// Both server and client are changed
+				result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+			} else if (localChanged) {
+				// Client are changed
+				result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
+			} else if (serverChanged) {
+				// Server are changed
+				result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+			}
 		}
 		// Else nothing changed
 		return result;
@@ -318,10 +328,10 @@ public class FileManager {
 	}
 
 	/**
-	 * Changes a {@link List} of {@link File} to a {@link List} of relative {@link String}. The strings are paths relative to
-	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
-	 * different PCs
+	 * Changes a {@link List} of {@link File} to a {@link List} of relative {@link String}. The strings are paths
+	 * relative to the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would
+	 * become "fruit/apple". This is used for the name stored on the server, the directory files can be saved
+	 * differently on different PCs
 	 *
 	 * @param files
 	 *            The file to turn to local space
