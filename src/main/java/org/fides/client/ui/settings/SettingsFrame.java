@@ -51,9 +51,15 @@ public class SettingsFrame extends JFrame {
 
 		generalTabPanel.add(preparePanel(new ChangeServerPanel(appHandler.getSyncManager().getEncManager())));
 		generalTabPanel.add(preparePanel(new CheckIntervalPanel()));
-		generalTabPanel.add(preparePanel(new ChangeFolderPanel()));
 
 		generalTabPanel.add(Box.createVerticalGlue());
+
+		// Create the individual setting screens
+		JPanel folderTabPanel = new JPanel();
+		tabbedPane.addTab("Folder", folderTabPanel);
+		folderTabPanel.setLayout(new BoxLayout(folderTabPanel, BoxLayout.PAGE_AXIS));
+		folderTabPanel.add(preparePanel(new ChangeFolderPanel()));
+		folderTabPanel.add(Box.createVerticalGlue());
 
 		// Create the individual setting screens
 		JPanel userTabPanel = new JPanel();

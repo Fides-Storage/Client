@@ -56,6 +56,7 @@ public class UiUtils {
 		b.add(Box.createHorizontalStrut(9));
 		b.add(component);
 		b.add(Box.createHorizontalGlue());
+		setMaxHeightToPreferred(b);
 		return b;
 	}
 }

@@ -2,6 +2,7 @@ package org.fides.client;
 
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
+import java.io.File;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -111,9 +112,10 @@ public class ApplicationHandler {
 	 * Opens the Fides folder
 	 */
 	public void openFolder() {
-		if (Desktop.getDesktop().isSupported(Action.OPEN)) {
+		File folder = UserProperties.getInstance().getFileDirectory();
+		if (Desktop.getDesktop().isSupported(Action.OPEN) && folder.exists()) {
 			try {
-				Desktop.getDesktop().open(UserProperties.getInstance().getFileDirectory());
+				Desktop.getDesktop().open(folder);
 			} catch (IOException e) {
 				LOG.error("Couldn't open the folder");
 			}

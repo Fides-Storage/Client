@@ -119,14 +119,20 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 			if (!messages.addAll(validateFolder(selectedFolder))) {
 				File oldFolder = UserProperties.getInstance().getFileDirectory();
 				File newFolder = selectedFolder;
-				if (oldFolder.getCanonicalPath() != newFolder.getCanonicalPath()) {
-					// Change the saved directory
-					UserProperties.getInstance().setFileDirectory(selectedFolder);
-					Files.move(oldFolder.toPath(), newFolder.toPath(), REPLACE_EXISTING);
+				if (!oldFolder.exists() || oldFolder.getCanonicalPath() != newFolder.getCanonicalPath()) {
+					if (!oldFolder.exists() || !newFolder.getParent().contains(oldFolder.getCanonicalPath())) {
+						if (oldFolder.exists()) {
+							// Move the old folder's contents to the new folder
+							Files.move(oldFolder.toPath(), newFolder.toPath(), REPLACE_EXISTING);
+						}
+						UserProperties.getInstance().setFileDirectory(selectedFolder);
+					} else {
+						messages.add(new UserMessage("Selected folder cannot be a subfolder of the old folder", true));
+					}
 				}
 			}
 		} catch (IOException e) {
-			LOG.error(e);
+			LOG.error(e, e);
 			messages.add(new UserMessage("Something unexpected went wrong", true));
 		}
 		return messages;
@@ -143,10 +149,10 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 		if (changed) {
 			if (selectedFolder.exists()) {
 				if (selectedFolder.list().length > 0) {
-					messages.add(new UserMessage("The selected Fides folder has to be empty", true));
+					messages.add(new UserMessage("The selected folder has to be empty", true));
 				}
 			} else {
-				messages.add(new UserMessage("The selected Fides folder doesn't exist", true));
+				messages.add(new UserMessage("The selected folder doesn't exist", true));
 			}
 		}
 		return messages;
