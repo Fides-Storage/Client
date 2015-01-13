@@ -40,6 +40,12 @@ public class ApplicationHandler {
 	 */
 	public ApplicationHandler(FileSyncManager syncManager) {
 		this.syncManager = syncManager;
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				stopApplication();
+			}
+		});
 	}
 
 	public FileSyncManager getSyncManager() {
