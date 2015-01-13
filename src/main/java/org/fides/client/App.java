@@ -7,6 +7,9 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +47,12 @@ public class App {
 	 *            The arguments passed on to the application
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+			LOG.debug("Setting the look and feel of the UI failed, throws " + e);
+		}
+
 		ServerConnector serverConnector = new ServerConnector();
 
 		InetSocketAddress serverAddress = newServerConnection(serverConnector);
