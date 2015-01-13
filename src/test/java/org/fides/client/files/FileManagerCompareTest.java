@@ -34,7 +34,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Test for the {@link FileManager}
  *
  */
-@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UserProperties.class, FileUtil.class, LocalHashes.class })
 @PowerMockIgnore("javax.management.*")
