@@ -48,6 +48,7 @@ public class SettingsFrame extends JFrame {
 		generalTabPanel.setLayout(new BoxLayout(generalTabPanel, BoxLayout.PAGE_AXIS));
 		generalTabPanel.add(createBorder(new ChangeServerPanel(appHandler.getSyncManager().getEncManager().getConnector())));
 		generalTabPanel.add(createBorder(new CheckIntervalPanel()));
+		generalTabPanel.add(createBorder(new ChangeFolderPanel()));
 		generalTabPanel.add(Box.createVerticalGlue());
 
 		// Create the individual setting screens
