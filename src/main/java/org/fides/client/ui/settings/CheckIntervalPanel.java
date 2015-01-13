@@ -33,11 +33,11 @@ public class CheckIntervalPanel extends SettingsJPanel {
 		// Set layout on panel
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-		checkTimeField.setText("" + UserProperties.getInstance().getCheckTimeInSeconds());
-
 		// Add a labels to the panel
 		this.add(new JLabel("Check interval (seconds):"));
 		this.add(checkTimeField);
+
+		checkTimeField.setText(Long.toString(UserProperties.getInstance().getCheckTimeInSeconds()));
 
 		// To prevent stretching
 		UiUtils.setMaxHeightToPreferred(checkTimeField);

@@ -88,13 +88,12 @@ public class ChangeServerPanel extends SettingsJPanel {
 				connector.disconnect();
 				// No errors? then save it
 				if (certificate != null && errorMessages.isEmpty()) {
-					System.out.println("BLAAA");
 					if (AuthenticateUser.authenticateUser(connector)) {
 						UserProperties.getInstance().setServerAddress(serverAddress);
 						UserProperties.getInstance().setCertificate(certificate);
 						LocalHashes.getInstance().removeAllHashes();
 						boolean hasKeyFile = connector.checkIfKeyFileExists();
-						if (!connector.checkIfKeyFileExists()) {
+						if (!hasKeyFile) {
 							encryptionManager.updateKeyFile(new KeyFile());
 						}
 					} else {
