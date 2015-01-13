@@ -1,6 +1,5 @@
 package org.fides.client.connector;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -50,20 +49,18 @@ public class ServerConnectorTest {
 
 	/**
 	 * Test whether the user can be registered.
+	 * 
+	 * @throws IOException
 	 */
 	@Test
-	public void testRegistrationOfUser() {
+	public void testRegistrationOfUser() throws IOException {
 		ByteArrayOutputStream byteArrayOutput = new ByteArrayOutputStream();
 		DataOutputStream writeJson = new DataOutputStream(byteArrayOutput);
 		Mockito.when(connector.register(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
-		try {
-			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
-			byteArrayOutput.close();
-			writeJson.close();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
+		writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
+		byteArrayOutput.close();
+		writeJson.close();
 
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
 		Whitebox.setInternalState(connector, "in", mockedDataInputStream);
@@ -74,31 +71,28 @@ public class ServerConnectorTest {
 		// Asserts that the expected Json text is equal to the actual Json text
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
-		try {
-			assertEquals("{\"" + Actions.ACTION + "\":\"" + Actions.CREATE_USER + "\",\"" + Actions.Properties.PASSWORD_HASH + "" +
-				"\":\"passwordTest\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\"}", readByteArrayAsData.readUTF());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
 
+		String answer = readByteArrayAsData.readUTF();
+		assertTrue(answer.contains("\"" + Actions.ACTION + "\":\"" + Actions.CREATE_USER + "\""));
+		assertTrue(answer.contains("\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\""));
+		assertTrue(answer.contains("\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\""));
 	}
 
 	/**
 	 * Test whether the user can log in with a user name and password
+	 * 
+	 * @throws IOException
 	 */
 	@Test
-	public void testLoginOfUser() {
+	public void testLoginOfUser() throws IOException {
 		ByteArrayOutputStream byteArrayOutput = new ByteArrayOutputStream();
 		DataOutputStream writeJson = new DataOutputStream(byteArrayOutput);
 		Mockito.when(connector.login(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
 
-		try {
-			writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
-			byteArrayOutput.close();
-			writeJson.close();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
+		writeJson.writeUTF("{" + Responses.SUCCESSFUL + ":true}");
+		byteArrayOutput.close();
+		writeJson.close();
+
 		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
 		Whitebox.setInternalState(connector, "in", mockedDataInputStream);
 
@@ -108,13 +102,12 @@ public class ServerConnectorTest {
 		// Asserts that the expected Json text is equal to the actual Json text
 		ByteArrayInputStream readMockedOutputStreamAsByteArray = new ByteArrayInputStream(mockedOutputStream.toByteArray());
 		DataInputStream readByteArrayAsData = new DataInputStream(readMockedOutputStreamAsByteArray);
-		try {
-			assertEquals(
-				"{\"" + Actions.ACTION + "\":\"" + Actions.LOGIN + "\",\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\",\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\"}",
-				readByteArrayAsData.readUTF());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
+
+		String answer = readByteArrayAsData.readUTF();
+		assertTrue(answer.contains("\"" + Actions.ACTION + "\":\"" + Actions.LOGIN + "\""));
+		assertTrue(answer.contains("\"" + Actions.Properties.PASSWORD_HASH + "\":\"passwordTest\""));
+		assertTrue(answer.contains("\"" + Actions.Properties.USERNAME_HASH + "\":\"usernameTest\""));
+
 	}
 
 	/**
