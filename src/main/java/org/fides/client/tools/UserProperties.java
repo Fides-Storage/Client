@@ -16,7 +16,7 @@ import org.fides.client.ui.ErrorMessageScreen;
 
 /**
  * Contains the settings on where files should be saved.
- *
+ * 
  */
 public final class UserProperties {
 
@@ -142,6 +142,19 @@ public final class UserProperties {
 
 	public File getFileDirectory() {
 		return new File(properties.getProperty(FILE_DIRECTORY_KEY));
+	}
+
+	/**
+	 * Changes the file directory
+	 * 
+	 * @param directory
+	 *            The directory to save to the settings
+	 * @throws IOException
+	 *             thrown when the directory cannot be resolved to a canonical path
+	 */
+	public void setFileDirectory(File directory) throws IOException {
+		properties.setProperty(FILE_DIRECTORY_KEY, directory.getCanonicalPath());
+		saveProperties();
 	}
 
 	public String getUsernameHash() {

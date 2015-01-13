@@ -1,11 +1,15 @@
 package org.fides.client.ui.settings;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -21,7 +25,12 @@ import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
 
+/**
+ * A UI Panel that allows the user to change his Fides folder
+ */
 public class ChangeFolderPanel extends SettingsJPanel implements ActionListener {
+
+	private static final long serialVersionUID = 308292657820504236L;
 
 	private static final Logger LOG = LogManager.getLogger(ChangeFolderPanel.class);
 
@@ -29,6 +38,10 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 
 	private final String initialFolder;
 
+	/**
+	 * The constructor for the {@link ChangeFolderPanel}. Adding this panel to a view shows the current selected folder
+	 * and gives the user a {@link JFileChooser} to change his Fides folder
+	 */
 	public ChangeFolderPanel() {
 		super("Fides folder");
 
@@ -65,13 +78,15 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 		this.add(folderPicker);
 	}
 
-	@Override
-	public List<UserMessage> applySettings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	/**
+	 * An action performed which can be used to call the changeSelectedFolder function when the 'Select' button is
+	 * pressed
+	 */
+	public void actionPerformed(ActionEvent e) {
+		changeSelectedFolder();
+	};
 
-	public void actionPerformed(ActionEvent event) {
+	private void changeSelectedFolder() {
 		JFileChooser chooser = new JFileChooser();
 
 		File lastSelected = new File(fidesFolderField.getText());
@@ -93,5 +108,47 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 				LOG.error(e);
 			}
 		}
+	}
+
+	@Override
+	public List<UserMessage> applySettings() {
+		ArrayList<UserMessage> messages = new ArrayList<>();
+		File selectedFolder = new File(fidesFolderField.getText());
+		try {
+			// If the folder is validated and it's not the same as the previously selected directory
+			if (!messages.addAll(validateFolder(selectedFolder))) {
+				File oldFolder = UserProperties.getInstance().getFileDirectory();
+				File newFolder = selectedFolder;
+				if (oldFolder.getCanonicalPath() != newFolder.getCanonicalPath()) {
+					// Change the saved directory
+					UserProperties.getInstance().setFileDirectory(selectedFolder);
+					Files.move(oldFolder.toPath(), newFolder.toPath(), REPLACE_EXISTING);
+				}
+			}
+		} catch (IOException e) {
+			LOG.error(e);
+			messages.add(new UserMessage("Something unexpected went wrong", true));
+		}
+		return messages;
+	}
+
+	private List<UserMessage> validateFolder(File selectedFolder) {
+		ArrayList<UserMessage> messages = new ArrayList<>();
+		boolean changed = true;
+		try {
+			changed = selectedFolder.getCanonicalPath() != UserProperties.getInstance().getFileDirectory().getCanonicalPath();
+		} catch (IOException e) {
+			// Empty, if this fails it will handle the error correctly later.
+		}
+		if (changed) {
+			if (selectedFolder.exists()) {
+				if (selectedFolder.list().length > 0) {
+					messages.add(new UserMessage("The selected Fides folder has to be empty", true));
+				}
+			} else {
+				messages.add(new UserMessage("The selected Fides folder doesn't exist", true));
+			}
+		}
+		return messages;
 	}
 }
