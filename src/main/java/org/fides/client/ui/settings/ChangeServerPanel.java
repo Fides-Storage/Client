@@ -16,8 +16,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
+import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.files.data.KeyFile;
 import org.fides.client.tools.CertificateUtil;
+import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
+import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -35,14 +39,14 @@ public class ChangeServerPanel extends SettingsJPanel {
 
 	private final JTextField hostPortField = new JTextField();
 
-	private final ServerConnector connector;
+	private final EncryptionManager encryptionManager;
 
 	/**
 	 * Constructor, sets up the panel
 	 */
-	public ChangeServerPanel(ServerConnector connector) {
+	public ChangeServerPanel(EncryptionManager encryptionManager) {
 		super("Server");
-		this.connector = connector;
+		this.encryptionManager = encryptionManager;
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 		this.add(new JLabel("Hostname:"));
@@ -72,6 +76,8 @@ public class ChangeServerPanel extends SettingsJPanel {
 		// Get the server address
 		serverAddress = getServerAddress(errorMessages);
 
+		ServerConnector connector = encryptionManager.getConnector();
+
 		// Continue if we don't have errors
 		if (serverAddress != null && errorMessages.isEmpty()) {
 			serverAddress = new InetSocketAddress(hostAddressField.getText(), Integer.parseInt(hostPortField.getText()));
@@ -82,13 +88,23 @@ public class ChangeServerPanel extends SettingsJPanel {
 				connector.disconnect();
 				// No errors? then save it
 				if (certificate != null && errorMessages.isEmpty()) {
-					UserProperties.getInstance().setServerAddress(serverAddress);
-					UserProperties.getInstance().setCertificate(certificate);
+					System.out.println("BLAAA");
+					if (AuthenticateUser.authenticateUser(connector)) {
+						UserProperties.getInstance().setServerAddress(serverAddress);
+						UserProperties.getInstance().setCertificate(certificate);
+						LocalHashes.getInstance().removeAllHashes();
+						boolean hasKeyFile = connector.checkIfKeyFileExists();
+						if (!connector.checkIfKeyFileExists()) {
+							encryptionManager.updateKeyFile(new KeyFile());
+						}
+					} else {
+						errorMessages.add(new UserMessage("Could not authenticate user", true));
+					}
 				}
 			}
-
+			// Make sure we are not connected
+			connector.disconnect();
 		}
-
 		return errorMessages;
 	}
 
@@ -135,7 +151,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 	private boolean connectCheck(InetSocketAddress serverAddress, List<UserMessage> errorMessages) {
 		try {
 			if (serverAddress != null) {
-				connector.init(serverAddress);
+				encryptionManager.getConnector().init(serverAddress);
 			}
 			return true;
 		} catch (UnknownHostException | ConnectException e) {

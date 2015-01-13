@@ -42,7 +42,7 @@ public class UiUtils {
 	}
 
 	/**
-	 * Sets the maximum size of a {@link JComponent} to the perverted size
+	 * Sets the maximum size of a {@link JComponent} to the preferred size
 	 * 
 	 * @param component
 	 *            The component to set the size of

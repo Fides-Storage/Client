@@ -32,10 +32,12 @@ public class SettingsFrame extends JFrame {
 	 * Constructor, creates and shows the settings window
 	 * 
 	 * @param appHandler
-	 *            The handler which is responsible for starting up and killing the application's threads
+	 *            The {@link ApplicationHandler} which is responsible for starting up and killing the application's
+	 *            threads
 	 */
 	public SettingsFrame(final ApplicationHandler appHandler) {
 		super("Settings");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -46,16 +48,18 @@ public class SettingsFrame extends JFrame {
 		JPanel generalTabPanel = new JPanel();
 		tabbedPane.addTab("General", generalTabPanel);
 		generalTabPanel.setLayout(new BoxLayout(generalTabPanel, BoxLayout.PAGE_AXIS));
-		generalTabPanel.add(createBorder(new ChangeServerPanel(appHandler.getSyncManager().getEncManager().getConnector())));
-		generalTabPanel.add(createBorder(new CheckIntervalPanel()));
-		generalTabPanel.add(createBorder(new ChangeFolderPanel()));
+
+		generalTabPanel.add(preparePanel(new ChangeServerPanel(appHandler.getSyncManager().getEncManager())));
+		generalTabPanel.add(preparePanel(new CheckIntervalPanel()));
+		generalTabPanel.add(preparePanel(new ChangeFolderPanel()));
+
 		generalTabPanel.add(Box.createVerticalGlue());
 
 		// Create the individual setting screens
 		JPanel userTabPanel = new JPanel();
 		tabbedPane.addTab("User", userTabPanel);
 		userTabPanel.setLayout(new BoxLayout(userTabPanel, BoxLayout.PAGE_AXIS));
-		userTabPanel.add(createBorder(new ChangePasswordPanel(appHandler.getSyncManager().getEncManager())));
+		userTabPanel.add(preparePanel(new ChangePasswordPanel(appHandler.getSyncManager().getEncManager())));
 		userTabPanel.add(Box.createVerticalGlue());
 
 		// Apply button
@@ -99,7 +103,15 @@ public class SettingsFrame extends JFrame {
 		setVisible(true);
 	}
 
-	private JPanel createBorder(SettingsJPanel settingsPanel) {
+	/**
+	 * Prepares a {@link SettingsJPanel} for usage. this adds a border to the panel and add its to the list for settings
+	 * to apply.
+	 * 
+	 * @param settingsPanel
+	 *            The panel to prepare
+	 * @return The prepared panel
+	 */
+	private JPanel preparePanel(SettingsJPanel settingsPanel) {
 		settingsPanels.add(settingsPanel);
 
 		Border etchedBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
