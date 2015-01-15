@@ -110,6 +110,9 @@ public class App {
 
 			FileManager fileManager = new FileManager();
 			FileSyncManager syncManager = new FileSyncManager(fileManager, encManager);
+
+			syncManager.removeGhostFiles();
+
 			LocalFileChecker checker = new LocalFileChecker(syncManager);
 			checker.start();
 

@@ -9,11 +9,13 @@ import java.net.UnknownHostException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.Collection;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
+import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
@@ -48,6 +50,42 @@ public class FileSyncManager {
 	public FileSyncManager(FileManager fileManager, EncryptionManager encManager) {
 		this.fileManager = fileManager;
 		this.encManager = encManager;
+	}
+
+	/**
+	 * Checks the server for files without any references, if these are found they will be removed
+	 * 
+	 * @return true if the actions is successfully completed
+	 */
+	public synchronized boolean removeGhostFiles() {
+		ServerConnector connector = encManager.getConnector();
+		try {
+			connector.connect();
+		} catch (ConnectException | UnknownHostException e) {
+			log.error(e);
+			return false;
+		}
+
+		KeyFile keyFile;
+
+		keyFile = encManager.requestKeyFile();
+
+		if (keyFile == null) {
+			connector.disconnect();
+			return false;
+		}
+
+		Set<String> locations = connector.requestLocations();
+		for (String location : locations) {
+			if (keyFile.getClientFileByLocation(location) == null) {
+				connector.removeFile(location);
+			}
+		}
+
+		System.out.println(locations);
+
+		connector.disconnect();
+		return true;
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -12,6 +13,7 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -28,7 +30,9 @@ import org.fides.components.virtualstream.VirtualInputStream;
 import org.fides.components.virtualstream.VirtualOutputStream;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * This class makes it possible to connect to a server and communicate with it
@@ -499,5 +503,42 @@ public class ServerConnector {
 		}
 		log.error("The last upload was not successful");
 		return false;
+	}
+
+	/**
+	 * Retrieves a set from the containing the locations the user has access to. returns null when failed
+	 * 
+	 * @return The set with locations
+	 */
+	public Set<String> requestLocations() {
+		try {
+			UserProperties userProperties = UserProperties.getInstance();
+			if (login(userProperties.getUsernameHash(), userProperties.getPasswordHash())) {
+
+				CommunicationUtil.requestAction(out, Actions.REQUEST_LOCATIONS);
+
+				JsonObject requestResponse = new Gson().fromJson(in.readUTF(), JsonObject.class);
+
+				if (requestResponse.has(Responses.SUCCESSFUL)) {
+					if (requestResponse.get(Responses.SUCCESSFUL).getAsBoolean()) {
+						JsonElement locationJelement = requestResponse.get(Responses.LOCATIONS);
+
+						if (locationJelement != null) {
+							Type collectionType = new TypeToken<Set<String>>() {
+							}.getType();
+							Set<String> locations = new Gson().fromJson(locationJelement, collectionType);
+							return locations;
+						}
+						errorMessages.put(Actions.GET_FILE, requestResponse.get(Responses.ERROR).getAsString());
+					}
+				}
+
+			} else {
+				log.error("ServerConnector couldn't log in");
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		}
+		return null;
 	}
 }
