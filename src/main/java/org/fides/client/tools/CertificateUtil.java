@@ -9,9 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A static class containing utils for certificates
- * 
- * @author Koen
- *
  */
 public final class CertificateUtil {
 	/**

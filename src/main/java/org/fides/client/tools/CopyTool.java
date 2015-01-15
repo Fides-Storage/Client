@@ -7,9 +7,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A custom tool to use for copying.
- * 
- * @author Thijs
- * 
  */
 public class CopyTool {
 

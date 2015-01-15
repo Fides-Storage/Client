@@ -55,7 +55,7 @@ public class ChangeServerPanel extends SettingsJPanel {
 		this.add(hostPortField);
 
 		hostAddressField.setText(UserProperties.getInstance().getHost());
-		hostPortField.setText("" + UserProperties.getInstance().getHostPort());
+		hostPortField.setText(Integer.toString(UserProperties.getInstance().getHostPort()));
 
 		UiUtils.setMaxHeightToPreferred(hostAddressField);
 		UiUtils.setMaxHeightToPreferred(hostPortField);
