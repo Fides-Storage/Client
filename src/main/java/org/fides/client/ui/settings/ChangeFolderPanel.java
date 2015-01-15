@@ -83,13 +83,24 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 	 * pressed
 	 */
 	public void actionPerformed(ActionEvent e) {
-		changeSelectedFolder();
+		String newFolder = getSelectedFolder(fidesFolderField.getText());
+		if (newFolder != null) {
+			fidesFolderField.setText(newFolder);
+		}
 	};
 
-	private void changeSelectedFolder() {
+	/**
+	 * Gives the user a FileChooser and returns the folder the user chose.
+	 * 
+	 * @param currentDirectory
+	 *            The folder the FileChooser opens in
+	 * @return The chosen folder. Returns null if the user didn't choose a folder.
+	 */
+	protected String getSelectedFolder(String currentDirectory) {
 		JFileChooser chooser = new JFileChooser();
+		String newFolder = null;
 
-		File lastSelected = new File(fidesFolderField.getText());
+		File lastSelected = new File(currentDirectory);
 		if (lastSelected.exists()) {
 			chooser.setCurrentDirectory(lastSelected);
 		} else {
@@ -103,11 +114,12 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			try {
-				fidesFolderField.setText(chooser.getSelectedFile().getCanonicalPath());
+				newFolder = chooser.getSelectedFile().getCanonicalPath();
 			} catch (IOException e) {
 				LOG.error(e);
 			}
 		}
+		return newFolder;
 	}
 
 	@Override
@@ -138,7 +150,14 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 		return messages;
 	}
 
-	private List<UserMessage> validateFolder(File selectedFolder) {
+	/**
+	 * Checks if the Fides folder can be changed to the folder the user selected
+	 * 
+	 * @param selectedFolder
+	 *            The folder the user selected
+	 * @return ArrayList with errorMessages if there were any
+	 */
+	protected List<UserMessage> validateFolder(File selectedFolder) {
 		ArrayList<UserMessage> messages = new ArrayList<>();
 		boolean changed = true;
 		try {
