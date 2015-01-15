@@ -64,8 +64,8 @@ public class ChangeServerPanel extends SettingsJPanel {
 	@Override
 	public List<UserMessage> applySettings() {
 		// Return if we did not change
-		if (hostAddressField.getText().equals(UserProperties.getInstance().getHost()) &&
-			hostPortField.getText().equals("" + UserProperties.getInstance().getHostPort())) {
+		if (StringUtils.equals(hostAddressField.getText(), UserProperties.getInstance().getHost()) &&
+			StringUtils.equals(hostPortField.getText(), Integer.toString(UserProperties.getInstance().getHostPort()))) {
 			return null;
 		}
 
@@ -80,22 +80,18 @@ public class ChangeServerPanel extends SettingsJPanel {
 
 		// Continue if we don't have errors
 		if (serverAddress != null && errorMessages.isEmpty()) {
-			serverAddress = new InetSocketAddress(hostAddressField.getText(), Integer.parseInt(hostPortField.getText()));
 			// Check if we don't have error and if we can connect
 			if (errorMessages.isEmpty() && connectCheck(serverAddress, errorMessages)) {
 				// Check the certificate
 				X509Certificate certificate = certificateCheck(connector, errorMessages);
-				connector.disconnect();
+
 				// No errors? then save it
 				if (certificate != null && errorMessages.isEmpty()) {
 					if (AuthenticateUser.authenticateUser(connector)) {
 						UserProperties.getInstance().setServerAddress(serverAddress);
 						UserProperties.getInstance().setCertificate(certificate);
 						LocalHashes.getInstance().removeAllHashes();
-						boolean hasKeyFile = connector.checkIfKeyFileExists();
-						if (!hasKeyFile) {
-							encryptionManager.updateKeyFile(new KeyFile());
-						}
+						keyFileCheck();
 					} else {
 						errorMessages.add(new UserMessage("Could not authenticate user", true));
 					}
@@ -115,21 +111,24 @@ public class ChangeServerPanel extends SettingsJPanel {
 	 * @return The {@link InetSocketAddress}
 	 */
 	private InetSocketAddress getServerAddress(List<UserMessage> errorMessages) {
+		String hostString = hostAddressField.getText();
+		String portString = hostPortField.getText();
+
 		// Check for empty hostname
-		if (StringUtils.isBlank(hostAddressField.getText())) {
+		if (StringUtils.isBlank(hostString)) {
 			errorMessages.add(new UserMessage("Hostname can not be blank", true));
 		}
 		// Check for empty port and if the port is an integer
-		if (StringUtils.isBlank(hostPortField.getText())) {
+		if (StringUtils.isBlank(portString)) {
 			errorMessages.add(new UserMessage("Port can not be blank", true));
 		} else {
 			try {
 				// Check if the port is a valid port.
-				int portInt = Integer.parseInt(hostPortField.getText());
+				int portInt = Integer.parseInt(portString);
 				if (portInt < 0 || portInt > 65535) {
 					errorMessages.add(new UserMessage("Port has to be a valid port", true));
 				}
-				return new InetSocketAddress(hostAddressField.getText(), Integer.parseInt(hostPortField.getText()));
+				return new InetSocketAddress(hostString, Integer.parseInt(portString));
 			} catch (NumberFormatException e) {
 				// We cannot parse it
 				errorMessages.add(new UserMessage("Port has to be a valid number", true));
@@ -182,6 +181,16 @@ public class ChangeServerPanel extends SettingsJPanel {
 			return certificate;
 		}
 		return null;
+	}
+
+	/**
+	 * Creates a {@link KeyFile} is one does not exist for the current user
+	 */
+	private void keyFileCheck() {
+		boolean hasKeyFile = encryptionManager.getConnector().checkIfKeyFileExists();
+		if (!hasKeyFile) {
+			encryptionManager.updateKeyFile(new KeyFile());
+		}
 	}
 
 }
