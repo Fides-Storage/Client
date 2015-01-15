@@ -129,6 +129,7 @@ public class EncryptionManager {
 		} else {
 			DataOutputStream dout = new DataOutputStream(out);
 			OutputStream outEncrypted = null;
+			boolean uploadeSuccessful = false;
 			try {
 				byte[] saltBytes = KeyGenerator.getSalt(SALT_SIZE);
 				int pbkdf2Rounds = KeyGenerator.getRounds();
@@ -145,15 +146,15 @@ public class EncryptionManager {
 				dout.flush();
 				out.flush();
 				outEncrypted.close();
-				successful = true;
+				uploadeSuccessful = true;
 			} catch (IOException e) {
 				LOG.error(e);
 			} finally {
 				IOUtils.closeQuietly(outEncrypted);
 				IOUtils.closeQuietly(dout);
 				IOUtils.closeQuietly(out);
-				successful = connector.confirmUpload(successful);
 			}
+			successful = connector.confirmUpload(uploadeSuccessful);
 		}
 		return successful;
 	}
