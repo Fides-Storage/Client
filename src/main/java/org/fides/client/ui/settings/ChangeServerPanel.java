@@ -30,6 +30,8 @@ import org.fides.client.ui.UserMessage;
  * UI where the server can be changed by a user
  */
 public class ChangeServerPanel extends SettingsJPanel {
+	private static final long serialVersionUID = -4725396003359289714L;
+
 	/**
 	 * Log for this class
 	 */

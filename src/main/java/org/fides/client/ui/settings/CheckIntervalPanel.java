@@ -17,6 +17,8 @@ import org.fides.client.ui.UserMessage;
  * UI where the check interval can be changed by a user
  */
 public class CheckIntervalPanel extends SettingsJPanel {
+	private static final long serialVersionUID = 6834169516638826769L;
+
 	/**
 	 * Log for this class
 	 */

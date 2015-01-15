@@ -21,6 +21,8 @@ import org.fides.tools.HashUtils;
  * UI where a password can be changed by a user
  */
 public class ChangePasswordPanel extends SettingsJPanel {
+	private static final long serialVersionUID = 900999340999410699L;
+
 	/**
 	 * Log for this class
 	 */

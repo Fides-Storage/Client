@@ -25,6 +25,7 @@ import org.fides.client.ui.UserMessage;
  * A frame containing the settings of the program
  */
 public class SettingsFrame extends JFrame {
+	private static final long serialVersionUID = 4971171028483297323L;
 
 	private final List<SettingsJPanel> settingsPanels = new ArrayList<>();
 
