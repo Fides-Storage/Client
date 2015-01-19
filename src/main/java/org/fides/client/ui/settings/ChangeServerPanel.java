@@ -13,8 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
 import org.fides.client.files.data.KeyFile;
@@ -31,11 +29,6 @@ import org.fides.client.ui.UserMessage;
  */
 public class ChangeServerPanel extends SettingsJPanel {
 	private static final long serialVersionUID = -4725396003359289714L;
-
-	/**
-	 * Log for this class
-	 */
-	private static final Logger LOG = LogManager.getLogger(ChangeServerPanel.class);
 
 	private final JTextField hostAddressField = new JTextField();
 

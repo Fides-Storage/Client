@@ -12,6 +12,8 @@ import org.fides.client.ui.UserMessage;
  */
 public abstract class SettingsJPanel extends JPanel {
 
+	private static final long serialVersionUID = -15736148359935264L;
+	
 	private final String name;
 
 	/**

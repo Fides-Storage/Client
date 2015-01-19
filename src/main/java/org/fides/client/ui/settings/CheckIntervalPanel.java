@@ -7,8 +7,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -18,11 +16,6 @@ import org.fides.client.ui.UserMessage;
  */
 public class CheckIntervalPanel extends SettingsJPanel {
 	private static final long serialVersionUID = 6834169516638826769L;
-
-	/**
-	 * Log for this class
-	 */
-	private static final Logger LOG = LogManager.getLogger(CheckIntervalPanel.class);
 
 	private final JTextField checkTimeField = new JTextField();
 

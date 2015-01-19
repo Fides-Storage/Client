@@ -131,7 +131,7 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 			if (!messages.addAll(validateFolder(selectedFolder))) {
 				File oldFolder = UserProperties.getInstance().getFileDirectory();
 				File newFolder = selectedFolder;
-				if (!oldFolder.exists() || oldFolder.getCanonicalPath() != newFolder.getCanonicalPath()) {
+				if (!oldFolder.exists() || !oldFolder.getCanonicalPath().equals(newFolder.getCanonicalPath())) {
 					if (!oldFolder.exists() || !newFolder.getParent().contains(oldFolder.getCanonicalPath())) {
 						if (oldFolder.exists()) {
 							// Move the old folder's contents to the new folder

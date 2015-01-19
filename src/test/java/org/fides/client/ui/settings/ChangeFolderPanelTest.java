@@ -150,8 +150,8 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdirs());
-		File FillFile = new File(newDir, "ToFilledFolder-File");
-		FillFile.createNewFile();
+		File fillFile = new File(newDir, "ToFilledFolder-File");
+		fillFile.createNewFile();
 		setFolderField(newDir.getCanonicalPath());
 
 		// Apply the Change Folder settings
