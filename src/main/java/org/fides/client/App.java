@@ -54,21 +54,7 @@ public class App {
 			LOG.debug("Setting the look and feel of the UI failed, throws " + e);
 		}
 
-		ServerConnector serverConnector = new ServerConnector();
-
-		InetSocketAddress serverAddress = newServerConnection(serverConnector);
-
-		if (serverAddress == null) {
-			System.exit(1);
-		}
-
-		try {
-			serverConnector.init(serverAddress);
-		} catch (ConnectException | UnknownHostException e) {
-			LOG.error(e);
-			System.exit(1);
-		}
-
+		ServerConnector serverConnector = initServerConnector();
 		Boolean isAuthenticated = AuthenticateUser.authenticateUser(serverConnector);
 
 		if (isAuthenticated && serverConnector.isConnected()) {
@@ -99,7 +85,6 @@ public class App {
 					encManager.updateKeyFile(new KeyFile());
 				}
 
-
 				// check if key file can be decrypted
 				KeyFile keyFile = null;
 				try {
@@ -128,6 +113,29 @@ public class App {
 			trayIcon.addToSystemTray();
 		}
 
+	}
+
+	/**
+	 * Initialize Server Connector with the users input
+	 * 
+	 * @return ServerConnect that is initialized
+	 */
+	private static ServerConnector initServerConnector() {
+		ServerConnector serverConnector = new ServerConnector();
+		InetSocketAddress serverAddress = newServerConnection(serverConnector);
+
+		if (serverAddress == null) {
+			System.exit(1);
+		}
+
+		try {
+			serverConnector.init(serverAddress);
+		} catch (ConnectException | UnknownHostException e) {
+			LOG.error(e);
+			System.exit(1);
+		}
+
+		return serverConnector;
 	}
 
 	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {
