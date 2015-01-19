@@ -1,5 +1,6 @@
 package org.fides.client.connector;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -10,6 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.fides.components.Actions;
 import org.fides.components.Responses;
@@ -18,8 +21,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 /**
- * The serverconnector unit test
+ * The {@link ServerConnector} unit test
  */
 public class ServerConnectorTest {
 
@@ -200,4 +206,50 @@ public class ServerConnectorTest {
 		// Assert false when no data is given by the server
 		assertFalse(connector.login("usernameTest", "passwordTest"));
 	}
+
+	/**
+	 * Test for {@link ServerConnector#requestLocations()}
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testRequestLocations() throws IOException {
+		Mockito.when(connector.requestLocations()).thenCallRealMethod();
+		Mockito.when(connector.login(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+
+		// The locations
+		final String location1 = "SomeLocation";
+		final String location2 = "Another Location";
+		final String location3 = "gysg8fh390jifda";
+
+		Set<String> locations = new HashSet<>();
+		locations.add(location1);
+		locations.add(location2);
+		locations.add(location3);
+
+		// The response
+		JsonObject returnJobj = new JsonObject();
+		returnJobj.addProperty(Responses.SUCCESSFUL, true);
+		returnJobj.add(Responses.LOCATIONS, new Gson().toJsonTree(locations));
+
+		// Make the response as it would be in real
+		ByteArrayOutputStream byteArrayOutput = new ByteArrayOutputStream();
+		DataOutputStream writeJson = new DataOutputStream(byteArrayOutput);
+		writeJson.writeUTF(new Gson().toJson(returnJobj));
+		writeJson.close();
+
+		// Make it read the right response
+		DataInputStream mockedDataInputStream = new DataInputStream(new ByteArrayInputStream(byteArrayOutput.toByteArray()));
+		Whitebox.setInternalState(connector, "in", mockedDataInputStream);
+
+		// Retrieve the locations
+		Set<String> locationsReturn = connector.requestLocations();
+
+		// The test
+		assertEquals(3, locationsReturn.size());
+		assertTrue(locationsReturn.contains(location1));
+		assertTrue(locationsReturn.contains(location2));
+		assertTrue(locationsReturn.contains(location3));
+	}
+
 }

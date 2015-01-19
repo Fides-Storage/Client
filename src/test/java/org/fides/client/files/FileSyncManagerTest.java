@@ -2,6 +2,8 @@ package org.fides.client.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -9,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.ServerConnector;
@@ -194,7 +197,35 @@ public class FileSyncManagerTest {
 	 */
 	@Test
 	public void testHandleConflict() {
-		// TODO inplement when needed
+		// TODO implement when needed
+	}
+
+	/**
+	 * To test {@link FileSyncManager#removeGhostFiles()}, checks if the remote file is removed when there is no
+	 * reference to it
+	 */
+	@Test
+	public void testRemoveGhostFiles() throws Exception {
+		final String location1 = "Location-1"; // server and client
+		final String location2 = "Location-2"; // client
+		final String location3 = "Location-3"; // server, should be removed
+
+		Set<String> locations = new HashSet<>();
+		locations.add(location1);
+		locations.add(location3);
+		Mockito.when(serverConnectorMock.requestLocations()).thenReturn(locations);
+
+		keyFile.addClientFile(new ClientFile("File-1.txt", location1, null, null));
+		keyFile.addClientFile(new ClientFile("File-2.txt", location2, null, null));
+
+		assertTrue(fileSyncManager.removeGhostFiles());
+
+		verify(serverConnectorMock, Mockito.never()).removeFile(location1);
+		verify(serverConnectorMock, Mockito.never()).removeFile(location2);
+		verify(serverConnectorMock, Mockito.times(1)).removeFile(location3);
+		verify(serverConnectorMock, Mockito.times(1)).removeFile(Mockito.anyString());
+		verify(serverConnectorMock, Mockito.atLeastOnce()).connect();
+		verify(serverConnectorMock, Mockito.atLeastOnce()).disconnect();
 	}
 
 }

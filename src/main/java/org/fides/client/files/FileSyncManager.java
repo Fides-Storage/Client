@@ -82,8 +82,6 @@ public class FileSyncManager {
 			}
 		}
 
-		System.out.println(locations);
-
 		connector.disconnect();
 		return true;
 	}
