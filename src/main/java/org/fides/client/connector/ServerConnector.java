@@ -42,6 +42,11 @@ public class ServerConnector {
 	private static final Logger LOG = LogManager.getLogger(ServerConnector.class);
 
 	/**
+	 * connection timeout for initial connect
+	 */
+	private static final int CONNECTTIMEOUT = 10000;
+
+	/**
 	 * The collection to store the error messages received from the server
 	 */
 	private Map<String, String> errorMessages = new HashMap<>();
@@ -94,7 +99,7 @@ public class ServerConnector {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
-			sslsocket.connect(address);
+			sslsocket.connect(address, CONNECTTIMEOUT);
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();

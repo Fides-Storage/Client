@@ -148,10 +148,8 @@ public class App {
 					}
 				} catch (UnknownHostException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to host " + serverAddress.getHostName());
-					break;
 				} catch (ConnectException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to " + serverAddress.getHostName() + ":" + serverAddress.getPort());
-					break;
 				}
 			}
 
