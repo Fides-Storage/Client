@@ -50,7 +50,7 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 		JLabel labelFolder = new JLabel("Location:");
 		this.add(UiUtils.leftAlignBox(labelFolder));
 
-		// Adding a panel with the folderfield and the selection button.
+		// Adding a panel with the fidesFolderField and the selection button.
 		JPanel folderPicker = new JPanel();
 		folderPicker.setLayout(new BoxLayout(folderPicker, BoxLayout.LINE_AXIS));
 
@@ -161,7 +161,7 @@ public class ChangeFolderPanel extends SettingsJPanel implements ActionListener 
 		ArrayList<UserMessage> messages = new ArrayList<>();
 		boolean changed = true;
 		try {
-			changed = selectedFolder.getCanonicalPath() != UserProperties.getInstance().getFileDirectory().getCanonicalPath();
+			changed = !selectedFolder.getCanonicalPath().equals(UserProperties.getInstance().getFileDirectory().getCanonicalPath());
 		} catch (IOException e) {
 			// Empty, if this fails it will handle the error correctly later.
 		}
