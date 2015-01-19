@@ -42,6 +42,10 @@ public class ChangeFolderPanelTest {
 
 	private JTextField newFolderFieldMock;
 	
+	/**
+	 * Sets up the test by mocking the UserProperties and the FolderField in the ChangeFolderPanel.
+	 * @throws Exception
+	 */
 	@Before
 	public void setUp() throws Exception {
 		mainDir = UserProperties.getInstance().getFileDirectory();
@@ -61,17 +65,29 @@ public class ChangeFolderPanelTest {
 
 		newFolderFieldMock = mock(JTextField.class);
 		Whitebox.setInternalState(panel, "fidesFolderField", newFolderFieldMock);
-		setFolderField(testDir.getCanonicalPath());
+		setFolderField(testDir);
 	}
 
+	/**
+	 * Changes the fileDirectory the UserProperties return
+	 * @param fileDirectory
+	 */
 	private void setFileDirectory(File fileDirectory) {
 		Mockito.when(userPropMock.getFileDirectory()).thenReturn(fileDirectory);
 	}
 
-	private void setFolderField(String newDirectory) {
-		when(newFolderFieldMock.getText()).thenReturn(newDirectory);
+	/**
+	 * Changes the directory in the FolderField
+	 * @param newDirectory
+	 */
+	private void setFolderField(File newDirectory) {
+		when(newFolderFieldMock.getText()).thenReturn(newDirectory.getPath());
 	}
 
+	/**
+	 * Tests the normal flow, changing the Fides folder to a new one.
+	 * @throws IOException
+	 */
 	@Test
 	public void testChangeFolder() throws IOException {
 		// Create old directory with a file
@@ -90,7 +106,7 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdirs());
-		setFolderField(newDir.getPath());
+		setFolderField(newDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -105,6 +121,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock).setFileDirectory(newDir);
 	}
 
+	/**
+	 * Tests that nothing happens when no new folder was selected
+	 * @throws IOException
+	 */
 	@Test
 	public void testSameFolder() throws IOException {
 		PowerMockito.mockStatic(Files.class);
@@ -118,7 +138,7 @@ public class ChangeFolderPanelTest {
 		File file = new File(oldDir, "ChangeFolder-File");
 		file.createNewFile();
 		setFileDirectory(oldDir);
-		setFolderField(oldDir.getCanonicalPath());
+		setFolderField(oldDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -132,6 +152,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock, Mockito.never()).setFileDirectory(Mockito.any(File.class));
 	}
 	
+	/**
+	 * Tests if the change fails if the new folder has contents
+	 * @throws IOException
+	 */
 	@Test
 	public void testToFilledFolder() throws IOException {
 		PowerMockito.mockStatic(Files.class);
@@ -152,7 +176,7 @@ public class ChangeFolderPanelTest {
 		assertTrue(newDir.mkdirs());
 		File fillFile = new File(newDir, "ToFilledFolder-File");
 		fillFile.createNewFile();
-		setFolderField(newDir.getCanonicalPath());
+		setFolderField(newDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -168,6 +192,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock, Mockito.never()).setFileDirectory(Mockito.any(File.class));
 	}
 	
+	/**
+	 * Tests if changing the folder still works if the old folder doesn't exist anymore.
+	 * @throws IOException
+	 */
 	@Test
 	public void testFromNullFolder() throws IOException {
 		PowerMockito.mockStatic(Files.class);
@@ -185,7 +213,7 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdir());
-		setFolderField(newDir.getPath());
+		setFolderField(newDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -200,6 +228,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock).setFileDirectory(newDir);
 	}
 	
+	/**
+	 * Tests if changing the folder fails correctly if the new folder doesn't exist
+	 * @throws IOException
+	 */
 	@Test
 	public void testToNullFolder() throws IOException {
 		PowerMockito.mockStatic(Files.class);
@@ -217,7 +249,7 @@ public class ChangeFolderPanelTest {
 		if (newDir.exists()) {
 			FileUtils.deleteDirectory(newDir);
 		}
-		setFolderField(newDir.getCanonicalPath());
+		setFolderField(newDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -232,6 +264,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock, Mockito.never()).setFileDirectory(Mockito.any(File.class));
 	}
 	
+	/**
+	 * Tests if changing the folder fails correctly if the new folder is a subfolder of the old folder.
+	 * @throws IOException
+	 */
 	@Test
 	public void testToInnerFolder() throws IOException {
 		PowerMockito.mockStatic(Files.class);
@@ -250,7 +286,7 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdirs());
-		setFolderField(newDir.getCanonicalPath());
+		setFolderField(newDir);
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -266,6 +302,10 @@ public class ChangeFolderPanelTest {
 		Mockito.verify(userPropMock, Mockito.never()).setFileDirectory(Mockito.any(File.class));
 	}
 	
+	/**
+	 * Tears down the test by removing all references and deleting the test directory.
+	 * @throws IOException
+	 */
 	@After
 	public void tearDown() throws IOException {
 		FileUtils.deleteDirectory(testDir);
