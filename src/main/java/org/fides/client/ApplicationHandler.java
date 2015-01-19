@@ -63,9 +63,12 @@ public class ApplicationHandler {
 
 	/**
 	 * Starts the {@link LocalFileChecker} thread and the {@link FileCheckTask} thread.
+	 * 
+	 * @return true if the application is started, false if already started
 	 */
-	public void startApplication() {
+	public synchronized boolean startApplication() {
 		if (!running) {
+			running = true;
 			LOG.debug("Starting the application");
 			syncManager.reenable();
 
@@ -78,15 +81,19 @@ public class ApplicationHandler {
 			checkTimer = new Timer("CheckTimer");
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
 			checkTimer.scheduleAtFixedRate(fileCheckTask, 0, timeCheck);
+			return true;
 		}
-		running = true;
+		return false;
 	}
 
 	/**
 	 * Stops the {@link LocalFileChecker} thread and the {@link FileCheckTask} thread.
+	 * 
+	 * @return true if the application is stopped, false if already stopped
 	 */
-	public void stopApplication() {
+	public synchronized boolean stopApplication() {
 		if (running) {
+			running = false;
 			LOG.debug("Stopping the application");
 			try {
 				syncManager.waitForStop();
@@ -104,8 +111,9 @@ public class ApplicationHandler {
 
 			checkTimer = null;
 			fileCheckTask = null;
+			return true;
 		}
-		running = false;
+		return false;
 	}
 
 	/**

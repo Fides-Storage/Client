@@ -77,7 +77,7 @@ public class SettingsFrame extends JFrame {
 		applyButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				appHandler.stopApplication();
+				boolean selfStopped = appHandler.stopApplication();
 
 				ArrayList<UserMessage> messages = new ArrayList<>();
 				for (SettingsJPanel settingsJPanel : settingsPanels) {
@@ -111,7 +111,9 @@ public class SettingsFrame extends JFrame {
 				} else {
 					SettingsFrame.this.dispose();
 				}
-				appHandler.startApplication();
+				if (selfStopped) {
+					appHandler.startApplication();
+				}
 			}
 		});
 
