@@ -485,20 +485,17 @@ public class ServerConnector {
 	 */
 	public boolean confirmUpload(boolean uploadSuccessful) {
 		try {
-			JsonObject returnJsonObject = new JsonObject();
-			returnJsonObject.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
-			out.writeUTF(new Gson().toJson(returnJsonObject));
-
-			if (uploadSuccessful) {
-				String message = in.readUTF();
-				JsonObject response = new Gson().fromJson(message, JsonObject.class);
-				if (response.has(Responses.SUCCESSFUL)) {
-					if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
-						LOG.debug("Upload was successful");
-						return true;
-					} else {
-						errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
-					}
+			String message = in.readUTF();
+			JsonObject response = new Gson().fromJson(message, JsonObject.class);
+			if (response.has(Responses.SUCCESSFUL)) {
+				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
+					LOG.debug("Upload was successful");
+					JsonObject returnJsonObject = new JsonObject();
+					returnJsonObject.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
+					out.writeUTF(new Gson().toJson(returnJsonObject));
+					return true;
+				} else {
+					errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
 				}
 			}
 		} catch (IOException e) {
