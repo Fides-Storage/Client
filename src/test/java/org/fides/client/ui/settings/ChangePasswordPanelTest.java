@@ -2,6 +2,7 @@ package org.fides.client.ui.settings;
 
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.data.KeyFile;
 import org.fides.tools.HashUtils;
 import org.junit.BeforeClass;
@@ -35,7 +36,7 @@ public class ChangePasswordPanelTest {
 	 * This beforeClass function will set the majority of mocks for this testing class
 	 */
 	@BeforeClass
-	public static void beforeClass() {
+	public static void beforeClass() throws InvalidPasswordException {
 		// Mock KeyFile
 		KeyFile keyFile = mock(KeyFile.class);
 

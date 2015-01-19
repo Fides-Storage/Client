@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
 import org.fides.client.files.data.KeyFile;
@@ -98,12 +99,17 @@ public class App {
 					encManager.updateKeyFile(new KeyFile());
 				}
 
-				// check if key file can be decrypted
-				KeyFile keyFile = encManager.requestKeyFile();
 
-				if (keyFile != null) {
-					isAccepted = true;
-				} else {
+				// check if key file can be decrypted
+				KeyFile keyFile = null;
+				try {
+					keyFile = encManager.requestKeyFile();
+					if (keyFile == null) {
+						messages.add(new UserMessage("Could not connect to server", true));
+					} else {
+						isAccepted = true;
+					}
+				} catch (InvalidPasswordException e) {
 					messages.clear();
 					messages.add(new UserMessage("Password is incorrect", true));
 				}

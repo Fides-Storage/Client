@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.data.KeyFile;
 import org.fides.client.ui.UiUtils;
 import org.fides.client.ui.UserMessage;
@@ -86,13 +87,15 @@ public class ChangePasswordPanel extends SettingsJPanel {
 				keyFile = encryptionManager.requestKeyFile(HashUtils.hash(oldPassword));
 			} catch (ConnectException | UnknownHostException e) {
 				LOG.error(e);
+			} catch (InvalidPasswordException e) {
+				messages.add(new UserMessage("Old password is incorrect", true));
 			} finally {
 				encryptionManager.getConnector().disconnect();
 			}
 
 			// Decryption of keyfile failed, add error message.
-			if (keyFile == null) {
-				messages.add(new UserMessage("Old password is incorrect", true));
+			if (messages.isEmpty() && keyFile == null) {
+				messages.add(new UserMessage("Could not connect to server", true));
 			}
 		}
 		if (StringUtils.isBlank(newPassword1)) {
@@ -109,8 +112,8 @@ public class ChangePasswordPanel extends SettingsJPanel {
 	}
 
 	/**
-	 * Apply the password change. This will (1) request the keyfile, (2) change the password in the EncryptionManager and
-	 * (3) upload the keyfile
+	 * Apply the password change. This will (1) request the keyfile, (2) change the password in the EncryptionManager
+	 * and (3) upload the keyfile
 	 * 
 	 * @return whether the password change was successful or not
 	 */
@@ -134,7 +137,7 @@ public class ChangePasswordPanel extends SettingsJPanel {
 			try {
 				encryptionManager.getConnector().connect();
 				keyFile = encryptionManager.requestKeyFile();
-			} catch (ConnectException | UnknownHostException e) {
+			} catch (ConnectException | UnknownHostException | InvalidPasswordException e) {
 				LOG.error(e);
 			}
 

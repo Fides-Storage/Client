@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.StreamCorruptedException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -69,7 +70,7 @@ public class EncryptionManager {
 	 * 
 	 * @return The decrypted {@link KeyFile}
 	 */
-	public KeyFile requestKeyFile() {
+	public KeyFile requestKeyFile() throws InvalidPasswordException {
 		return requestKeyFile(password);
 	}
 
@@ -81,7 +82,7 @@ public class EncryptionManager {
 	 * 
 	 * @return The decrypted {@link KeyFile}
 	 */
-	public KeyFile requestKeyFile(String decryptionPassword) {
+	public KeyFile requestKeyFile(String decryptionPassword) throws InvalidPasswordException {
 		InputStream in = connector.requestKeyFile();
 		if (in == null) {
 			LOG.error("Server connector does not give an InputStream for a keyfile");
@@ -103,7 +104,9 @@ public class EncryptionManager {
 			KeyFile keyFile;
 			keyFile = (KeyFile) inDecrypted.readObject();
 			return keyFile;
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (ClassNotFoundException | StreamCorruptedException e) {
+			throw new InvalidPasswordException();
+		} catch (IOException e) {
 			return null;
 		} finally {
 			IOUtils.closeQuietly(inDecrypted);

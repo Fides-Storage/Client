@@ -8,14 +8,17 @@ import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.FileCompareResult;
 import org.fides.client.files.data.KeyFile;
@@ -23,6 +26,8 @@ import org.fides.client.tools.CopyInterruptedException;
 import org.fides.client.tools.CopyTool;
 import org.fides.client.tools.LocalHashes;
 import org.fides.client.tools.UserProperties;
+import org.fides.client.ui.PasswordScreen;
+import org.fides.client.ui.UserMessage;
 import org.fides.tools.HashUtils;
 
 /**
@@ -72,7 +77,7 @@ public class FileSyncManager {
 			busyBoolean.set(true);
 		}
 		try {
-			boolean successful;
+			boolean successful = false;
 			try {
 				encManager.getConnector().connect();
 			} catch (ConnectException | UnknownHostException e) {
@@ -81,28 +86,69 @@ public class FileSyncManager {
 			}
 			KeyFile keyFile;
 
-			keyFile = encManager.requestKeyFile();
-
-			if (keyFile == null || stopBoolean.get()) {
-				encManager.getConnector().disconnect();
-				successful = false;
-			} else {
-				Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
-				successful = true;
-				for (FileCompareResult result : results) {
-					if (stopBoolean.get()) {
-						successful = false;
-						break;
+			try {
+				keyFile = encManager.requestKeyFile();
+				if (keyFile == null || stopBoolean.get()) {
+					encManager.getConnector().disconnect();
+					successful = false;
+				} else {
+					Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+					successful = true;
+					for (FileCompareResult result : results) {
+						if (stopBoolean.get()) {
+							successful = false;
+							break;
+						}
+						handleCompareResult(result, keyFile);
 					}
-					handleCompareResult(result, keyFile);
+					encManager.getConnector().disconnect();
 				}
+			} catch (InvalidPasswordException e) {
 				encManager.getConnector().disconnect();
+				requestNewPassword();
 			}
 			return successful;
 		} finally {
 			synchronized (stopLock) {
 				busyBoolean.set(false);
 				stopLock.notifyAll();
+			}
+		}
+	}
+
+	/**
+	 * Whether the current password is correct or not
+	 * 
+	 * @return true if the password is correct or the connection could not a established
+	 */
+	private boolean validatePassword() {
+		try {
+			encManager.getConnector().connect();
+			encManager.requestKeyFile();
+		} catch (ConnectException | UnknownHostException e) {
+			LOG.error(e);
+			return true;
+		} catch (InvalidPasswordException e) {
+			return false;
+		} finally {
+			encManager.getConnector().disconnect();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Asks user for there password while password is incorrect
+	 */
+	private void requestNewPassword() {
+		while (!validatePassword() && !stopBoolean.get()) {
+			ArrayList<UserMessage> messages = new ArrayList<>();
+			messages.add(new UserMessage("Password is incorrect, provide your password", true));
+			String passwordString = PasswordScreen.getPassword(messages, false);
+			if (StringUtils.isNotBlank(passwordString)) {
+				encManager.setPassword(HashUtils.hash(passwordString));
+			} else {
+				System.exit(0);
 			}
 		}
 	}
@@ -121,17 +167,12 @@ public class FileSyncManager {
 			}
 			busyBoolean.set(true);
 		}
+		boolean successful = false;
+
+		KeyFile keyFile = null;
 		try {
-			boolean successful = false;
-
-			KeyFile keyFile = null;
-			try {
-				encManager.getConnector().connect();
-				keyFile = encManager.requestKeyFile();
-			} catch (ConnectException | UnknownHostException e) {
-				LOG.error(e);
-			}
-
+			encManager.getConnector().connect();
+			keyFile = encManager.requestKeyFile();
 			if (keyFile == null || stopBoolean.get()) {
 				encManager.getConnector().disconnect();
 				return false;
@@ -142,15 +183,19 @@ public class FileSyncManager {
 			if (result != null && !stopBoolean.get()) {
 				successful = handleCompareResult(result, keyFile);
 			}
-
+		} catch (ConnectException | UnknownHostException e) {
+			LOG.error(e);
+		} catch (InvalidPasswordException e) {
 			encManager.getConnector().disconnect();
-			return successful;
+			requestNewPassword();
 		} finally {
 			synchronized (stopLock) {
 				busyBoolean.set(false);
 				stopLock.notifyAll();
 			}
 		}
+		encManager.getConnector().disconnect();
+		return successful;
 	}
 
 	/**

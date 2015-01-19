@@ -13,6 +13,7 @@ import java.util.HashSet;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.CompareResultType;
 import org.fides.client.files.data.FileCompareResult;
@@ -115,7 +116,7 @@ public class FileSyncManagerTest {
 	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#LOCAL_REMOVED}
 	 */
 	@Test
-	public void testHandleLocalRemoved() throws InvalidClientFileException {
+	public void testHandleLocalRemoved() throws InvalidClientFileException, InvalidPasswordException {
 		String filename = "removedLocalFile";
 		compareResults.add(new FileCompareResult(filename, CompareResultType.LOCAL_REMOVED));
 		when(encManagerMock.removeFile(Mockito.any(ClientFile.class))).thenReturn(true);
