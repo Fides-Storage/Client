@@ -90,7 +90,7 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdirs());
-		setFolderField(newDir.getCanonicalPath());
+		setFolderField(newDir.getPath());
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
@@ -185,7 +185,7 @@ public class ChangeFolderPanelTest {
 			FileUtils.deleteDirectory(newDir);
 		}
 		assertTrue(newDir.mkdir());
-		setFolderField(newDir.getCanonicalPath());
+		setFolderField(newDir.getPath());
 
 		// Apply the Change Folder settings
 		List<UserMessage> result = panel.applySettings();
