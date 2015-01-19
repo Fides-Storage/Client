@@ -494,6 +494,10 @@ public class FileSyncManager {
 		if (successful) {
 			String hexHash = HashUtils.toHex(messageDigest.digest());
 			LocalHashes.getInstance().setHash(fileName, hexHash);
+		} else {
+			if (fileManager.removeFile(fileName) && update) {
+				LocalHashes.getInstance().removeHash(fileName);
+			}
 		}
 		return successful;
 	}
