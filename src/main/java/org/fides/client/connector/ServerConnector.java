@@ -480,7 +480,7 @@ public class ServerConnector {
 
 	/**
 	 * After an upload or update, this function has to be called. This function tells the server whether the upload was
-	 * successful on the client side, and if it was successful it wil check if the upload was successful on the server
+	 * successful on the client side, and if it was successful it will check if the upload was successful on the server
 	 * side.
 	 * 
 	 * @param uploadSuccessful
@@ -494,11 +494,12 @@ public class ServerConnector {
 			JsonObject response = new Gson().fromJson(message, JsonObject.class);
 			if (response.has(Responses.SUCCESSFUL)) {
 				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					LOG.debug("Upload was successful");
+					LOG.debug("Upload serverside was successful");
 					JsonObject returnJsonObject = new JsonObject();
 					returnJsonObject.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
 					out.writeUTF(new Gson().toJson(returnJsonObject));
-					return true;
+					LOG.debug("Upload clientside was successful: " + uploadSuccessful);
+					return uploadSuccessful;
 				} else {
 					errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
 				}
