@@ -75,15 +75,19 @@ public class FileSyncManager {
 			return false;
 		}
 
+		boolean successful = false;
 		Set<String> locations = connector.requestLocations();
-		for (String location : locations) {
-			if (keyFile.getClientFileByLocation(location) == null) {
-				connector.removeFile(location);
+		if (locations != null) {
+			for (String location : locations) {
+				if (keyFile.getClientFileByLocation(location) == null) {
+					connector.removeFile(location);
+				}
 			}
+			successful = true;
 		}
 
 		connector.disconnect();
-		return true;
+		return successful;
 	}
 
 	/**
