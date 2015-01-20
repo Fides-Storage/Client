@@ -86,8 +86,7 @@ public class ServerConnector {
 	 */
 	public ServerConnector() {
 		// TODO: For testing purposes only
-		String dir = System.getProperty("user.dir");
-		File file = new File(dir, "truststore.ts");
+		File file = new File(".", "truststore.ts");
 		try {
 			if (file.exists()) {
 				Properties systemProps = System.getProperties();
