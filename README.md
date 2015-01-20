@@ -11,11 +11,25 @@ When the user adds, removes or updates files, the keyfile gets updated with the 
 
 To synchronise with the server, the client will first download and decrypt the keyfile that's saved on the server. In this file the client can see which files it's missing and which files it needs to upload.
 
-How to install
+Installation for user
 ======
-In order to get the project running you need at least Java jre 7. You also need Maven to get the project running. If you haven't installed it yet, look at following link for more information about Maven: maven.apache.org/. To work with Maven within Eclipse, you have to install the Maven plugin called 'Maven integration for Eclipse' from the Eclipse Marketplace. After you've installed the Maven plugin you can clone all three Github repositories from Github.com/Fides-Storage/. In Eclipse you have to import the three repositories by selecting 'Existing Maven Projects'. Open the folder where all three repositories are cloned to and import them.
+In order to install the software, the user needs Java 7 or above. To get the software running, use the jar-with-dependencies.jar and asign the destination folder with read/write access.
 
-<i>P.S. Administrator rights might be needed in order to create files.</i>
+Installation requirements for development
+======
+In order to get the software running, you need the following requirements:
+
+* Atleast Java JRE 7
+* Maven
+* Maven plugin (Maven integration for Eclipse)
+* Eclipse
+
+Checkout all three Github repositories from Github.com/Fides-Storage/ on your prefered location. Open Eclipse and import 'Existing Maven Projects' and open the folder where all three repositories are cloned to and import them.
+
+Installation guide for building packages
+======
+In order to build an executable jar for both the client and the server, first you need to build the components package with the following command:
+`mvn install` in the components repository. The next step is to package the client and the server. While in the concerning repository fill out the following command: `mvn package`. This will result into two different jar files in the target map of the current repository, please use the jar-with-dependancies.jar. 
 
 Checkstyle and Formatter
 ======
