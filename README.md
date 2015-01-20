@@ -26,6 +26,9 @@ In order to get the software running, you need the following requirements:
 
 Checkout all three Github repositories from Github.com/Fides-Storage/ on your prefered location. Open Eclipse and import 'Existing Maven Projects' and open the folder where all three repositories are cloned to and import them.
 
+If you want to use a selfsigned certificate, you can add start the application with the following VM arguments.
+-Djavax.net.ssl.trustStore="<truststore location>" -Djavax.net.ssl.trustStorePassword="<truststore password>"
+
 Installation guide for building packages
 ======
 In order to build an executable jar for both the client and the server, first you need to build the components package with the following command:

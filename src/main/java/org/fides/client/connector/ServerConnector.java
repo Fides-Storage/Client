@@ -82,24 +82,6 @@ public class ServerConnector {
 	private boolean loggedIn = false;
 
 	/**
-	 * The constructor for the ServerConnector, adds a certificate to the list of trusted certificates.
-	 */
-	public ServerConnector() {
-		// TODO: For testing purposes only
-		File file = new File(".", "truststore.ts");
-		try {
-			if (file.exists()) {
-				Properties systemProps = System.getProperties();
-				systemProps.put("javax.net.ssl.trustStore", file.getCanonicalPath());
-				systemProps.put("javax.net.ssl.trustStorePassword", "");
-				System.setProperties(systemProps);
-			}
-		} catch (IOException e) {
-			// Do nothing when file.getCanonicalPath doesn't work.
-		}
-	}
-
-	/**
 	 * Connect to the server with the given ip and port
 	 * 
 	 * @param address
