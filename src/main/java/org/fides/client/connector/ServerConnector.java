@@ -483,9 +483,9 @@ public class ServerConnector {
 	}
 
 	/**
-	 * After an upload or update, this function has to be called. This function tells the server whether the upload was
-	 * successful on the client side, and if it was successful it will check if the upload was successful on the server
-	 * side.
+	 * After an upload or update, this function has to be called. The functions checks if the upload on the server side
+	 * is successful. If the upload or update is successful on the server side, the client will send if its update or
+	 * upload is successful on the client side.
 	 * 
 	 * @param uploadSuccessful
 	 *            true if the upload was successful on the client side
