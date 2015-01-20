@@ -2,6 +2,7 @@ package org.fides.client.connector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -84,11 +85,19 @@ public class ServerConnector {
 	 * The constructor for the ServerConnector, adds a certificate to the list of trusted certificates.
 	 */
 	public ServerConnector() {
-		// For testing purposes only
-		Properties systemProps = System.getProperties();
-		systemProps.put("javax.net.ssl.trustStore", "./truststore.ts");
-		systemProps.put("javax.net.ssl.trustStorePassword", "");
-		System.setProperties(systemProps);
+		// TODO: For testing purposes only
+		String dir = System.getProperty("user.dir");
+		File file = new File(dir, "truststore.ts");
+		try {
+			if (file.exists()) {
+				Properties systemProps = System.getProperties();
+				systemProps.put("javax.net.ssl.trustStore", file.getCanonicalPath());
+				systemProps.put("javax.net.ssl.trustStorePassword", "");
+				System.setProperties(systemProps);
+			}
+		} catch (IOException e) {
+			// Do nothing when file.getCanonicalPath doesn't work.
+		}
 	}
 
 	/**
