@@ -80,7 +80,7 @@ public class ApplicationHandler {
 			fileCheckTask = new FileCheckTask(syncManager);
 			checkTimer = new Timer("CheckTimer");
 			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
-			checkTimer.scheduleAtFixedRate(fileCheckTask, 0, timeCheck);
+			checkTimer.schedule(fileCheckTask, 0, timeCheck);
 			return true;
 		}
 		return false;
