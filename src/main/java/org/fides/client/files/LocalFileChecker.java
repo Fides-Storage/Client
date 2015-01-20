@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -28,23 +29,25 @@ import org.fides.client.tools.UserProperties;
 
 /**
  * Checks the local file system for changes
- *
+ * 
  */
 public class LocalFileChecker extends Thread {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(LocalFileChecker.class);
+	private static final Logger LOG = LogManager.getLogger(LocalFileChecker.class);
 
 	private final FileSyncManager syncManager;
 
 	private final Map<WatchKey, Path> keys = new HashMap<>();
 
-	private BlockingQueue<EventPair> eventsQueue = new LinkedBlockingQueue<>();
+	private final BlockingQueue<EventPair> eventsQueue = new LinkedBlockingQueue<>();
 
 	private final Thread handleThread;
 
 	private WatchService watcher;
+
+	private final AtomicBoolean continueBoolean = new AtomicBoolean(true);
 
 	/**
 	 * Constructor for LocalFileChecker. Creates an extra thread to handle the events.
@@ -59,12 +62,12 @@ public class LocalFileChecker extends Thread {
 			@Override
 			public void run() {
 				try {
-					for (;;) {
+					while (continueBoolean.get()) {
 						EventPair pair = eventsQueue.take();
 						handleEvent(pair.kind, pair.child);
 					}
 				} catch (InterruptedException e) {
-					log.error("LocalFileChecker handle interrupted: " + e);
+					LOG.error("LocalFileChecker handle interrupted: " + e);
 				}
 			}
 		}, "Handle Thread");
@@ -77,16 +80,16 @@ public class LocalFileChecker extends Thread {
 		try {
 			setup();
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 			return;
 		}
-		for (;;) {
+		while (continueBoolean.get()) {
 			// wait for key to be signaled
 			WatchKey key;
 			try {
 				key = watcher.take();
 			} catch (InterruptedException e) {
-				log.error(e);
+				LOG.debug(e);
 				return;
 			}
 
@@ -108,6 +111,14 @@ public class LocalFileChecker extends Thread {
 	} // End run
 
 	/**
+	 * Stop the watching and handling of local file changes. This does interrupt the watching thread
+	 */
+	public void stopHandling() {
+		continueBoolean.set(false);
+		this.interrupt();
+	}
+
+	/**
 	 * Handles the even in a {@link WatchKey}
 	 * 
 	 * @param key
@@ -116,7 +127,7 @@ public class LocalFileChecker extends Thread {
 	private void handleKey(WatchKey key) {
 		Path dir = keys.get(key);
 		if (dir == null) {
-			log.error("WatchKey not recognized!!");
+			LOG.error("WatchKey not recognized!!");
 			return;
 		}
 
@@ -146,7 +157,7 @@ public class LocalFileChecker extends Thread {
 			return;
 		}
 
-		log.debug(kind + " : " + child);
+		LOG.debug(kind + " : " + child);
 
 		if (Files.isRegularFile(child)) {
 			// Transform string to local space and upload (or remove)
@@ -166,7 +177,7 @@ public class LocalFileChecker extends Thread {
 					keys.put(newKey, child);
 				} catch (IOException e) {
 					e.printStackTrace();
-					log.error(e);
+					LOG.error(e);
 				}
 				checkDirectory(child);
 			}
@@ -218,7 +229,7 @@ public class LocalFileChecker extends Thread {
 					ENTRY_MODIFY);
 				keys.put(newKey, subPath);
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 			checkDirectory(subPath);
 		}
@@ -230,7 +241,7 @@ public class LocalFileChecker extends Thread {
 	 * @throws IOException
 	 */
 	private void setup() throws IOException {
-		// Create a watchter and watch the file directory
+		// Create a watcher and watch the file directory
 		Path basePath = UserProperties.getInstance().getFileDirectory().toPath();
 		watcher = FileSystems.getDefault().newWatchService();
 		WatchKey key = basePath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
@@ -247,20 +258,14 @@ public class LocalFileChecker extends Thread {
 		});
 	}
 
-	@Override
-	public void interrupt() {
-		super.interrupt();
-		handleThread.interrupt();
-	}
-
 	/**
 	 * A class containing and {@link WatchEvent} and a {@link Path}
 	 * 
 	 */
 	private static final class EventPair {
-		private WatchEvent.Kind<?> kind;
+		private final WatchEvent.Kind<?> kind;
 
-		private Path child;
+		private final Path child;
 
 		public EventPair(WatchEvent.Kind<?> kind, Path child) {
 			this.kind = kind;

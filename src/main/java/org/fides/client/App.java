@@ -4,27 +4,27 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
+
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
-import org.fides.client.files.FileCheckTask;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.FileManager;
 import org.fides.client.files.FileSyncManager;
-import org.fides.client.files.LocalFileChecker;
 import org.fides.client.files.data.KeyFile;
+import org.fides.client.tools.CertificateUtil;
 import org.fides.client.tools.UserProperties;
 import org.fides.client.ui.AuthenticateUser;
 import org.fides.client.ui.CertificateValidationScreen;
 import org.fides.client.ui.ErrorMessageScreen;
+import org.fides.client.ui.FidesTrayIcon;
 import org.fides.client.ui.PasswordScreen;
 import org.fides.client.ui.ServerAddressScreen;
 import org.fides.client.ui.UserMessage;
@@ -39,7 +39,7 @@ public class App {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(App.class);
+	private static final Logger LOG = LogManager.getLogger(App.class);
 
 	/**
 	 * Main
@@ -48,21 +48,13 @@ public class App {
 	 *            The arguments passed on to the application
 	 */
 	public static void main(String[] args) {
-		ServerConnector serverConnector = new ServerConnector();
-
-		InetSocketAddress serverAddress = newServerConnection(serverConnector);
-
-		if (serverAddress == null) {
-			System.exit(1);
-		}
-
 		try {
-			serverConnector.init(serverAddress);
-		} catch (ConnectException | UnknownHostException e) {
-			log.error(e);
-			System.exit(1);
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+			LOG.debug("Setting the look and feel of the UI failed, throws " + e);
 		}
 
+		ServerConnector serverConnector = initServerConnector();
 		Boolean isAuthenticated = AuthenticateUser.authenticateUser(serverConnector);
 
 		if (isAuthenticated && serverConnector.isConnected()) {
@@ -94,11 +86,15 @@ public class App {
 				}
 
 				// check if key file can be decrypted
-				KeyFile keyFile = encManager.requestKeyFile();
-
-				if (keyFile != null) {
-					isAccepted = true;
-				} else {
+				KeyFile keyFile = null;
+				try {
+					keyFile = encManager.requestKeyFile();
+					if (keyFile == null) {
+						messages.add(new UserMessage("Could not connect to server", true));
+					} else {
+						isAccepted = true;
+					}
+				} catch (InvalidPasswordException e) {
 					messages.clear();
 					messages.add(new UserMessage("Password is incorrect", true));
 				}
@@ -113,15 +109,36 @@ public class App {
 
 			syncManager.removeGhostFiles();
 
-			LocalFileChecker checker = new LocalFileChecker(syncManager);
-			checker.start();
+			ApplicationHandler appHandler = new ApplicationHandler(syncManager);
+			appHandler.startApplication();
 
-			Timer timer = new Timer("CheckTimer");
-			long timeCheck = TimeUnit.SECONDS.toMillis(UserProperties.getInstance().getCheckTimeInSeconds());
-			timer.scheduleAtFixedRate(new FileCheckTask(syncManager), 0, timeCheck);
-
+			FidesTrayIcon trayIcon = new FidesTrayIcon(appHandler);
+			trayIcon.addToSystemTray();
 		}
 
+	}
+
+	/**
+	 * Initialize Server Connector with the users input
+	 * 
+	 * @return ServerConnect that is initialized
+	 */
+	private static ServerConnector initServerConnector() {
+		ServerConnector serverConnector = new ServerConnector();
+		InetSocketAddress serverAddress = newServerConnection(serverConnector);
+
+		if (serverAddress == null) {
+			System.exit(1);
+		}
+
+		try {
+			serverConnector.init(serverAddress);
+		} catch (ConnectException | UnknownHostException e) {
+			LOG.error(e);
+			System.exit(1);
+		}
+
+		return serverConnector;
 	}
 
 	private static InetSocketAddress newServerConnection(ServerConnector serverConnector) {
@@ -142,10 +159,8 @@ public class App {
 					}
 				} catch (UnknownHostException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to host " + serverAddress.getHostName());
-					break;
 				} catch (ConnectException e) {
 					ErrorMessageScreen.showErrorMessage("Could not connect to " + serverAddress.getHostName() + ":" + serverAddress.getPort());
-					break;
 				}
 			}
 
@@ -159,7 +174,7 @@ public class App {
 			if (certificates.length > 0) {
 				certificate = (X509Certificate) certificates[0];
 
-				if (!checkValidCertificate(certificate)) {
+				if (!CertificateUtil.checkValidCertificate(certificate)) {
 					ErrorMessageScreen.showErrorMessage("Server certificate not valid!!!!");
 					System.exit(1);
 				}
@@ -192,7 +207,7 @@ public class App {
 	 * 
 	 * @param certificate
 	 *            the given certificate
-	 * @return if certificate is the same
+	 * @return true if certificate is the same
 	 */
 	private static boolean checkCertificateAccepted(X509Certificate certificate) {
 		// Check saved certificate with current one
@@ -205,18 +220,4 @@ public class App {
 		return CertificateValidationScreen.validateCertificate(certificate);
 	}
 
-	private static boolean checkValidCertificate(X509Certificate certificate) {
-
-		try {
-			certificate.checkValidity();
-			// The rest of the checks are done by SSLSocket, if failed the socket is closed
-			return true;
-		} catch (CertificateExpiredException e) {
-			log.error(e);
-		} catch (CertificateNotYetValidException e) {
-			log.error(e);
-		}
-
-		return false;
-	}
 }

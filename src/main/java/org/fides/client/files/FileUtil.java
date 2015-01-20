@@ -19,7 +19,7 @@ public final class FileUtil {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileUtil.class);
+	private static final Logger LOG = LogManager.getLogger(FileUtil.class);
 
 	private static final String HASH_ALGORITHM = "MD5";
 
@@ -46,7 +46,7 @@ public final class FileUtil {
 				}
 			} catch (IOException e) {
 				// Should never happen
-				log.error(e);
+				LOG.error(e);
 			}
 			fileHash = HashUtils.toHex(messageDigest.digest());
 		}
@@ -65,7 +65,7 @@ public final class FileUtil {
 			messageDigest = MessageDigest.getInstance(HASH_ALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			// Should never happen
-			log.error(e);
+			LOG.error(e);
 		}
 		return messageDigest;
 	}

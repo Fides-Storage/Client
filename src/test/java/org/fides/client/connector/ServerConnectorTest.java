@@ -25,7 +25,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 /**
+<<<<<<< HEAD
  * The {@link ServerConnector} unit test
+=======
+ * The ServerConnector unit test
+>>>>>>> settings
  */
 public class ServerConnectorTest {
 

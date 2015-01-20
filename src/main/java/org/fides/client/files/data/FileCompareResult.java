@@ -6,9 +6,9 @@ package org.fides.client.files.data;
  */
 public class FileCompareResult {
 
-	private String name;
+	private final String name;
 
-	private CompareResultType resultType;
+	private final CompareResultType resultType;
 
 	/**
 	 * Constructor for FileCompareResult
@@ -28,16 +28,8 @@ public class FileCompareResult {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public CompareResultType getResultType() {
 		return resultType;
-	}
-
-	public void setResultType(CompareResultType resultType) {
-		this.resultType = resultType;
 	}
 
 	@Override

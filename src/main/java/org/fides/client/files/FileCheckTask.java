@@ -4,11 +4,10 @@ import java.util.TimerTask;
 
 /**
  * A {@link TimerTask} which periodical check for changed files
- *
  */
-public class FileCheckTask extends TimerTask {
+public final class FileCheckTask extends TimerTask {
 
-	private FileSyncManager syncManager;
+	private final FileSyncManager syncManager;
 
 	/**
 	 * Constructor for FileCheckTask

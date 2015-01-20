@@ -34,9 +34,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Test for the {@link FileManager}
  *
  */
-@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UserProperties.class, FileUtil.class, LocalHashes.class })
+@PowerMockIgnore("javax.management.*")
 public class FileManagerCompareTest {
 
 	private UserProperties settingsMock;
@@ -62,7 +62,7 @@ public class FileManagerCompareTest {
 
 		// Create a directory for test files
 		testDir = new File("./testDir");
-		testDir.mkdir();
+		assertTrue(testDir.mkdir());
 		testDir.deleteOnExit();
 
 		// Mock the UserProperties so it returns the test directory
@@ -119,16 +119,18 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareServerAdded() {
+		final String fileName = "File1.txt";
 		// Setup
-		keyFile.addClientFile(new ClientFile("File1.txt", "", null, "File1.txt"));
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileName));
 
 		FileCompareResult expected = new FileCompareResult("File1.txt", CompareResultType.SERVER_ADDED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult result = fileManager.checkServerSideFile("File1.txt", keyFile);
+		FileCompareResult result = fileManager.checkServerSideFile(fileName, keyFile);
 		assertEquals(expected, result);
 	}
 
@@ -139,16 +141,18 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareClientAdded() throws IOException {
+		final String fileName = "File2.txt";
 		// Setup
-		new File(testDir, "File2.txt").createNewFile();
+		assertTrue(new File(testDir, fileName).createNewFile());
 
-		FileCompareResult expected = new FileCompareResult("File2.txt", CompareResultType.LOCAL_ADDED);
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.LOCAL_ADDED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult result = fileManager.checkClientSideFile("File2.txt", keyFile);
+		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
 		assertEquals(expected, result);
 	}
 
@@ -159,17 +163,19 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareServerRemoved() throws IOException {
+		final String fileName = "File3.txt";
 		// Setup
-		localHashes.setProperty("File3.txt", "File3.txt");
-		new File(testDir, "File3.txt").createNewFile();
+		localHashes.setProperty(fileName, fileName);
+		assertTrue(new File(testDir, fileName).createNewFile());
 
-		FileCompareResult expected = new FileCompareResult("File3.txt", CompareResultType.SERVER_REMOVED);
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.SERVER_REMOVED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult result = fileManager.checkClientSideFile("File3.txt", keyFile);
+		FileCompareResult result = fileManager.checkClientSideFile(fileName, keyFile);
 		assertEquals(expected, result);
 	}
 
@@ -178,17 +184,19 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareClientRemoved() {
+		final String fileName = "File4.txt";
 		// Setup
-		keyFile.addClientFile(new ClientFile("File4.txt", "", null, "File4.txt"));
-		localHashes.setProperty("File4.txt", "File4.txt");
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileName));
+		localHashes.setProperty(fileName, fileName);
 
-		FileCompareResult expected = new FileCompareResult("File4.txt", CompareResultType.LOCAL_REMOVED);
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.LOCAL_REMOVED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult result = fileManager.checkServerSideFile("File4.txt", keyFile);
+		FileCompareResult result = fileManager.checkServerSideFile(fileName, keyFile);
 		assertEquals(expected, result);
 	}
 
@@ -199,21 +207,25 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareServerUpdated() throws IOException {
-		// Setup
-		keyFile.addClientFile(new ClientFile("File5.txt", "", null, "File5C.txt"));
-		localHashes.setProperty("File5.txt", "File5.txt");
-		new File(testDir, "File5.txt").createNewFile();
+		final String fileName = "File5.txt";
+		final String fileNameC = "File5C.txt";
 
-		FileCompareResult expected = new FileCompareResult("File5.txt", CompareResultType.SERVER_UPDATED);
+		// Setup
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileNameC));
+		localHashes.setProperty(fileName, fileName);
+		assertTrue(new File(testDir, fileName).createNewFile());
+
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult resultClient = fileManager.checkClientSideFile("File5.txt", keyFile);
+		FileCompareResult resultClient = fileManager.checkClientSideFile(fileName, keyFile);
 		assertEquals(expected, resultClient);
 
-		FileCompareResult resultServer = fileManager.checkServerSideFile("File5.txt", keyFile);
+		FileCompareResult resultServer = fileManager.checkServerSideFile(fileName, keyFile);
 		assertEquals(expected, resultServer);
 	}
 
@@ -224,21 +236,25 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareClientUpdated() throws IOException {
-		// Setup
-		keyFile.addClientFile(new ClientFile("File6.txt", "", null, "File6D.txt"));
-		localHashes.setProperty("File6.txt", "File6D.txt");
-		new File(testDir, "File6.txt").createNewFile();
+		final String fileName = "File6.txt";
+		final String fileNameD = "File6D.txt";
 
-		FileCompareResult expected = new FileCompareResult("File6.txt", CompareResultType.LOCAL_UPDATED);
+		// Setup
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileNameD));
+		localHashes.setProperty(fileName, fileNameD);
+		assertTrue(new File(testDir, fileName).createNewFile());
+
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult resultClient = fileManager.checkClientSideFile("File6.txt", keyFile);
+		FileCompareResult resultClient = fileManager.checkClientSideFile(fileName, keyFile);
 		assertEquals(expected, resultClient);
 
-		FileCompareResult resultServer = fileManager.checkServerSideFile("File6.txt", keyFile);
+		FileCompareResult resultServer = fileManager.checkServerSideFile(fileName, keyFile);
 		assertEquals(expected, resultServer);
 	}
 
@@ -249,21 +265,78 @@ public class FileManagerCompareTest {
 	 */
 	@Test
 	public void testCompareConflict() throws IOException {
-		// Setup
-		keyFile.addClientFile(new ClientFile("File7.txt", "", null, "File7C.txt"));
-		localHashes.setProperty("File7.txt", "File7O.txt");
-		new File(testDir, "File7.txt").createNewFile();
+		final String fileName = "File7.txt";
+		final String fileNameC = "File7C.txt";
+		final String fileNameO = "File7O.txt";
 
-		FileCompareResult expected = new FileCompareResult("File7.txt", CompareResultType.CONFLICTED);
+		// Setup
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileNameC));
+		localHashes.setProperty(fileName, fileNameO);
+		assertTrue(new File(testDir, fileName).createNewFile());
+
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
 
 		// Test
 		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
 		assertTrue(results.contains(expected));
 
-		FileCompareResult resultClient = fileManager.checkClientSideFile("File7.txt", keyFile);
+		FileCompareResult resultClient = fileManager.checkClientSideFile(fileName, keyFile);
 		assertEquals(expected, resultClient);
 
-		FileCompareResult resultServer = fileManager.checkServerSideFile("File7.txt", keyFile);
+		FileCompareResult resultServer = fileManager.checkServerSideFile(fileName, keyFile);
+		assertEquals(expected, resultServer);
+	}
+
+	/**
+	 * Test the check for a file existing local and on the server but not in hashes, the files are the same
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testCompareServerLocalSame() throws IOException {
+		final String fileName = "File7.txt";
+
+		// Setup
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileName));
+		assertTrue(new File(testDir, fileName).createNewFile());
+
+		// Test
+		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(0, results.size());
+
+		FileCompareResult resultClient = fileManager.checkClientSideFile(fileName, keyFile);
+		assertTrue(resultClient == null);
+
+		FileCompareResult resultServer = fileManager.checkServerSideFile(fileName, keyFile);
+		assertTrue(resultServer == null);
+	}
+
+	/**
+	 * Test the check for a file existing local and on the server but not in hashes, the files are different
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testCompareServerLocalDifferent() throws IOException {
+		final String fileName = "File7.txt";
+		final String fileNameD = "File7D.txt";
+
+		// Setup
+		keyFile.addClientFile(new ClientFile(fileName, "", null, fileNameD));
+		assertTrue(new File(testDir, fileName).createNewFile());
+
+		FileCompareResult expected = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+
+		// Test
+		Collection<FileCompareResult> results = fileManager.compareFiles(keyFile);
+		assertEquals(1, results.size());
+		assertTrue(results.contains(expected));
+
+		FileCompareResult resultClient = fileManager.checkClientSideFile(fileName, keyFile);
+		assertEquals(expected, resultClient);
+
+		FileCompareResult resultServer = fileManager.checkServerSideFile(fileName, keyFile);
 		assertEquals(expected, resultServer);
 	}
 

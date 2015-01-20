@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fides.client.files.data.ClientFile;
@@ -29,7 +30,7 @@ public class FileManager {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(FileManager.class);
+	private static final Logger LOG = LogManager.getLogger(FileManager.class);
 
 	/**
 	 * Compares the local files and the files on a server ({@link KeyFile})
@@ -40,7 +41,7 @@ public class FileManager {
 	 */
 	public Collection<FileCompareResult> compareFiles(KeyFile keyFile) {
 		UserProperties settings = UserProperties.getInstance();
-		List<FileCompareResult> results = new ArrayList<>();
+		Collection<FileCompareResult> results = new HashSet<>();
 		// Get all the names of the local stored files
 		List<File> files = new ArrayList<>();
 		File directory = settings.getFileDirectory();
@@ -49,7 +50,6 @@ public class FileManager {
 
 		// We don't the files need it anymore, only the names
 		files.clear();
-		files = null;
 
 		// Get all the name of the server stored files
 		Set<String> serverFileNames = new HashSet<>();
@@ -186,25 +186,35 @@ public class FileManager {
 		FileCompareResult result = null;
 		String fileHash = FileUtil.generateFileHash(new File(UserProperties.getInstance().getFileDirectory(), fileName));
 		String savedHash = LocalHashes.getInstance().getHash(fileName);
-		boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
-		boolean localChanged = !savedHash.equals(fileHash);
 
-		if (localChanged && serverChanged) {
-			// Both server and client are changed
-			result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
-		} else if (localChanged) {
-			// Client are changed
-			result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
-		} else if (serverChanged) {
-			// Server are changed
-			result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+		if (StringUtils.isBlank(savedHash)) {
+			// Client has the file, server has the file, but it is not stored
+			if (!fileHash.equals(keyFile.getClientFileByName(fileName).getHash())) {
+				// The local and server file are different, but it did not exist before
+				result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+			}
+			// Else it is local and on the server and in the keyFile, do nothing
+		} else {
+			boolean serverChanged = !savedHash.equals(keyFile.getClientFileByName(fileName).getHash());
+			boolean localChanged = !savedHash.equals(fileHash);
+
+			if (localChanged && serverChanged) {
+				// Both server and client are changed
+				result = new FileCompareResult(fileName, CompareResultType.CONFLICTED);
+			} else if (localChanged) {
+				// Client are changed
+				result = new FileCompareResult(fileName, CompareResultType.LOCAL_UPDATED);
+			} else if (serverChanged) {
+				// Server are changed
+				result = new FileCompareResult(fileName, CompareResultType.SERVER_UPDATED);
+			}
 		}
 		// Else nothing changed
 		return result;
 	}
 
 	/**
-	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
+	 * Creates a new file at the correct location of the given name and returns it as an OutputStream.
 	 *
 	 * @param fileName
 	 *            The name of the file
@@ -215,43 +225,43 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (file.exists()) {
-			log.error("File does already exist: " + file);
+			LOG.error("File does already exist: " + file);
 			throw new IOException("File does already exist: " + file);
 		}
 		File parent = file.getParentFile();
 		if (!parent.exists()) {
 			boolean created = parent.mkdirs();
 			if (!created) {
-				log.error("File parent can not be created: " + parent);
+				LOG.error("File parent can not be created: " + parent);
 				throw new IOException("File parent can not be created: " + parent);
 			}
 		}
 
-		file.createNewFile();
-		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+		boolean fileCreated = file.createNewFile();
+		if (!file.canWrite() || !fileCreated) {
+			LOG.error("File can not be written: " + file);
 			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
 	}
 
 	/**
-	 * Saves the file to the correct location, returns the hash of the file (to check its integrity)
+	 * Returns an OutputStream to update the file.
 	 *
 	 * @param fileName
 	 *            The name of the file to create, in local space
 	 * @return The {@link OutputStream} to write to the file
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
 	public OutputStream updateFile(String fileName) throws IOException {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.exists()) {
-			log.error("File does not exist: " + file);
+			LOG.error("File does not exist: " + file);
 			throw new IOException("File does not exist: " + file);
 		}
 		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+			LOG.error("File can not be written: " + file);
 			throw new IOException("File can not be written: " + file);
 		}
 		return new FileOutputStream(file);
@@ -268,7 +278,7 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canWrite()) {
-			log.error("File can not be written: " + file);
+			LOG.error("File can not be written: " + file);
 			return false;
 		}
 		return file.delete();
@@ -285,13 +295,13 @@ public class FileManager {
 		UserProperties settings = UserProperties.getInstance();
 		File file = new File(settings.getFileDirectory(), fileName);
 		if (!file.canRead()) {
-			log.error("File can not be read: " + file);
+			LOG.error("File can not be read: " + file);
 			return null;
 		}
 		try {
 			return new FileInputStream(file);
 		} catch (FileNotFoundException e) {
-			log.debug(e);
+			LOG.debug(e);
 			return null;
 		}
 	}
@@ -318,10 +328,10 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a {@link List} of {@link File} to a {@link List} of {@link String}. The strings are paths relative to
-	 * the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would become
-	 * "fruit/apple". This is used for the name stored on the server, the directory files can be saved differently on
-	 * different PCs
+	 * Changes a {@link List} of {@link File} to a {@link List} of relative {@link String}. The strings are paths
+	 * relative to the directory. A sample is that with a directory "C:/somedir" a file "C:/somedir/fruit/apple" would
+	 * become "fruit/apple". This is used for the name stored on the server, the directory files can be saved
+	 * differently on different PCs
 	 *
 	 * @param files
 	 *            The file to turn to local space
@@ -340,7 +350,7 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a file to a local file name
+	 * Changes a file to a local file name
 	 *
 	 * @param file
 	 *            The file to turn to local space
@@ -352,18 +362,17 @@ public class FileManager {
 	}
 
 	/**
-	 * Relativizes a file to a local file name
+	 * Changes a file to a local file name
 	 *
 	 * @param file
 	 *            The file to turn to local space
-	 * @param basedir
+	 * @param baseDir
 	 *            The directory to relativize to
 	 * @return The local file name
 	 */
-	private static String fileToLocalName(File file, File basedir) {
-		File baseDir = UserProperties.getInstance().getFileDirectory();
+	private static String fileToLocalName(File file, File baseDir) {
 		File relativeFile = baseDir.toPath().relativize(file.toPath()).toFile();
-		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use thesame
+		// we always want '/' and no '\' this because Windows and Unix/Linux systems do not use the same
 		return relativeFile.getPath().replace('\\', '/');
 	}
 }

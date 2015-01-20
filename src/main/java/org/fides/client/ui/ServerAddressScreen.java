@@ -21,12 +21,12 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * UI Screen where the user enters a hostname and a portnumber.
+ * UI Screen where the user enters a hostname and a port number.
  */
 public class ServerAddressScreen {
 
 	/**
-	 * Opens a screen where the user can insert a hostname and a portnumber.
+	 * Opens a screen where the user can insert a hostname and a port number.
 	 * 
 	 * @return The InetSocketAddress the user selected. Will be null if the user pressed cancel.
 	 */
@@ -40,7 +40,7 @@ public class ServerAddressScreen {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		// Add a panel where the inputfields can be added
+		// Add a panel where the input fields can be added
 		JPanel inputPanel = new JPanel();
 		inputPanel.setLayout(new GridLayout(2, 1, 0, 5));
 
@@ -63,7 +63,7 @@ public class ServerAddressScreen {
 		JTextField port = new JTextField(10);
 		inputPanel.add(port);
 
-		// Combines the inputpanel with the mainpanel
+		// Combines the inputPanel with the main panel
 		mainPanel.add(inputPanel);
 
 		// Make sure that the username field is selected while it is still possible to press enter for

@@ -43,7 +43,12 @@ public class ServerConnector {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(ServerConnector.class);
+	private static final Logger LOG = LogManager.getLogger(ServerConnector.class);
+
+	/**
+	 * connection timeout for initial connect
+	 */
+	private static final int CONNECTTIMEOUT = 10000;
 
 	/**
 	 * The collection to store the error messages received from the server
@@ -56,12 +61,12 @@ public class ServerConnector {
 	private SSLSocket sslsocket;
 
 	/**
-	 * The retreived server certificates
+	 * The retrieved server certificates
 	 */
 	private Certificate[] serverCertificates;
 
 	/**
-	 * The data ouput stream to the server
+	 * The data output stream to the server
 	 */
 	private DataOutputStream out;
 
@@ -91,14 +96,14 @@ public class ServerConnector {
 	 * 
 	 * @param address
 	 *            The {@link InetSocketAddress} with the server's address
-	 * @return true if the connection was successfull
+	 * @return true if the connection was successful
 	 */
 	public boolean init(InetSocketAddress address) throws UnknownHostException, ConnectException {
 		try {
 			SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
 			sslsocket = (SSLSocket) sslsocketfactory.createSocket();
-			sslsocket.connect(address);
+			sslsocket.connect(address, CONNECTTIMEOUT);
 
 			SSLSession session = sslsocket.getSession();
 			serverCertificates = session.getPeerCertificates();
@@ -107,9 +112,7 @@ public class ServerConnector {
 			in = new DataInputStream(sslsocket.getInputStream());
 
 			return true;
-		} catch (ConnectException e) {
-			throw e;
-		} catch (UnknownHostException e) {
+		} catch (ConnectException | UnknownHostException e) {
 			throw e;
 		} catch (IOException e) {
 			throw new ConnectException(e.getLocalizedMessage());
@@ -134,9 +137,7 @@ public class ServerConnector {
 
 			out = new DataOutputStream(sslsocket.getOutputStream());
 			in = new DataInputStream(sslsocket.getInputStream());
-		} catch (ConnectException e) {
-			throw e;
-		} catch (UnknownHostException e) {
+		} catch (ConnectException | UnknownHostException e) {
 			throw e;
 		} catch (IOException e) {
 			throw new ConnectException(e.getLocalizedMessage());
@@ -180,7 +181,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				log.error("IOException connection failed: ", e);
+				LOG.error("IOException connection failed: ", e);
 				loggedIn = false;
 			}
 		}
@@ -219,7 +220,7 @@ public class ServerConnector {
 				}
 
 			} catch (IOException e) {
-				log.error("IOException connection failed: ", e);
+				LOG.error("IOException connection failed: ", e);
 			}
 		}
 		return false;
@@ -244,7 +245,7 @@ public class ServerConnector {
 			CommunicationUtil.requestAction(out, Actions.DISCONNECT);
 			out.flush();
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		} finally {
 			loggedIn = false;
 			errorMessages = new HashMap<>();
@@ -285,11 +286,11 @@ public class ServerConnector {
 				if (keyFileStream.read() == -1) {
 					return false;
 				} else {
-					log.debug("A keyfile is available on the server");
+					LOG.debug("A KeyFile is available on the server");
 					return true;
 				}
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			} finally {
 				IOUtils.closeQuietly(keyFileStream);
 			}
@@ -299,9 +300,9 @@ public class ServerConnector {
 	}
 
 	/**
-	 * Requests a keyfile from the server
+	 * Requests a KeyFile from the server
 	 * 
-	 * @return An inputstream with the keyfile. If something went wrong, this will be <code>null</code>
+	 * @return An InputStream with the KeyFile. If something went wrong, this will be <code>null</code>
 	 */
 	public InputStream requestKeyFile() {
 		try {
@@ -318,19 +319,19 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 
 	}
 
 	/**
-	 * Requests a stream from the server for updating the keyfile
+	 * Requests a stream from the server for updating the KeyFile
 	 * 
-	 * @return An outputstream to write the keyfile to. If something went wrong, this will be <code>null</code>
+	 * @return An OutputStream to write the KeyFile to. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStream updateKeyFile() {
 		try {
@@ -347,10 +348,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -360,7 +361,7 @@ public class ServerConnector {
 	 * 
 	 * @param location
 	 *            The location of the requested file
-	 * @return An inputstream with the content of the requested file. Returns <code>null</code> if the request failed.
+	 * @return An InputStream with the content of the requested file. Returns <code>null</code> if the request failed.
 	 */
 	public InputStream requestFile(String location) {
 		try {
@@ -379,10 +380,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -390,7 +391,7 @@ public class ServerConnector {
 	/**
 	 * Requests a stream from the server for uploading a file
 	 * 
-	 * @return An outputdatastream containing a stream to write the file to and the location of the new file on the
+	 * @return An OutputStreamData containing a stream to write the file to and the location of the new file on the
 	 *         server. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStreamData uploadFile() {
@@ -409,10 +410,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -422,7 +423,7 @@ public class ServerConnector {
 	 * 
 	 * @param location
 	 *            The location of the file you want to update
-	 * @return An outputstream to write the file to. If something went wrong, this will be <code>null</code>
+	 * @return An OutputStream to write the file to. If something went wrong, this will be <code>null</code>
 	 */
 	public OutputStream updateFile(String location) {
 		try {
@@ -441,10 +442,10 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}
@@ -473,35 +474,44 @@ public class ServerConnector {
 					}
 				}
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't LOG in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return false;
 	}
 
 	/**
-	 * After an upload or update this function has to be called to check if the action was successful
+	 * After an upload or update, this function has to be called. This function tells the server whether the upload was
+	 * successful on the client side, and if it was successful it will check if the upload was successful on the server
+	 * side.
 	 * 
-	 * @return true if the last upload or update was successful, othwise false
+	 * @param uploadSuccessful
+	 *            true if the upload was successful on the client side
+	 * 
+	 * @return true if the last upload or update was successful, otherwise false
 	 */
-	public boolean checkUploadSuccessful() {
+	public boolean confirmUpload(boolean uploadSuccessful) {
 		try {
 			String message = in.readUTF();
 			JsonObject response = new Gson().fromJson(message, JsonObject.class);
 			if (response.has(Responses.SUCCESSFUL)) {
 				if (response.get(Responses.SUCCESSFUL).getAsBoolean()) {
-					log.debug("Upload was successful");
-					return true;
+					LOG.debug("Upload serverside was successful");
+					JsonObject returnJsonObject = new JsonObject();
+					returnJsonObject.addProperty(Responses.SUCCESSFUL, uploadSuccessful);
+					out.writeUTF(new Gson().toJson(returnJsonObject));
+					LOG.debug("Upload clientside was successful: " + uploadSuccessful);
+					return uploadSuccessful;
 				} else {
 					errorMessages.put(Actions.UPLOAD_FILE, response.get(Responses.ERROR).getAsString());
 				}
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
-		log.error("The last upload was not successful");
+		LOG.debug("The last upload was not successful");
 		return false;
 	}
 
@@ -534,10 +544,10 @@ public class ServerConnector {
 				}
 
 			} else {
-				log.error("ServerConnector couldn't log in");
+				LOG.error("ServerConnector couldn't log in");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}

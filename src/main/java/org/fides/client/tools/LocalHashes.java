@@ -19,24 +19,24 @@ public final class LocalHashes {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(LocalHashes.class);
+	private static final Logger LOG = LogManager.getLogger(LocalHashes.class);
 
-	private static final String LOCAL_HASHSES_FILE = "hashes.xml";
+	private static final String LOCAL_HASHES_FILE = "hashes.xml";
 
 	private static LocalHashes instance;
 
-	private Properties localHashes = new Properties();
+	private final Properties localHashes = new Properties();
 
 	/**
 	 * Constructor for LocalHashes, checks if the hash file exists and loads the local hashes
 	 */
 	private LocalHashes() {
-		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
+		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHES_FILE);
 		if (file.exists()) {
 			try (InputStream in = new FileInputStream(file)) {
 				localHashes.loadFromXML(in);
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 		}
 	}
@@ -69,17 +69,17 @@ public final class LocalHashes {
 	 * Saves the Properties with the current hashes
 	 */
 	private synchronized void saveHashes() {
-		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHSES_FILE);
+		File file = new File(UserProperties.SETTINGS_DIRECTORY, LOCAL_HASHES_FILE);
 		try (OutputStream out = new FileOutputStream(file)) {
 			localHashes.storeToXML(out, "Local file hashes");
 		} catch (IOException e) {
 			// We accept this
-			log.warn(e);
+			LOG.warn(e);
 		}
 	}
 
 	/**
-	 * Removes a hash from the localhashes
+	 * Removes a hash from the local hashes
 	 * 
 	 * @param fileName
 	 *            The filename of the hash
@@ -91,8 +91,16 @@ public final class LocalHashes {
 			saveHashes();
 			return true;
 		}
-		log.debug("Given filename was NULL");
+		LOG.debug("Given filename was NULL");
 		return false;
+	}
+
+	/**
+	 * Removes all hashes from the local hashes
+	 */
+	public void removeAllHashes() {
+		localHashes.clear();
+		saveHashes();
 	}
 
 	/**

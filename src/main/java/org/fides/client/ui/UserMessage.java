@@ -6,9 +6,9 @@ package org.fides.client.ui;
  */
 public class UserMessage {
 
-	private String message;
+	private final String message;
 
-	private boolean error;
+	private final boolean error;
 
 	/**
 	 * Constructor for user message

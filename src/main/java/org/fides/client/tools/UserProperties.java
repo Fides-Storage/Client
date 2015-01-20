@@ -16,7 +16,7 @@ import org.fides.client.ui.ErrorMessageScreen;
 
 /**
  * Contains the settings on where files should be saved.
- *
+ * 
  */
 public final class UserProperties {
 
@@ -28,7 +28,7 @@ public final class UserProperties {
 	/**
 	 * Log for this class
 	 */
-	private static Logger log = LogManager.getLogger(UserProperties.class);
+	private static final Logger LOG = LogManager.getLogger(UserProperties.class);
 
 	/**
 	 * The default directory to store files
@@ -88,7 +88,7 @@ public final class UserProperties {
 	/**
 	 * The properties used for storing the settings
 	 */
-	private Properties properties;
+	private final Properties properties;
 
 	/**
 	 * Constructor, reads the {@link UserProperties}
@@ -98,7 +98,7 @@ public final class UserProperties {
 
 		if (!SETTINGS_DIRECTORY.exists()) {
 			if (!SETTINGS_DIRECTORY.mkdirs()) {
-				log.error("Could not create settings directory");
+				LOG.error("Could not create settings directory");
 				ErrorMessageScreen.showErrorMessage("Could not create settings directory.", "Make sure you have the rights to create files.");
 				System.exit(1);
 			}
@@ -110,7 +110,7 @@ public final class UserProperties {
 				properties.load(new FileInputStream(file));
 			}
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 
 		createFileDirectory();
@@ -132,7 +132,7 @@ public final class UserProperties {
 		File fileDirectory = new File(fileDirectoryName);
 		if (!fileDirectory.exists()) {
 			if (!fileDirectory.mkdirs()) {
-				log.error("File directory can not be created");
+				LOG.error("File directory can not be created");
 				ErrorMessageScreen.showErrorMessage("File directory can not be created.", "Make sure you have the rights to create files");
 				System.exit(1);
 			}
@@ -142,6 +142,19 @@ public final class UserProperties {
 
 	public File getFileDirectory() {
 		return new File(properties.getProperty(FILE_DIRECTORY_KEY));
+	}
+
+	/**
+	 * Changes the file directory
+	 * 
+	 * @param directory
+	 *            The directory to save to the settings
+	 * @throws IOException
+	 *             thrown when the directory cannot be resolved to a canonical path
+	 */
+	public void setFileDirectory(File directory) throws IOException {
+		properties.setProperty(FILE_DIRECTORY_KEY, directory.getCanonicalPath());
+		saveProperties();
 	}
 
 	public String getUsernameHash() {
@@ -210,8 +223,13 @@ public final class UserProperties {
 	 *            address of the server
 	 */
 	public void setServerAddress(InetSocketAddress serverAddress) {
-		properties.setProperty(HOST_KEY, serverAddress.getHostString());
-		properties.setProperty(HOST_PORT_KEY, Integer.toString(serverAddress.getPort()));
+		if (serverAddress == null) {
+			properties.remove(HOST_KEY);
+			properties.remove(HOST_PORT_KEY);
+		} else {
+			properties.setProperty(HOST_KEY, serverAddress.getHostString());
+			properties.setProperty(HOST_PORT_KEY, Integer.toString(serverAddress.getPort()));
+		}
 		saveProperties();
 	}
 
@@ -240,20 +258,25 @@ public final class UserProperties {
 	 *            certificate to save
 	 */
 	public void setCertificate(X509Certificate certificate) {
-		properties.setProperty(CERTIFICATE_ID_KEY, certificate.getSerialNumber().toString());
-		properties.setProperty(CERTIFICATE_ISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		if (certificate == null) {
+			properties.remove(CERTIFICATE_ID_KEY);
+			properties.remove(CERTIFICATE_ISSUER_KEY);
+		} else {
+			properties.setProperty(CERTIFICATE_ID_KEY, certificate.getSerialNumber().toString());
+			properties.setProperty(CERTIFICATE_ISSUER_KEY, certificate.getIssuerX500Principal().getName());
+		}
 		saveProperties();
 	}
 
 	/**
 	 * Sets the check time
 	 * 
-	 * @param secondes
+	 * @param seconds
 	 *            between checks
 	 */
-	public void setCheckTimeInSeconds(int secondes) {
-		if (secondes >= 1) {
-			properties.setProperty(CHECK_TIME_KEY, Integer.toString(secondes));
+	public void setCheckTimeInSeconds(int seconds) {
+		if (seconds >= 1) {
+			properties.setProperty(CHECK_TIME_KEY, Integer.toString(seconds));
 			saveProperties();
 		}
 	}
@@ -271,7 +294,7 @@ public final class UserProperties {
 		}
 
 		/**
-		 * Failback to 5 min if not set or incorrect
+		 * Fallback to 5 min if not set or incorrect
 		 */
 		if (parsedCheckTime <= 0) {
 			parsedCheckTime = 300;
@@ -289,7 +312,7 @@ public final class UserProperties {
 		try (OutputStream out = new FileOutputStream(new File(SETTINGS_DIRECTORY, USER_SETTINGS_FILE))) {
 			properties.store(out, "Fides user settings");
 		} catch (IOException e) {
-			log.error(e);
+			LOG.error(e);
 		}
 	}
 

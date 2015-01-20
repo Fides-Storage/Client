@@ -8,13 +8,13 @@ import java.util.Map;
 /**
  * The file contains a collection of {@link ClientFile} containing the location of files on the server and the key to
  * decrypt them.
- *
+ * 
  */
 public class KeyFile implements Serializable {
 
 	private static final long serialVersionUID = -3100793225474334464L;
 
-	private Map<String, ClientFile> clientFiles = new HashMap<>();
+	private final Map<String, ClientFile> clientFiles = new HashMap<>();
 
 	/**
 	 * Return a {@link ClientFile} with the given name
@@ -57,7 +57,7 @@ public class KeyFile implements Serializable {
 	 * Add a {@link ClientFile} to the {@link KeyFile}.
 	 * 
 	 * @param clientFile
-	 *            THe client file to add
+	 *            The client file to add
 	 */
 	public void addClientFile(ClientFile clientFile) {
 		clientFiles.put(clientFile.getName(), clientFile);

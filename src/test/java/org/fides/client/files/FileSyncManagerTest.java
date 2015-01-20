@@ -16,6 +16,7 @@ import java.util.Set;
 import org.fides.client.connector.EncryptedOutputStreamData;
 import org.fides.client.connector.ServerConnector;
 import org.fides.client.encryption.EncryptionManager;
+import org.fides.client.encryption.InvalidPasswordException;
 import org.fides.client.files.data.ClientFile;
 import org.fides.client.files.data.CompareResultType;
 import org.fides.client.files.data.FileCompareResult;
@@ -33,7 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Tests for the {@link FileSyncManager}
- *
+ * 
  */
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
@@ -118,7 +119,7 @@ public class FileSyncManagerTest {
 	 * Test to handle a {@link FileCompareResult} with a {@link CompareResultType#LOCAL_REMOVED}
 	 */
 	@Test
-	public void testHandleLocalRemoved() throws InvalidClientFileException {
+	public void testHandleLocalRemoved() throws InvalidClientFileException, InvalidPasswordException {
 		String filename = "removedLocalFile";
 		compareResults.add(new FileCompareResult(filename, CompareResultType.LOCAL_REMOVED));
 		when(encManagerMock.removeFile(Mockito.any(ClientFile.class))).thenReturn(true);
@@ -144,10 +145,10 @@ public class FileSyncManagerTest {
 		compareResults.add(new FileCompareResult("UpdatedLocalFile", CompareResultType.LOCAL_UPDATED));
 		when(fileManagerMock.readFile("UpdatedLocalFile")).thenReturn(new ByteArrayInputStream("This is an in update file".getBytes()));
 
-		// The clientfile of the existing file on the server
+		// The ClientFile of the existing file on the server
 		ClientFile updatedFile = new ClientFile("UpdatedLocalFile", "ulf", null, "");
 		keyFile.addClientFile(updatedFile);
-		// Set an outputstream we can read
+		// Set an OutputStream we can read
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		when(encManagerMock.updateFile(updatedFile)).thenReturn(out);
 
